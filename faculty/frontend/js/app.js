@@ -72,8 +72,16 @@ async function handlePortalLogin(e) {
   const alertEl = document.getElementById('authAlert');
   if (alertEl) alertEl.style.display = 'none';
 
-  const username = document.getElementById('loginUser').value.trim();
+  const username = document.getElementById('loginUser').value.trim().toLowerCase();
   const password = document.getElementById('loginPass').value.trim();
+
+  if (!username.endsWith('@mitsgwalior.in') && username !== 'admin') {
+    if (alertEl) {
+      alertEl.textContent = 'Faculty login requires an institutional email ending with @mitsgwalior.in';
+      alertEl.style.display = 'block';
+    }
+    return;
+  }
 
   const r = await API.login({ username, password });
   if (r.ok && r.data.success) {

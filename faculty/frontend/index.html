@@ -36,8 +36,9 @@
 
       <form id="loginForm" onsubmit="handlePortalLogin(event)">
         <div class="form-group">
-          <label class="form-label">Username</label>
-          <input type="text" class="form-control" id="loginUser" value="admin" required autocomplete="username">
+          <label class="form-label">Faculty Institutional Email</label>
+          <input type="text" class="form-control" id="loginUser" value="faculty@mitsgwalior.in" placeholder="teacher@mitsgwalior.in" required autocomplete="username">
+          <small style="color:var(--sky); font-size:11px; display:block; margin-top:3px;">Must end with <strong>@mitsgwalior.in</strong></small>
         </div>
         <div class="form-group">
           <label class="form-label">Password</label>

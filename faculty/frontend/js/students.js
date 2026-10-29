@@ -110,8 +110,8 @@ function openAddStudentModal() {
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Student College Email ID <span class="required">*</span></label>
-        <input type="email" class="form-control" id="sEmail" placeholder="e.g. aarav.sharma@mitsgwalior.in">
-        <small style="color:var(--slate-500); font-size:11px; display:block; margin-top:2px;">Student logs in with this email to view their result & dashboard.</small>
+        <input type="email" class="form-control" id="sEmail" placeholder="e.g. rollno@mitsgwl.ac.in or student@mitsgwl.ac.in">
+        <small style="color:var(--sky); font-size:11px; display:block; margin-top:2px;">Must end with <strong>@mitsgwl.ac.in</strong> for student login.</small>
       </div>
       <div class="form-group">
         <label class="form-label">Class / Section</label>
@@ -148,6 +148,10 @@ async function submitAddStudent() {
   if (!name)   { showToast('Please enter student name.', 'error'); return; }
   if (!rollNo) { showToast('Please enter roll number.', 'error'); return; }
   if (!email)  { showToast('Please enter student college email ID.', 'error'); return; }
+  if (!email.toLowerCase().endsWith('@mitsgwl.ac.in')) {
+    showToast('Student college email must end with @mitsgwl.ac.in', 'error');
+    return;
+  }
 
   const body = {
     name, rollNo, email,
@@ -184,8 +188,8 @@ function openEditStudentModal(id) {
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Student College Email ID</label>
-        <input type="email" class="form-control" id="eEmail" value="${escHtml(st.email || '')}" placeholder="e.g. aarav.sharma@mitsgwalior.in">
-        <small style="color:var(--slate-500); font-size:11px; display:block; margin-top:2px;">Student logs in with this email to view their result & dashboard.</small>
+        <input type="email" class="form-control" id="eEmail" value="${escHtml(st.email || '')}" placeholder="e.g. rollno@mitsgwl.ac.in">
+        <small style="color:var(--sky); font-size:11px; display:block; margin-top:2px;">Must end with <strong>@mitsgwl.ac.in</strong> for student login.</small>
       </div>
       <div class="form-group">
         <label class="form-label">Class</label>
@@ -215,10 +219,15 @@ function openEditStudentModal(id) {
 }
 
 async function submitEditStudent(id) {
+  const email = (document.getElementById('eEmail')?.value || '').trim();
+  if (email && !email.toLowerCase().endsWith('@mitsgwl.ac.in')) {
+    showToast('Student college email must end with @mitsgwl.ac.in', 'error');
+    return;
+  }
   const body = {
     name:         document.getElementById('eName').value.trim(),
     rollNo:       document.getElementById('eRoll').value.trim(),
-    email:        (document.getElementById('eEmail')?.value || '').trim(),
+    email:        email,
     className:    document.getElementById('eClass').value.trim(),
     semester:     parseInt(document.getElementById('eSem').value),
     department:   document.getElementById('eDept').value.trim(),

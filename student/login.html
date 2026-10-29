@@ -899,10 +899,13 @@
 
           <!-- Email -->
           <div class="form-group">
-            <label for="email">Email</label>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <label for="email" id="emailLabel">College Email Address</label>
+              <span id="domainTag" style="font-size:11px; color:#00F0FF; font-weight:700; background:rgba(0,240,255,0.1); border:1px solid rgba(0,240,255,0.25); border-radius:6px; padding:2px 8px;">Domain: @mitsgwl.ac.in</span>
+            </div>
             <div class="input-wrap">
               <input type="email" id="email" name="email"
-                     placeholder="Enter your email"
+                     placeholder="e.g. rollno@mitsgwl.ac.in"
                      autocomplete="email" required />
               <span class="field-icon">
                 <svg viewBox="0 0 24 24">
@@ -911,6 +914,9 @@
                 </svg>
               </span>
             </div>
+            <small id="emailDomainHint" style="display:block; font-size:11.5px; color:rgba(186,230,253,0.7); margin-top:4px;">
+              Student login requires college email ending with <strong>@mitsgwl.ac.in</strong>
+            </small>
           </div>
 
           <!-- Password -->
@@ -1220,16 +1226,38 @@
     const btn   = document.getElementById('loginBtn');
     const badge = document.getElementById('roleBadge');
 
+    const emailInput = document.getElementById('email');
+    const emailHint  = document.getElementById('emailDomainHint');
+    const domainTag  = document.getElementById('domainTag');
+
     if (role === 'student') {
       tabS.classList.add('active');    tabS.setAttribute('aria-selected', 'true');
       tabF.classList.remove('active'); tabF.setAttribute('aria-selected', 'false');
       btn.textContent   = 'Login as Student';
       badge.textContent = 'STUDENT';
+      if (emailInput) emailInput.placeholder = 'e.g. rollno@mitsgwl.ac.in';
+      if (domainTag) {
+        domainTag.textContent = 'Domain: @mitsgwl.ac.in';
+        domainTag.style.color = '#00F0FF';
+        domainTag.style.borderColor = 'rgba(0,240,255,0.25)';
+      }
+      if (emailHint) {
+        emailHint.innerHTML = 'Student login requires college email ending with <strong>@mitsgwl.ac.in</strong>';
+      }
     } else {
       tabF.classList.add('active');    tabF.setAttribute('aria-selected', 'true');
       tabS.classList.remove('active'); tabS.setAttribute('aria-selected', 'false');
       btn.textContent   = 'Login as Faculty';
       badge.textContent = 'FACULTY';
+      if (emailInput) emailInput.placeholder = 'e.g. faculty.name@mitsgwalior.in';
+      if (domainTag) {
+        domainTag.textContent = 'Domain: @mitsgwalior.in';
+        domainTag.style.color = '#38BDF8';
+        domainTag.style.borderColor = 'rgba(56,189,248,0.25)';
+      }
+      if (emailHint) {
+        emailHint.innerHTML = 'Faculty login requires institutional email ending with <strong>@mitsgwalior.in</strong>';
+      }
     }
   }
 
@@ -1248,12 +1276,26 @@
   // ── Form submission ────────────────────────────────────────────────
   function handleLogin(e) {
     e.preventDefault();
-    const email = document.getElementById('email').value.trim();
+    const email = document.getElementById('email').value.trim().toLowerCase();
     const pass  = document.getElementById('password').value;
     if (!email || !pass) {
       showBanner('error', 'Please fill in both Email and Password.');
       return;
     }
+
+    // Domain validation enforcement
+    if (currentRole === 'student') {
+      if (!email.endsWith('@mitsgwl.ac.in')) {
+        showBanner('error', '⚠️ Student email must end with @mitsgwl.ac.in (e.g. rollno@mitsgwl.ac.in or student@mitsgwl.ac.in)');
+        return;
+      }
+    } else if (currentRole === 'faculty') {
+      if (!email.endsWith('@mitsgwalior.in')) {
+        showBanner('error', '⚠️ Faculty email must end with @mitsgwalior.in (e.g. name@mitsgwalior.in)');
+        return;
+      }
+    }
+
     // Save session and navigate to dashboard or faculty interface
     if (currentRole === 'faculty') {
       localStorage.setItem('ra_session', JSON.stringify({
@@ -1318,7 +1360,19 @@
     })
     .then(r => r.json())
     .then(profile => {
-      const gEmail = (profile.email || '').toLowerCase();
+      const gEmail = (profile.email || '').trim().toLowerCase();
+      if (currentRole === 'student') {
+        if (!gEmail.endsWith('@mitsgwl.ac.in')) {
+          showBanner('error', `⚠️ Student login restricted: Google account must end with @mitsgwl.ac.in (detected: ${gEmail})`);
+          return;
+        }
+      } else if (currentRole === 'faculty') {
+        if (!gEmail.endsWith('@mitsgwalior.in')) {
+          showBanner('error', `⚠️ Faculty login restricted: Google account must end with @mitsgwalior.in (detected: ${gEmail})`);
+          return;
+        }
+      }
+
       if (currentRole === 'faculty') {
         localStorage.setItem('ra_session', JSON.stringify({
           email: gEmail,

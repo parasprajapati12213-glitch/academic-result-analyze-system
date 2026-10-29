@@ -226,9 +226,12 @@ function getStudentByEmail(email) {
   const clean = String(email).trim().toLowerCase();
   return getStudents().find(s => {
     const sEmail = (s.email || '').trim().toLowerCase();
-    const sRollEmail = (s.rollNo || '').trim().toLowerCase() + '@mits.edu';
+    const sRollEmail = (s.rollNo || '').trim().toLowerCase() + '@mitsgwl.ac.in';
     const sRoll = (s.rollNo || '').trim().toLowerCase();
-    return sEmail === clean || sRollEmail === clean || sRoll === clean;
+    return sEmail === clean || 
+           sRollEmail === clean || 
+           (sEmail.replace('@mitsgwalior.in', '@mitsgwl.ac.in') === clean) || 
+           sRoll === clean;
   }) || null;
 }
 

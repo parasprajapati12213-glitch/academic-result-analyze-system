@@ -370,7 +370,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "pranjali.mehra@mitsgwalior.in"
+    "email": "pranjali.mehra@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTIO25O1042",
@@ -380,7 +380,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "bhumika.varfa@mitsgwalior.in"
+    "email": "bhumika.varfa@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1081",
@@ -390,7 +390,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "mritunjay.dubey@mitsgwalior.in"
+    "email": "mritunjay.dubey@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1116",
@@ -400,7 +400,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "satwik.singhal@mitsgwalior.in"
+    "email": "satwik.singhal@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1091",
@@ -410,7 +410,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "pragati.jain@mitsgwalior.in"
+    "email": "pragati.jain@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1154",
@@ -420,7 +420,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "nikita.tripathi@mitsgwalior.in"
+    "email": "nikita.tripathi@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1101",
@@ -430,7 +430,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "rajmani.sisodiya@mitsgwalior.in"
+    "email": "rajmani.sisodiya@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1139",
@@ -440,7 +440,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "vaishali.varma@mitsgwalior.in"
+    "email": "vaishali.varma@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1108",
@@ -450,7 +450,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "ronak.gupta@mitsgwalior.in"
+    "email": "ronak.gupta@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1133",
@@ -460,7 +460,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "tanishka.singh.sengar@mitsgwalior.in"
+    "email": "tanishka.singh.sengar@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1122",
@@ -470,7 +470,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "shreyansh.verma@mitsgwalior.in"
+    "email": "shreyansh.verma@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1134",
@@ -480,7 +480,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "tanu.samadhiya@mitsgwalior.in"
+    "email": "tanu.samadhiya@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1082",
@@ -490,7 +490,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "mritunjay.mishra@mitsgwalior.in"
+    "email": "mritunjay.mishra@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1113",
@@ -500,7 +500,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "sarthak.vashishtha@mitsgwalior.in"
+    "email": "sarthak.vashishtha@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1093",
@@ -510,7 +510,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "pranshu.gupta@mitsgwalior.in"
+    "email": "pranshu.gupta@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1155",
@@ -520,7 +520,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "aditya.ahamana@mitsgwalior.in"
+    "email": "aditya.ahamana@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1105",
@@ -530,7 +530,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "risikesh.singh.bhadouria@mitsgwalior.in"
+    "email": "risikesh.singh.bhadouria@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1099",
@@ -540,7 +540,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "raj.sahu@mitsgwalior.in"
+    "email": "raj.sahu@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1143",
@@ -550,7 +550,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "vinamra.tamrakar@mitsgwalior.in"
+    "email": "vinamra.tamrakar@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1106",
@@ -560,7 +560,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "ritik.baghel@mitsgwalior.in"
+    "email": "ritik.baghel@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1144",
@@ -570,7 +570,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "vinay.gaur@mitsgwalior.in"
+    "email": "vinay.gaur@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1086",
@@ -580,7 +580,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "niharika@mitsgwalior.in"
+    "email": "niharika@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1104",
@@ -590,7 +590,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "rishika.chourasiya@mitsgwalior.in"
+    "email": "rishika.chourasiya@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1121",
@@ -600,7 +600,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "shivansh.pathak@mitsgwalior.in"
+    "email": "shivansh.pathak@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1138",
@@ -610,7 +610,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "utsav.gupta@mitsgwalior.in"
+    "email": "utsav.gupta@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1146",
@@ -620,7 +620,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "virendra.sharma@mitsgwalior.in"
+    "email": "virendra.sharma@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1126",
@@ -630,7 +630,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "srashti.gupta@mitsgwalior.in"
+    "email": "srashti.gupta@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1132",
@@ -640,7 +640,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "swastika.chaubey@mitsgwalior.in"
+    "email": "swastika.chaubey@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1085",
@@ -650,7 +650,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "neelam.patel@mitsgwalior.in"
+    "email": "neelam.patel@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1118",
@@ -660,7 +660,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "shital.sangulle@mitsgwalior.in"
+    "email": "shital.sangulle@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1124",
@@ -670,7 +670,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "siddhant.gupta@mitsgwalior.in"
+    "email": "siddhant.gupta@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1130",
@@ -680,7 +680,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "sumit.suryawanshi@mitsgwalior.in"
+    "email": "sumit.suryawanshi@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1111",
@@ -690,7 +690,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "sanchit.mandrai@mitsgwalior.in"
+    "email": "sanchit.mandrai@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1112",
@@ -700,7 +700,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "sandeep.ahirwar@mitsgwalior.in"
+    "email": "sandeep.ahirwar@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1089",
@@ -710,7 +710,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "paras.prajapati@mitsgwalior.in"
+    "email": "paras.prajapati@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1094",
@@ -720,7 +720,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "prateek.singh.chauhan@mitsgwalior.in"
+    "email": "prateek.singh.chauhan@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1095",
@@ -730,7 +730,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "prerna.bhadouria@mitsgwalior.in"
+    "email": "prerna.bhadouria@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1127",
@@ -740,7 +740,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "sujal.agrawal@mitsgwalior.in"
+    "email": "sujal.agrawal@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1148",
@@ -750,7 +750,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "vishwabodh.singh@mitsgwalior.in"
+    "email": "vishwabodh.singh@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1151",
@@ -760,7 +760,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "yashvardhan.singh.chauhan@mitsgwalior.in"
+    "email": "yashvardhan.singh.chauhan@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1137",
@@ -770,7 +770,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "tushar.birla@mitsgwalior.in"
+    "email": "tushar.birla@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1150",
@@ -780,7 +780,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "yash.gupta@mitsgwalior.in"
+    "email": "yash.gupta@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1087",
@@ -790,7 +790,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "nishchal.pratap.rajawat@mitsgwalior.in"
+    "email": "nishchal.pratap.rajawat@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1158",
@@ -800,7 +800,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "sahib.khan@mitsgwalior.in"
+    "email": "sahib.khan@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1100",
@@ -810,7 +810,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "rajkumar.patidar@mitsgwalior.in"
+    "email": "rajkumar.patidar@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1147",
@@ -820,7 +820,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "vishesh.gurjar@mitsgwalior.in"
+    "email": "vishesh.gurjar@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1156",
@@ -830,7 +830,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "dev.srajan.purohit@mitsgwalior.in"
+    "email": "dev.srajan.purohit@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1157",
@@ -840,7 +840,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "pramod.kushwah@mitsgwalior.in"
+    "email": "pramod.kushwah@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1119",
@@ -850,7 +850,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "shiv.bhavsar@mitsgwalior.in"
+    "email": "shiv.bhavsar@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1120",
@@ -860,7 +860,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "shivam.prasad.sahu@mitsgwalior.in"
+    "email": "shivam.prasad.sahu@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1096",
@@ -870,7 +870,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "prithvi.patel@mitsgwalior.in"
+    "email": "prithvi.patel@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1135",
@@ -880,7 +880,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "tanuja.rawat@mitsgwalior.in"
+    "email": "tanuja.rawat@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1107",
@@ -890,7 +890,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "rohit.kumar@mitsgwalior.in"
+    "email": "rohit.kumar@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1110",
@@ -900,7 +900,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "sahil.ghorse@mitsgwalior.in"
+    "email": "sahil.ghorse@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1140",
@@ -910,7 +910,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "vaishnavi.sharma@mitsgwalior.in"
+    "email": "vaishnavi.sharma@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1152",
@@ -920,7 +920,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "yuvraj.jain@mitsgwalior.in"
+    "email": "yuvraj.jain@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1083",
@@ -930,7 +930,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "naman.kumar.tripathi@mitsgwalior.in"
+    "email": "naman.kumar.tripathi@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1136",
@@ -940,7 +940,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "tarun.dahiya@mitsgwalior.in"
+    "email": "tarun.dahiya@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1084",
@@ -950,7 +950,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "naman.rahangdale@mitsgwalior.in"
+    "email": "naman.rahangdale@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1117",
@@ -960,7 +960,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "satyam.sharma@mitsgwalior.in"
+    "email": "satyam.sharma@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1115",
@@ -970,7 +970,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "satakshi.sharma@mitsgwalior.in"
+    "email": "satakshi.sharma@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1145",
@@ -980,7 +980,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "vipul.jain@mitsgwalior.in"
+    "email": "vipul.jain@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1088",
@@ -990,7 +990,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "nitin.meena@mitsgwalior.in"
+    "email": "nitin.meena@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1090",
@@ -1000,7 +1000,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "piyush.baghel@mitsgwalior.in"
+    "email": "piyush.baghel@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1097",
@@ -1010,7 +1010,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "priyansh.patel@mitsgwalior.in"
+    "email": "priyansh.patel@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1103",
@@ -1020,7 +1020,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "raman.sahu@mitsgwalior.in"
+    "email": "raman.sahu@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1114",
@@ -1030,7 +1030,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "sarvesh.patel@mitsgwalior.in"
+    "email": "sarvesh.patel@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1128",
@@ -1040,7 +1040,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "sumit.kumar.patel@mitsgwalior.in"
+    "email": "sumit.kumar.patel@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1142",
@@ -1050,7 +1050,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "vansh.patidar@mitsgwalior.in"
+    "email": "vansh.patidar@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1149",
@@ -1060,7 +1060,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "vivek.patidar@mitsgwalior.in"
+    "email": "vivek.patidar@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1098",
@@ -1070,7 +1070,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "raghvendra.rajput@mitsgwalior.in"
+    "email": "raghvendra.rajput@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1102",
@@ -1080,7 +1080,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "ramkrishan.singh.tomar@mitsgwalior.in"
+    "email": "ramkrishan.singh.tomar@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1123",
@@ -1090,7 +1090,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "shyam.kushwah@mitsgwalior.in"
+    "email": "shyam.kushwah@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1131",
@@ -1100,7 +1100,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "sumit.yadav@mitsgwalior.in"
+    "email": "sumit.yadav@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1125",
@@ -1110,7 +1110,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "sparsh.tamrakar@mitsgwalior.in"
+    "email": "sparsh.tamrakar@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1153",
@@ -1120,7 +1120,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "yuvraj.singh.rajpoot@mitsgwalior.in"
+    "email": "yuvraj.singh.rajpoot@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTEE25O1039",
@@ -1130,7 +1130,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "mayank.jaiswal@mitsgwalior.in"
+    "email": "mayank.jaiswal@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1159",
@@ -1140,7 +1140,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-B",
     "department": "Centre for Computer Science and Technology",
-    "email": "abhijeet.bhadouriya@mitsgwalior.in"
+    "email": "abhijeet.bhadouriya@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1001",
@@ -1150,7 +1150,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-A",
     "department": "Centre for Computer Science and Technology",
-    "email": "aarav.sharma@mitsgwalior.in"
+    "email": "aarav.sharma@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_BTCB25O1002",
@@ -1160,7 +1160,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-A",
     "department": "Centre for Computer Science and Technology",
-    "email": "priya.patel@mitsgwalior.in"
+    "email": "priya.patel@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_0901CSBS251003",
@@ -1170,7 +1170,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-A",
     "department": "Centre for Computer Science and Technology",
-    "email": "rohan.verma@mitsgwalior.in"
+    "email": "rohan.verma@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_0901CSBS251004",
@@ -1180,7 +1180,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-A",
     "department": "Centre for Computer Science and Technology",
-    "email": "ananya.iyer@mitsgwalior.in"
+    "email": "ananya.iyer@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_0901CSBS251005",
@@ -1190,7 +1190,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-A",
     "department": "Centre for Computer Science and Technology",
-    "email": "vikram.singh@mitsgwalior.in"
+    "email": "vikram.singh@mitsgwl.ac.in"
   },
   {
     "id": "s_mits_0901CSBS251006",
@@ -1200,7 +1200,7 @@ const SEED_STUDENTS     = [
     "academicYear": "2025-2026",
     "className": "CSBS-A",
     "department": "Centre for Computer Science and Technology",
-    "email": "sneha.kulkarni@mitsgwalior.in"
+    "email": "sneha.kulkarni@mitsgwl.ac.in"
   }
 ];
 const SEED_RESULTS      = [
