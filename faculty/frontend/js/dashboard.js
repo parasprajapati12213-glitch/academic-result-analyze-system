@@ -152,23 +152,35 @@ async function loadDashboard() {
       </div>
     </div>
 
-    <!-- Charts -->
+    <!-- 3D Interactive Charts (Student Interface Graph Effects) -->
     <div class="two-col">
-      <div class="card">
-        <div class="card-header">
-          <h2>Student Division Breakdown</h2>
-        </div>
-        <div class="chart-wrap">
-          <canvas id="divisionDonutChart"></canvas>
+      <div class="card chart-card-3d">
+        <div class="chart-3d-inner">
+          <div class="card-header">
+            <h2>🥧 Student Division Breakdown (3D Doughnut)</h2>
+            <span class="badge" style="background:rgba(0,240,255,0.12);color:#00F0FF;border-color:rgba(0,240,255,0.3)">3D Pop-up Slices</span>
+          </div>
+          <div class="chart-inspector" id="divInspector">
+            <span>💡</span> <span>Hover over any division slice to pop up student share &amp; count details</span>
+          </div>
+          <div class="card-body" style="padding:10px 18px 18px;height:300px;position:relative">
+            <canvas id="divisionDonutChart"></canvas>
+          </div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header">
-          <h2>Subject Average Grade Points</h2>
-        </div>
-        <div class="chart-wrap">
-          <canvas id="subjectGPBarChart"></canvas>
+      <div class="card chart-card-3d">
+        <div class="chart-3d-inner">
+          <div class="card-header">
+            <h2>📊 Subject Average Grade Points (Histogram)</h2>
+            <span class="badge" style="background:rgba(56,189,248,0.12);color:#38BDF8;border-color:rgba(56,189,248,0.3)">Course Benchmark</span>
+          </div>
+          <div class="chart-inspector" id="subGPInspector">
+            <span>💡</span> <span>Hover over any subject bar to pop up average grade points</span>
+          </div>
+          <div class="card-body" style="padding:10px 18px 18px;height:300px;position:relative">
+            <canvas id="subjectGPBarChart"></canvas>
+          </div>
         </div>
       </div>
     </div>
@@ -226,52 +238,157 @@ async function loadDashboard() {
 
 function renderDashboardCharts(d) {
   const ctxDiv = document.getElementById('divisionDonutChart');
+  const divInspector = document.getElementById('divInspector');
   if (ctxDiv) {
     if (dashCharts.divChart) dashCharts.divChart.destroy();
+    const divLabels = ['Distinction (≥ 8.0)', 'First Division (6.5 - 7.99)', 'Second Division (5.0 - 6.49)', 'Failed (Backlog)'];
+    const divData = [d.distinctionCount || 0, d.firstClassCount || 0, d.secondClassCount || 0, d.failCount || 0];
+    const totalDivStudents = divData.reduce((a, b) => a + b, 0) || 1;
+
     dashCharts.divChart = new Chart(ctxDiv, {
       type: 'doughnut',
       data: {
-        labels: ['Distinction (≥ 8.0)', 'First Division (6.5 - 7.99)', 'Second Division (5.0 - 6.49)', 'Failed (Backlog)'],
+        labels: divLabels,
         datasets: [{
-          data: [d.distinctionCount || 0, d.firstClassCount || 0, d.secondClassCount || 0, d.failCount || 0],
-          backgroundColor: ['#6d28d9', '#1e40af', '#0284c7', '#dc2626'],
-          borderWidth: 2,
-          borderColor: '#ffffff'
+          data: divData,
+          backgroundColor: ['#00F0FF', '#38BDF8', '#fbbf24', '#f87171'],
+          borderWidth: 3,
+          borderColor: '#030712',
+          hoverOffset: 28,
+          hoverBorderColor: '#ffffff',
+          hoverBorderWidth: 4
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        onHover: (event, activeElements) => {
+          if (!divInspector) return;
+          if (activeElements.length > 0) {
+            const idx = activeElements[0].index;
+            const label = divLabels[idx];
+            const count = divData[idx];
+            const pct = ((count / totalDivStudents) * 100).toFixed(1);
+            divInspector.classList.add('active');
+            divInspector.innerHTML = `<strong>✨ Pop-up Slice: ${label}:</strong> <strong>${count} Student(s)</strong> (${pct}% of cohort)`;
+          } else {
+            divInspector.classList.remove('active');
+            divInspector.innerHTML = `<span>💡</span> <span>Hover over any division slice to pop up student share &amp; count details</span>`;
+          }
+        },
         plugins: {
-          legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: 'rgba(186,230,253,0.85)',
+              font: { family: 'DM Sans', size: 12, weight: 600 },
+              boxWidth: 14,
+              padding: 14
+            }
+          },
+          tooltip: {
+            padding: 14,
+            backgroundColor: 'rgba(3, 7, 18, 0.95)',
+            titleColor: '#00F0FF',
+            titleFont: { family: 'DM Sans', size: 13, weight: 700 },
+            bodyColor: '#ffffff',
+            bodyFont: { family: 'DM Sans', size: 12 },
+            borderColor: '#00F0FF',
+            borderWidth: 2,
+            cornerRadius: 10,
+            callbacks: {
+              label: (ctx) => {
+                const count = ctx.raw;
+                const pct = ((count / totalDivStudents) * 100).toFixed(1);
+                return ` ${count} Students (${pct}% of cohort)`;
+              }
+            }
+          }
         }
       }
     });
   }
 
   const ctxSub = document.getElementById('subjectGPBarChart');
+  const subInspector = document.getElementById('subGPInspector');
   if (ctxSub && d.subjectOverview && d.subjectOverview.length > 0) {
     if (dashCharts.subChart) dashCharts.subChart.destroy();
     const sem1Subs = d.subjectOverview.filter(s => s.avgGradePoint > 0);
+    const subLabels = sem1Subs.map(s => s.code);
+    const subData = sem1Subs.map(s => s.avgGradePoint);
+    const subNames = sem1Subs.map(s => s.name || s.code);
+
+    let barGrad = '#00F0FF';
+    if (ctxSub.getContext) {
+      const barCtx = ctxSub.getContext('2d');
+      if (barCtx && barCtx.createLinearGradient) {
+        const g = barCtx.createLinearGradient(0, 0, 0, 260);
+        g.addColorStop(0, '#00F0FF');
+        g.addColorStop(1, '#00A3FF');
+        barGrad = g;
+      }
+    }
+
     dashCharts.subChart = new Chart(ctxSub, {
       type: 'bar',
       data: {
-        labels: sem1Subs.map(s => s.code),
+        labels: subLabels,
         datasets: [{
           label: 'Average Grade Point (0 to 10)',
-          data: sem1Subs.map(s => s.avgGradePoint.toFixed(2)),
-          backgroundColor: '#1e40af',
-          borderRadius: 3
+          data: subData,
+          backgroundColor: barGrad,
+          borderRadius: 6,
+          hoverBackgroundColor: '#ffffff',
+          hoverBorderColor: '#00F0FF',
+          hoverBorderWidth: 3
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        onHover: (event, activeElements) => {
+          if (!subInspector) return;
+          if (activeElements.length > 0) {
+            const idx = activeElements[0].index;
+            const code = subLabels[idx];
+            const name = subNames[idx];
+            const gp = subData[idx];
+            subInspector.classList.add('active');
+            subInspector.innerHTML = `<strong>✨ Pop-up Bar: ${code} (${name}):</strong> Average Grade Point: <strong>${gp.toFixed(2)} / 10.00</strong>`;
+          } else {
+            subInspector.classList.remove('active');
+            subInspector.innerHTML = `<span>💡</span> <span>Hover over any subject bar to pop up average grade points</span>`;
+          }
+        },
         scales: {
-          y: { beginAtZero: true, max: 10.0, ticks: { stepSize: 2 } }
+          x: {
+            ticks: { color: 'rgba(186,230,253,0.85)', font: { family: 'DM Sans', size: 12, weight: 600 } },
+            grid: { color: 'rgba(56,189,248,0.08)' }
+          },
+          y: {
+            beginAtZero: true,
+            max: 10.0,
+            ticks: { color: 'rgba(186,230,253,0.85)', font: { family: 'DM Sans', size: 12 }, stepSize: 2 },
+            grid: { color: 'rgba(56,189,248,0.08)' }
+          }
         },
         plugins: {
-          legend: { display: false }
+          legend: { display: false },
+          tooltip: {
+            padding: 14,
+            backgroundColor: 'rgba(3, 7, 18, 0.95)',
+            titleColor: '#00F0FF',
+            titleFont: { family: 'DM Sans', size: 13, weight: 700 },
+            bodyColor: '#ffffff',
+            bodyFont: { family: 'DM Sans', size: 12 },
+            borderColor: '#00F0FF',
+            borderWidth: 2,
+            cornerRadius: 10,
+            callbacks: {
+              title: (items) => `${subLabels[items[0].dataIndex]} — ${subNames[items[0].dataIndex]}`,
+              label: (ctx) => ` Class Avg Grade Point: ${Number(ctx.raw).toFixed(2)} / 10.00`
+            }
+          }
         }
       }
     });

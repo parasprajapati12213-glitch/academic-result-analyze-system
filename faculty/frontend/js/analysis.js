@@ -100,22 +100,35 @@ function renderOverviewTab() {
       </div>
     </div>
 
+    <!-- 3D Interactive Charts (Student Interface Graph Effects) -->
     <div class="two-col">
-      <div class="card">
-        <div class="card-header">
-          <h2>Grades Distribution</h2>
-        </div>
-        <div class="chart-wrap">
-          <canvas id="gradeDistChart"></canvas>
+      <div class="card chart-card-3d">
+        <div class="chart-3d-inner">
+          <div class="card-header">
+            <h2>📊 Overall Grade Frequency Distribution (Histogram)</h2>
+            <span class="badge" style="background:rgba(0,240,255,0.12);color:#00F0FF;border-color:rgba(0,240,255,0.3)">Grade Frequency</span>
+          </div>
+          <div class="chart-inspector" id="gradeDistInspector">
+            <span>💡</span> <span>Hover over any grade bar to pop up student count &amp; share</span>
+          </div>
+          <div class="card-body" style="padding:10px 18px 18px;height:300px;position:relative">
+            <canvas id="gradeDistChart"></canvas>
+          </div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header">
-          <h2>Top Students by CGPA</h2>
-        </div>
-        <div class="chart-wrap">
-          <canvas id="cgpaRankingChart"></canvas>
+      <div class="card chart-card-3d">
+        <div class="chart-3d-inner">
+          <div class="card-header">
+            <h2>🏆 Top Cohort CGPA Benchmark (Horizontal Pillar)</h2>
+            <span class="badge" style="background:rgba(251,191,36,0.12);color:#fbbf24;border-color:rgba(251,191,36,0.3)">Top Performers</span>
+          </div>
+          <div class="chart-inspector" id="rankingInspector">
+            <span>💡</span> <span>Hover over any student bar to pop up CGPA &amp; standing</span>
+          </div>
+          <div class="card-body" style="padding:10px 18px 18px;height:300px;position:relative">
+            <canvas id="cgpaRankingChart"></canvas>
+          </div>
         </div>
       </div>
     </div>
@@ -176,19 +189,21 @@ function renderOverviewTab() {
 
 function renderGradeDistChart(dist) {
   const ctx = document.getElementById('gradeDistChart');
+  const gradeInspector = document.getElementById('gradeDistInspector');
   if (!ctx || !dist) return;
   if (analysisCharts.gradeDistChart) analysisCharts.gradeDistChart.destroy();
 
   const labels = Object.keys(dist);
   const data = Object.values(dist);
+  const totalGrades = data.reduce((a, b) => a + b, 0) || 1;
   const colors = labels.map(g => {
-    if (g === 'O')  return '#7e22ce';
-    if (g === 'A+') return '#1d4ed8';
-    if (g === 'A')  return '#15803d';
-    if (g === 'B+') return '#a16207';
-    if (g === 'B')  return '#c2410c';
-    if (g === 'C')  return '#475569';
-    return '#dc2626';
+    if (g === 'O')  return '#a78bfa';
+    if (g === 'A+') return '#00F0FF';
+    if (g === 'A')  return '#38BDF8';
+    if (g === 'B+') return '#4ade80';
+    if (g === 'B')  return '#fbbf24';
+    if (g === 'C')  return '#f97316';
+    return '#f87171';
   });
 
   analysisCharts.gradeDistChart = new Chart(ctx, {
@@ -199,42 +214,150 @@ function renderGradeDistChart(dist) {
         label: 'Number of Grades',
         data: data,
         backgroundColor: colors,
-        borderRadius: 4
+        borderRadius: 6,
+        hoverBackgroundColor: '#ffffff',
+        hoverBorderColor: '#00F0FF',
+        hoverBorderWidth: 3
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
-      plugins: { legend: { display: false } }
+      onHover: (event, activeElements) => {
+        if (!gradeInspector) return;
+        if (activeElements.length > 0) {
+          const idx = activeElements[0].index;
+          const g = labels[idx];
+          const count = data[idx];
+          const pct = ((count / totalGrades) * 100).toFixed(1);
+          gradeInspector.classList.add('active');
+          gradeInspector.innerHTML = `<strong>✨ Pop-up Bar: Grade ${g}:</strong> <strong>${count} Grades Awarded</strong> (${pct}% of all grades evaluated)`;
+        } else {
+          gradeInspector.classList.remove('active');
+          gradeInspector.innerHTML = `<span>💡</span> <span>Hover over any grade bar to pop up student count &amp; share</span>`;
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: 'rgba(186,230,253,0.85)', font: { family: 'DM Sans', size: 12, weight: 600 } },
+          grid: { color: 'rgba(56,189,248,0.08)' }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { color: 'rgba(186,230,253,0.85)', font: { family: 'DM Sans', size: 12 }, precision: 0 },
+          grid: { color: 'rgba(56,189,248,0.08)' }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          padding: 14,
+          backgroundColor: 'rgba(3, 7, 18, 0.95)',
+          titleColor: '#00F0FF',
+          titleFont: { family: 'DM Sans', size: 13, weight: 700 },
+          bodyColor: '#ffffff',
+          bodyFont: { family: 'DM Sans', size: 12 },
+          borderColor: '#00F0FF',
+          borderWidth: 2,
+          cornerRadius: 10,
+          callbacks: {
+            title: (items) => `🎖️ Relative Grade: ${items[0].label}`,
+            label: (ctx) => {
+              const count = ctx.raw;
+              const pct = ((count / totalGrades) * 100).toFixed(1);
+              return ` ${count} Student Grades (${pct}% of cohort)`;
+            }
+          }
+        }
+      }
     }
   });
 }
 
 function renderCgpaRankingChart(rankings) {
   const ctx = document.getElementById('cgpaRankingChart');
+  const rankInspector = document.getElementById('rankingInspector');
   if (!ctx || !rankings) return;
   if (analysisCharts.cgpaRankingChart) analysisCharts.cgpaRankingChart.destroy();
 
   const topCohort = rankings.slice(0, 8);
+  const labels = topCohort.map(s => s.name.split(' ')[0]);
+  const data = topCohort.map(s => s.cgpa);
+
+  let barGrad = '#00F0FF';
+  if (ctx.getContext) {
+    const barCtx = ctx.getContext('2d');
+    if (barCtx && barCtx.createLinearGradient) {
+      const g = barCtx.createLinearGradient(0, 0, 400, 0);
+      g.addColorStop(0, '#00F0FF');
+      g.addColorStop(1, '#00A3FF');
+      barGrad = g;
+    }
+  }
 
   analysisCharts.cgpaRankingChart = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: topCohort.map(s => s.name.split(' ')[0]),
+      labels: labels,
       datasets: [{
         label: 'CGPA',
-        data: topCohort.map(s => s.cgpa.toFixed(2)),
-        backgroundColor: '#1e40af',
-        borderRadius: 4
+        data: data,
+        backgroundColor: barGrad,
+        borderRadius: 6,
+        hoverBackgroundColor: '#ffffff',
+        hoverBorderColor: '#00F0FF',
+        hoverBorderWidth: 3
       }]
     },
     options: {
       indexAxis: 'y',
       responsive: true,
       maintainAspectRatio: false,
-      scales: { x: { beginAtZero: true, max: 10.0 } },
-      plugins: { legend: { display: false } }
+      onHover: (event, activeElements) => {
+        if (!rankInspector) return;
+        if (activeElements.length > 0) {
+          const idx = activeElements[0].index;
+          const st = topCohort[idx];
+          rankInspector.classList.add('active');
+          rankInspector.innerHTML = `<strong>✨ Pop-up Rank: #${idx + 1} ${st.name} (${st.rollNo}):</strong> CGPA: <strong>${st.cgpa.toFixed(2)} / 10.00</strong> · Division: <strong>${st.academicClass || 'First Division'}</strong>`;
+        } else {
+          rankInspector.classList.remove('active');
+          rankInspector.innerHTML = `<span>💡</span> <span>Hover over any student bar to pop up CGPA &amp; standing</span>`;
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          max: 10.0,
+          ticks: { color: 'rgba(186,230,253,0.85)', font: { family: 'DM Sans', size: 12 } },
+          grid: { color: 'rgba(56,189,248,0.08)' }
+        },
+        y: {
+          ticks: { color: 'rgba(186,230,253,0.85)', font: { family: 'DM Sans', size: 12, weight: 600 } },
+          grid: { color: 'rgba(56,189,248,0.08)' }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          padding: 14,
+          backgroundColor: 'rgba(3, 7, 18, 0.95)',
+          titleColor: '#00F0FF',
+          titleFont: { family: 'DM Sans', size: 13, weight: 700 },
+          bodyColor: '#ffffff',
+          bodyFont: { family: 'DM Sans', size: 12 },
+          borderColor: '#00F0FF',
+          borderWidth: 2,
+          cornerRadius: 10,
+          callbacks: {
+            title: (items) => {
+              const st = topCohort[items[0].dataIndex];
+              return `Rank #${items[0].dataIndex + 1}: ${st.name} (${st.rollNo})`;
+            },
+            label: (ctx) => ` Cumulative CGPA: ${Number(ctx.raw).toFixed(2)} / 10.00`
+          }
+        }
+      }
     }
   });
 }

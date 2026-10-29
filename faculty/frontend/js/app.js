@@ -32,7 +32,7 @@ const PAGE_LOADERS = {
 
 // ── Theme management (Light & Dark Mode) ───────────────────────────────────
 function initTheme() {
-  const saved = localStorage.getItem('mits_theme') || 'light';
+  const saved = localStorage.getItem('mits_theme') || 'dark';
   if (saved === 'dark') {
     document.body.classList.add('dark-mode');
   } else {
