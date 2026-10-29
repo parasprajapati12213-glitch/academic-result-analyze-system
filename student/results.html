@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Result Analyzer – Results</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="app.js"></script>
+  <script src="leo_chatbot.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--cyan:#00F0FF;--blue:#00A3FF;--sky:#38BDF8;--navy:#030712;--glass:rgba(6,18,38,0.70);--border:rgba(56,189,248,0.20);--soft:rgba(255,255,255,0.87);--muted:rgba(186,230,253,0.60);--r:14px}
+    html,body{height:100%;font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#030712,#050C1A 50%,#071428);color:#fff;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,240,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,0.03) 1px,transparent 1px);background-size:52px 52px;pointer-events:none;z-index:0}
+    #appNav{position:relative;z-index:200}
+    .page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:28px 20px 70px}
+    .pg-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+    .pg-header h1{font-size:22px;font-weight:800;background:linear-gradient(135deg,#fff,var(--sky));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .btn{display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:9px 16px;border-radius:9px;border:none;cursor:pointer;transition:all .2s}
+    .btn-primary{background:linear-gradient(135deg,var(--cyan),var(--blue));color:#030712}
+    .btn-primary:hover{opacity:.88;transform:translateY(-1px)}
+    .btn-secondary{background:rgba(56,189,248,0.10);border:1px solid rgba(56,189,248,0.28);color:var(--sky)}
+    .btn-pdf{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.30);color:#f87171}
+    .btn-pdf:hover{background:rgba(239,68,68,0.20)}
+
+    /* Filter row */
+    .filter-row{display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
+    .form-field label{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+    .form-field select{padding:9px 13px;background:rgba(2,10,24,0.80);border:1px solid rgba(56,189,248,0.22);border-radius:8px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13.5px;outline:none;cursor:pointer;transition:border .2s}
+    .form-field select:focus{border-color:var(--cyan)}
+
+    /* Student info card */
+    .stu-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:22px 24px;backdrop-filter:blur(14px);margin-bottom:20px;display:none}
+    .stu-card.show{display:block}
+    .stu-card-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+    .stu-info h2{font-size:20px;font-weight:800;color:#fff;margin-bottom:4px}
+    .stu-info p{font-size:13px;color:var(--muted)}
+    .stu-kpis{display:flex;gap:14px;flex-wrap:wrap}
+    .stu-kpi{text-align:center;background:rgba(0,240,255,0.06);border:1px solid rgba(0,240,255,0.18);border-radius:10px;padding:12px 18px}
+    .stu-kpi-val{font-size:22px;font-weight:800;color:var(--cyan)}
+    .stu-kpi-label{font-size:11px;color:var(--muted);font-weight:500;margin-top:3px}
+
+    /* SGPA chart */
+    .sgpa-chart-wrap{background:rgba(0,240,255,0.04);border:1px solid rgba(0,240,255,0.12);border-radius:12px;padding:16px 20px;margin-bottom:20px}
+    .sgpa-chart-wrap h4{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:.4px}
+    .sgpa-chart-wrap canvas{height:260px;max-height:280px}
+
+    /* Semester tabs */
+    .sem-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+    .sem-tab{padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid rgba(56,189,248,0.20);background:rgba(56,189,248,0.05);color:var(--muted);transition:all .2s}
+    .sem-tab:hover{border-color:rgba(0,240,255,.35);color:var(--sky)}
+    .sem-tab.active{background:rgba(0,240,255,0.12);border-color:rgba(0,240,255,0.40);color:var(--cyan)}
+    .sem-tab.no-data{opacity:.4;cursor:default}
+
+    /* Results table */
+    .result-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;backdrop-filter:blur(14px);margin-bottom:16px}
+    .result-card-head{background:linear-gradient(90deg,#1B365D,#14274f);padding:14px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+    .result-card-head h3{font-size:15px;font-weight:700;color:#fff}
+    .result-head-right{display:flex;align-items:center;gap:10px}
+    .sgpa-badge{font-size:16px;font-weight:800;color:var(--cyan)}
+    table{width:100%;border-collapse:collapse;font-size:13.5px}
+    thead th{background:#1B365D;padding:10px 16px;text-align:left;font-weight:700;font-size:12px;color:#fff;letter-spacing:.4px;text-transform:uppercase}
+    tbody tr{border-bottom:1px solid rgba(56,189,248,0.09);transition:background .18s}
+    tbody tr:hover{background:rgba(0,240,255,0.05)}
+    tbody td{padding:11px 16px;color:var(--soft)}
+
+    /* Grade chip */
+    .grade-chip{display:inline-block;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:800;border:1px solid}
+    .no-data{text-align:center;padding:48px;color:var(--muted);font-size:14px}
+    .no-data span{display:block;font-size:40px;margin-bottom:10px}
+    .pass-chip{background:rgba(74,222,128,.10);border-color:rgba(74,222,128,.30);color:#4ade80}
+    .fail-chip{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.30);color:#f87171}
+  </style>
+</head>
+<body>
+<div id="appNav"></div>
+<main class="page">
+  <div class="pg-header">
+    <div><h1>📊 Results & GPA</h1></div>
+    <button class="btn btn-pdf" id="pdfBtn" style="display:none" onclick="generatePDF()">📄 Download PDF Report</button>
+  </div>
+
+  <!-- Filter row -->
+  <div class="filter-row">
+    <div class="form-field">
+      <label>Student</label>
+      <select id="stuSel" onchange="loadStudent()">
+        <option value="">— Select Student —</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Student card -->
+  <div class="stu-card" id="stuCard">
+    <div class="stu-card-top">
+      <div class="stu-info">
+        <h2 id="sc_name">—</h2>
+        <p id="sc_meta">—</p>
+      </div>
+      <div class="stu-kpis">
+        <div class="stu-kpi"><div class="stu-kpi-val" id="sc_cgpa">—</div><div class="stu-kpi-label">CGPA</div></div>
+        <div class="stu-kpi"><div class="stu-kpi-val" id="sc_sems">—</div><div class="stu-kpi-label">Semesters</div></div>
+        <div class="stu-kpi"><div class="stu-kpi-val" id="sc_credits">—</div><div class="stu-kpi-label">Credits Earned</div></div>
+      </div>
+    </div>
+
+    <!-- SGPA trend chart -->
+    <div class="sgpa-chart-wrap">
+      <h4>SGPA Trend across Semesters</h4>
+      <canvas id="sgpaChart"></canvas>
+    </div>
+
+    <!-- Semester tabs -->
+    <div class="sem-tabs" id="semTabs"></div>
+
+    <!-- Results per semester -->
+    <div id="resultContent">
+      <div class="no-data"><span>📭</span>Select a semester above to view detailed results.</div>
+    </div>
+  </div>
+
+  <div id="emptyState" class="no-data" style="margin-top:24px">
+    <span>☝️</span>Select a student to view their results and GPA.
+  </div>
+</main>
+
+<script>
+  initPage('results');
+  let sgpaChartInst = null;
+  let currentStudent = null;
+
+  function populateStudents() {
+    const sel = document.getElementById('stuSel');
+    const session = RA.getSession();
+    const isStudent = session.role === 'student';
+
+    if (isStudent) {
+      // 🎓 Logged in as student: restrict to own records matching email!
+      const userEmail = (session.email || '').trim().toLowerCase();
+      const me = RA.getStudentByEmail ? RA.getStudentByEmail(userEmail) : null;
+      if (me) {
+        sel.innerHTML = '<option value="' + me.id + '">' + RA.escHTML(me.rollNo + ' — ' + me.name + ' (' + me.email + ')') + '</option>';
+        sel.disabled = true;
+        loadStudent();
+      } else {
+        sel.innerHTML = '<option value="">No student record for ' + RA.escHTML(userEmail) + '</option>';
+        sel.disabled = true;
+      }
+      return;
+    }
+
+    // 🧑‍🏫 Faculty view: show all students
+    const students = RA.getStudents().slice().sort((a,b)=>a.rollNo.localeCompare(b.rollNo));
+    sel.innerHTML = '<option value="">— Select Student —</option>' +
+      students.map(s => '<option value="' + s.id + '">' + RA.escHTML(s.rollNo + ' — ' + s.name) + '</option>').join('');
+
+    // URL param
+    const params = new URLSearchParams(window.location.search);
+    const sid = params.get('sid');
+    if (sid) { sel.value = sid; loadStudent(); }
+  }
+
+  function loadStudent() {
+    const sid = document.getElementById('stuSel').value;
+    if (!sid) {
+      document.getElementById('stuCard').classList.remove('show');
+      document.getElementById('emptyState').style.display = 'block';
+      document.getElementById('pdfBtn').style.display = 'none';
+      return;
+    }
+    currentStudent = RA.getStudent(sid);
+    if (!currentStudent) return;
+
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('stuCard').classList.add('show');
+    document.getElementById('pdfBtn').style.display = 'inline-flex';
+
+    const allMarks = RA.getMarksForStudent(sid).sort((a,b) => a.semester - b.semester);
+    const cgpa     = RA.calcCGPA(sid);
+    const credits  = allMarks.reduce((sum,m) => sum + m.subjects.reduce((s,sub)=>s+sub.credits,0), 0);
+
+    document.getElementById('sc_name').textContent   = currentStudent.name;
+    document.getElementById('sc_meta').textContent   = currentStudent.rollNo + ' · ' + currentStudent.branch + ' · Sem ' + currentStudent.currentSem;
+    document.getElementById('sc_cgpa').textContent   = cgpa > 0 ? cgpa.toFixed(2) : '—';
+    document.getElementById('sc_sems').textContent   = allMarks.length;
+    document.getElementById('sc_credits').textContent= credits || '—';
+
+    // SGPA Trend chart
+    if (sgpaChartInst) { sgpaChartInst.destroy(); }
+    const labels = allMarks.map(m => 'Sem ' + m.semester);
+    const sgpas  = allMarks.map(m => RA.calcSGPA(m.subjects));
+    const ctx = document.getElementById('sgpaChart').getContext('2d');
+    sgpaChartInst = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'SGPA', data: sgpas,
+          borderColor: '#00F0FF', backgroundColor: 'rgba(0,240,255,0.12)',
+          pointBackgroundColor: '#00F0FF', pointRadius: 5, pointHoverRadius: 7,
+          tension: 0.35, fill: true, borderWidth: 2,
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: 'rgba(186,230,253,0.7)', font: { family: 'DM Sans', size: 12 } }, grid: { color: 'rgba(56,189,248,0.08)' } },
+          y: { ticks: { color: 'rgba(186,230,253,0.7)', font: { family: 'DM Sans', size: 12 } }, grid: { color: 'rgba(56,189,248,0.08)' }, min: 0, max: 10 }
+        },
+        responsive: true, maintainAspectRatio: true,
+      }
+    });
+
+    // Semester tabs
+    const tabs = document.getElementById('semTabs');
+    tabs.innerHTML = allMarks.map(m => {
+      const sgpa = RA.calcSGPA(m.subjects);
+      return '<div class="sem-tab" onclick="showSemResult(' + m.semester + ')" id="tab_' + m.semester + '">Sem ' + m.semester + ' <small style="opacity:.7">' + sgpa.toFixed(1) + '</small></div>';
+    }).join('');
+
+    // Auto-show last semester
+    if (allMarks.length) showSemResult(allMarks[allMarks.length - 1].semester);
+    else document.getElementById('resultContent').innerHTML = '<div class="no-data"><span>📭</span>No marks entered yet.</div>';
+  }
+
+  function showSemResult(sem) {
+    // Update active tab
+    document.querySelectorAll('.sem-tab').forEach(t => t.classList.remove('active'));
+    const tab = document.getElementById('tab_' + sem);
+    if (tab) tab.classList.add('active');
+
+    const sid    = document.getElementById('stuSel').value;
+    const record = RA.getMarksForStudentSem(sid, sem);
+    const rc     = document.getElementById('resultContent');
+
+    if (!record) { rc.innerHTML = '<div class="no-data"><span>📭</span>No marks found for Semester ' + sem + '.</div>'; return; }
+
+    const sgpa      = RA.calcSGPA(record.subjects);
+    const passCount = record.subjects.filter(s => s.total >= 40).length;
+    const totCred   = record.subjects.reduce((a,b) => a + b.credits, 0);
+
+    rc.innerHTML = '<div class="result-card">' +
+      '<div class="result-card-head">' +
+        '<h3>Semester ' + sem + ' — Detailed Results</h3>' +
+        '<div class="result-head-right">' +
+          '<span style="font-size:13px;color:var(--muted)">SGPA:</span>' +
+          '<span class="sgpa-badge">' + sgpa.toFixed(2) + '</span>' +
+          '<span style="font-size:13px;color:var(--muted)">' + passCount + '/' + record.subjects.length + ' passed</span>' +
+        '</div>' +
+      '</div>' +
+      '<div style="overflow-x:auto"><table>' +
+      '<thead><tr><th>Code</th><th>Subject</th><th>Credits</th><th>Internal</th><th>External</th><th>Total</th><th>Grade</th><th>Grade Pts</th><th>Status</th></tr></thead>' +
+      '<tbody>' + record.subjects.map(s => {
+        const g   = RA.getGrade(s.total);
+        const col = RA.gradeColor(g.grade);
+        const pass= s.total >= 40;
+        return '<tr>' +
+          '<td><strong style="color:var(--sky)">' + RA.escHTML(s.code) + '</strong></td>' +
+          '<td>' + RA.escHTML(s.name) + '</td>' +
+          '<td style="text-align:center;color:var(--muted)">' + s.credits + '</td>' +
+          '<td style="text-align:center">' + s.internal + '</td>' +
+          '<td style="text-align:center">' + s.external + '</td>' +
+          '<td style="text-align:center;font-weight:800;color:' + col + '">' + s.total + '</td>' +
+          '<td><span class="grade-chip" style="color:' + col + ';border-color:' + col + '40;background:' + col + '18">' + g.grade + '</span></td>' +
+          '<td style="text-align:center;color:var(--muted)">' + g.points + '</td>' +
+          '<td><span class="grade-chip ' + (pass ? 'pass-chip' : 'fail-chip') + '">' + (pass ? '✓ Pass' : '✗ Fail') + '</span></td>' +
+        '</tr>';
+      }).join('') +
+      '</tbody></table></div>' +
+      '<div style="padding:16px 22px;display:flex;gap:24px;border-top:1px solid rgba(56,189,248,0.12);flex-wrap:wrap">' +
+        '<div><span style="color:var(--muted);font-size:13px">Total Credits: </span><strong style="color:var(--sky)">' + totCred + '</strong></div>' +
+        '<div><span style="color:var(--muted);font-size:13px">SGPA: </span><strong style="color:var(--cyan);font-size:16px">' + sgpa.toFixed(2) + '</strong></div>' +
+        '<div><span style="color:var(--muted);font-size:13px">Subjects Passed: </span><strong style="color:#4ade80">' + passCount + ' / ' + record.subjects.length + '</strong></div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // ── PDF Generation ─────────────────────────────────────────
+  function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    if (!currentStudent) return;
+    const sid      = currentStudent.id;
+    const allMarks = RA.getMarksForStudent(sid).sort((a,b) => a.semester - b.semester);
+    const cgpa     = RA.calcCGPA(sid);
+    const doc      = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    const W = 210, pad = 15;
+    let y = pad;
+
+    // Header
+    doc.setFillColor(27, 54, 93);
+    doc.rect(0, 0, W, 32, 'F');
+    doc.setFontSize(16); doc.setFont('helvetica','bold');
+    doc.setTextColor(255,255,255);
+    doc.text('MITS — Academic Result Report', pad, 12);
+    doc.setFontSize(10); doc.setFont('helvetica','normal');
+    doc.text('Department of Computer Science & Engineering', pad, 19);
+    doc.text('Generated: ' + new Date().toLocaleDateString('en-IN'), pad, 26);
+    y = 40;
+
+    // Student info box
+    doc.setFillColor(240,245,255);
+    doc.roundedRect(pad, y, W - 2*pad, 28, 3, 3, 'F');
+    doc.setTextColor(10,20,50);
+    doc.setFontSize(13); doc.setFont('helvetica','bold');
+    doc.text(currentStudent.name, pad+4, y+8);
+    doc.setFontSize(10); doc.setFont('helvetica','normal');
+    doc.text('Roll No: ' + currentStudent.rollNo, pad+4, y+15);
+    doc.text('Branch: ' + currentStudent.branch + '  |  Current Semester: ' + currentStudent.currentSem, pad+4, y+21);
+    doc.setFont('helvetica','bold'); doc.setFontSize(12);
+    doc.setTextColor(0,100,200);
+    doc.text('CGPA: ' + (cgpa > 0 ? cgpa.toFixed(2) : '—'), W - pad - 30, y+14);
+    y += 34;
+
+    // Semester-wise tables
+    for (const record of allMarks) {
+      const sgpa = RA.calcSGPA(record.subjects);
+      if (y > 250) { doc.addPage(); y = pad; }
+
+      doc.setFillColor(27, 54, 93);
+      doc.rect(pad, y, W - 2*pad, 8, 'F');
+      doc.setFontSize(10); doc.setFont('helvetica','bold');
+      doc.setTextColor(255,255,255);
+      doc.text('Semester ' + record.semester + '  —  SGPA: ' + sgpa.toFixed(2), pad+3, y+5.5);
+      y += 10;
+
+      // Table header
+      doc.setFillColor(200,215,240);
+      doc.rect(pad, y, W-2*pad, 6, 'F');
+      doc.setFontSize(8); doc.setTextColor(10,20,50);
+      const cols = [pad+2, pad+18, pad+78, pad+95, pad+110, pad+126, pad+140, pad+155];
+      const heads = ['Code','Subject','Cr','Int','Ext','Tot','Grade','Pts'];
+      heads.forEach((h,i) => doc.text(h, cols[i], y+4.3));
+      y += 7;
+
+      for (const s of record.subjects) {
+        if (y > 270) { doc.addPage(); y = pad; }
+        const g = RA.getGrade(s.total);
+        const even = record.subjects.indexOf(s) % 2 === 0;
+        if (even) { doc.setFillColor(248,250,255); doc.rect(pad, y, W-2*pad, 6, 'F'); }
+        doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+        doc.setTextColor(30,40,60);
+        doc.text(s.code, cols[0], y+4.2);
+        doc.text(s.name.substring(0,28), cols[1], y+4.2);
+        doc.text(String(s.credits), cols[2], y+4.2);
+        doc.text(String(s.internal), cols[3], y+4.2);
+        doc.text(String(s.external), cols[4], y+4.2);
+        doc.setFont('helvetica','bold');
+        doc.text(String(s.total), cols[5], y+4.2);
+        doc.text(g.grade, cols[6], y+4.2);
+        doc.text(String(g.points), cols[7], y+4.2);
+        y += 6.5;
+      }
+      y += 4;
+    }
+
+    // Footer
+    doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(100,120,160);
+    doc.text('This is a computer-generated report from MITS Result Analyzer System.', pad, 290);
+
+    doc.save('Result_' + currentStudent.rollNo + '_' + currentStudent.name.replace(/\s+/g,'_') + '.pdf');
+  }
+
+  populateStudents();
+</script>
+</body>
+</html>

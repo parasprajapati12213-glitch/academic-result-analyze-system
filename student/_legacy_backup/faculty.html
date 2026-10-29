@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Result Analyzer – Faculty Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="app.js"></script>
+  <script src="leo_chatbot.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --cyan:#00F0FF;--blue:#00A3FF;--sky:#38BDF8;
+      --navy:#030712;--navy2:#050C1A;--navy3:#071428;
+      --sidebar-w:240px;
+      --glass:rgba(6,18,38,0.72);--border:rgba(56,189,248,0.18);
+      --border-h:rgba(0,240,255,0.42);
+      --soft:rgba(255,255,255,0.88);--muted:rgba(186,230,253,0.60);
+      --r:12px;
+    }
+    html,body{height:100%;font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#030712,#050C1A 50%,#071428);color:#fff;overflow:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,240,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,0.025) 1px,transparent 1px);background-size:52px 52px;pointer-events:none;z-index:0}
+
+    /* ════════════════════════ LAYOUT ════════════════════════ */
+    .layout{display:flex;height:100vh;position:relative;z-index:1}
+
+    /* ── Sidebar ── */
+    .sidebar{
+      width:var(--sidebar-w);flex-shrink:0;
+      background:rgba(3,7,18,0.95);
+      border-right:1px solid rgba(0,240,255,0.14);
+      display:flex;flex-direction:column;
+      height:100vh;overflow-y:auto;
+      transition:transform .3s;
+      z-index:100;
+    }
+    .sidebar::-webkit-scrollbar{width:4px}
+    .sidebar::-webkit-scrollbar-thumb{background:rgba(0,240,255,0.2);border-radius:2px}
+
+    .sb-brand{padding:20px 18px 16px;border-bottom:1px solid rgba(0,240,255,0.10);display:flex;align-items:center;gap:10px}
+    .sb-logo{width:36px;height:36px;border-radius:8px;background:#fff;padding:3px;object-fit:contain;flex-shrink:0}
+    .sb-title{font-size:13px;font-weight:700;color:var(--cyan);line-height:1.25}
+    .sb-sub{font-size:10px;color:var(--muted);margin-top:1px}
+
+    .sb-section-label{font-size:9.5px;font-weight:700;color:rgba(186,230,253,0.35);letter-spacing:1.5px;text-transform:uppercase;padding:16px 18px 6px}
+
+    .sb-nav{display:flex;flex-direction:column;gap:3px;padding:0 10px}
+    .sb-link{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:9px;font-size:13px;font-weight:500;color:rgba(186,230,253,0.70);cursor:pointer;transition:all .2s;border:1px solid transparent;user-select:none}
+    .sb-link:hover{color:var(--sky);background:rgba(56,189,248,0.07);border-color:rgba(56,189,248,0.12)}
+    .sb-link.active{color:var(--cyan);background:rgba(0,240,255,0.10);border-color:rgba(0,240,255,0.25);font-weight:600}
+    .sb-link .icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+
+    .sb-footer{margin-top:auto;padding:16px 10px;border-top:1px solid rgba(0,240,255,0.08)}
+    .sb-user{display:flex;align-items:center;gap:10px;padding:10px;margin-bottom:10px}
+    .sb-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--blue));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#030712;flex-shrink:0}
+    .sb-user-info .name{font-size:13px;font-weight:600;color:#fff}
+    .sb-user-info .role{font-size:11px;color:var(--muted)}
+    .btn-logout{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:9px;border-radius:9px;background:rgba(239,68,68,0.09);border:1px solid rgba(239,68,68,0.28);color:#f87171;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+    .btn-logout:hover{background:rgba(239,68,68,0.18)}
+
+    /* ── Main area ── */
+    .main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+    .topbar{flex-shrink:0;background:rgba(3,7,18,0.90);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,240,255,0.12);padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .topbar-title{font-size:16px;font-weight:700;color:#fff}
+    .topbar-right{display:flex;align-items:center;gap:10px}
+    .hamburger{display:none;background:none;border:1px solid rgba(0,240,255,0.22);color:var(--cyan);font-size:18px;padding:5px 10px;border-radius:7px;cursor:pointer}
+    .sem-select{padding:7px 12px;background:rgba(2,10,24,0.80);border:1px solid rgba(56,189,248,0.22);border-radius:8px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;cursor:pointer}
+    .sem-select:focus{border-color:var(--cyan)}
+
+    .content{flex:1;overflow-y:auto;padding:24px;scroll-behavior:smooth}
+    .content::-webkit-scrollbar{width:5px}
+    .content::-webkit-scrollbar-thumb{background:rgba(0,240,255,0.18);border-radius:3px}
+
+    /* ── Sections ── */
+    .section{display:none}
+    .section.active{display:block}
+
+    /* ════════════════════════ COMMON UI ════════════════════════ */
+    .btn{display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:8px 16px;border-radius:9px;border:none;cursor:pointer;transition:all .2s;text-decoration:none}
+    .btn-primary{background:linear-gradient(135deg,var(--cyan),var(--blue));color:#030712}
+    .btn-primary:hover{opacity:.88;transform:translateY(-1px)}
+    .btn-secondary{background:rgba(56,189,248,0.10);border:1px solid rgba(56,189,248,0.28);color:var(--sky)}
+    .btn-secondary:hover{background:rgba(56,189,248,0.20)}
+    .btn-danger{background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.30);color:#f87171}
+    .btn-danger:hover{background:rgba(239,68,68,0.20)}
+    .btn-success{background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.30);color:#4ade80}
+    .btn-success:hover{background:rgba(74,222,128,0.22)}
+    .btn-sm{padding:5px 11px;font-size:11.5px}
+    .btn-xs{padding:3px 9px;font-size:11px}
+
+    /* Section header */
+    .sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+    .sec-header h2{font-size:20px;font-weight:800;background:linear-gradient(135deg,#fff,var(--sky));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .sec-header p{font-size:13px;color:var(--muted);margin-top:2px}
+
+    /* KPI row */
+    .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+    .kpi{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:18px 16px;backdrop-filter:blur(14px);transition:border-color .25s,transform .2s}
+    .kpi:hover{border-color:rgba(0,240,255,0.38);transform:translateY(-2px)}
+    .kpi-val{font-size:28px;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:5px}
+    .kpi-label{font-size:12px;color:var(--muted);font-weight:500}
+
+    /* Cards */
+    .card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);backdrop-filter:blur(14px);overflow:hidden;margin-bottom:18px}
+    .card-head{background:linear-gradient(90deg,#1B365D,#14274f);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+    .card-head h3{font-size:14.5px;font-weight:700;color:#fff}
+    .card-body{padding:20px}
+
+    /* Tables */
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    thead th{background:#1B365D;padding:10px 14px;text-align:left;font-weight:700;font-size:11.5px;color:#fff;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap}
+    thead th.sortable{cursor:pointer;user-select:none}
+    thead th.sortable:hover{background:#1f3f6a}
+    tbody tr{border-bottom:1px solid rgba(56,189,248,0.09);transition:background .18s}
+    tbody tr:hover{background:rgba(0,240,255,0.05)}
+    tbody td{padding:10px 14px;color:var(--soft);vertical-align:middle}
+    .td-actions{display:flex;gap:5px;align-items:center}
+
+    /* Form elements */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media(max-width:560px){.form-grid{grid-template-columns:1fr}}
+    .form-col3{grid-template-columns:1fr 1fr 1fr}
+    .form-field{display:flex;flex-direction:column;gap:5px}
+    .form-field label{font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+    .form-field input,.form-field select,.form-field textarea{padding:9px 12px;background:rgba(2,10,24,0.70);border:1px solid rgba(56,189,248,0.22);border-radius:8px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13.5px;outline:none;transition:border .2s;width:100%}
+    .form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,240,255,0.08)}
+    .form-field input::placeholder,.form-field textarea::placeholder{color:rgba(186,230,253,0.30)}
+    .form-field select option{background:#071428}
+    .form-full{grid-column:1/-1}
+
+    /* Modal */
+    .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.68);z-index:900;align-items:center;justify-content:center;padding:16px}
+    .modal-bg.open{display:flex}
+    .modal{background:linear-gradient(160deg,#071428,#050C1A);border:1px solid rgba(0,240,255,0.22);border-radius:16px;padding:28px 24px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,0.7)}
+    .modal::-webkit-scrollbar{width:4px}
+    .modal::-webkit-scrollbar-thumb{background:rgba(0,240,255,0.2);border-radius:2px}
+    .modal h2{font-size:17px;font-weight:800;color:var(--cyan);margin-bottom:20px}
+    .modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:22px}
+    .err{color:#f87171;font-size:12px;margin-top:12px;display:none;padding:10px 14px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:8px}
+
+    /* Badges */
+    .badge{display:inline-block;padding:3px 9px;border-radius:10px;font-size:11.5px;font-weight:700;border:1px solid}
+    .badge-cyan{color:var(--cyan);border-color:rgba(0,240,255,0.28);background:rgba(0,240,255,0.08)}
+    .badge-green{color:#4ade80;border-color:rgba(74,222,128,0.28);background:rgba(74,222,128,0.08)}
+    .badge-red{color:#f87171;border-color:rgba(248,113,113,0.28);background:rgba(248,113,113,0.08)}
+    .badge-yellow{color:#facc15;border-color:rgba(250,204,21,0.28);background:rgba(250,204,21,0.08)}
+    .badge-blue{color:var(--sky);border-color:rgba(56,189,248,0.28);background:rgba(56,189,248,0.08)}
+
+    /* Rank medals */
+    .medal{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-size:14px;font-weight:800;flex-shrink:0}
+    .medal-1{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#000}
+    .medal-2{background:linear-gradient(135deg,#9ca3af,#d1d5db);color:#000}
+    .medal-3{background:linear-gradient(135deg,#b45309,#d97706);color:#fff}
+    .medal-n{background:rgba(56,189,248,0.12);color:var(--sky);font-size:12px}
+
+    /* Marks entry grid */
+    .marks-grid{overflow-x:auto}
+    .marks-table{border-collapse:collapse;font-size:12.5px;min-width:600px}
+    .marks-table th{background:#1B365D;padding:9px 10px;text-align:center;font-size:11px;color:#fff;white-space:nowrap;letter-spacing:.3px;text-transform:uppercase}
+    .marks-table th.name-col{text-align:left;min-width:140px}
+    .marks-table td{padding:6px 6px;border-bottom:1px solid rgba(56,189,248,0.08);text-align:center;vertical-align:middle}
+    .marks-table td.name-col{text-align:left;padding-left:10px;font-weight:600;color:var(--soft);white-space:nowrap}
+    .marks-table tr:hover td{background:rgba(0,240,255,0.04)}
+    .mark-inp{width:54px;padding:5px 6px;background:rgba(2,10,24,0.75);border:1px solid rgba(56,189,248,0.20);border-radius:6px;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;text-align:center;outline:none;transition:border .18s}
+    .mark-inp:focus{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(0,240,255,0.10)}
+    .mark-inp.err{border-color:#f87171}
+    .tot-cell{font-size:13px;font-weight:800;min-width:36px}
+    .grade-cell{font-size:12px;font-weight:700;min-width:32px}
+
+    /* Toast */
+    .toast{position:fixed;bottom:24px;right:20px;background:#071428;border:1px solid rgba(0,240,255,0.35);border-radius:12px;padding:13px 18px;font-size:13.5px;font-weight:600;z-index:9999;transform:translateY(80px);opacity:0;transition:all .35s;max-width:300px}
+    .toast.show{transform:translateY(0);opacity:1}
+    .toast.ok{border-color:rgba(74,222,128,0.45);color:#4ade80}
+    .toast.fail{border-color:rgba(239,68,68,0.45);color:#f87171}
+
+    /* Filter bar */
+    .filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+    .search-box{position:relative;flex:1;min-width:180px}
+    .search-box input{width:100%;padding:8px 12px 8px 32px;background:rgba(5,12,26,0.80);border:1px solid rgba(56,189,248,0.22);border-radius:8px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border .2s}
+    .search-box input:focus{border-color:var(--cyan)}
+    .search-box::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;pointer-events:none}
+    .count-tag{font-size:12px;padding:4px 11px;border-radius:12px;background:rgba(0,240,255,0.08);border:1px solid rgba(0,240,255,0.20);color:var(--cyan);font-weight:700;white-space:nowrap}
+
+    .no-data{text-align:center;padding:44px;color:var(--muted);font-size:14px}
+    .no-data .icon{font-size:38px;display:block;margin-bottom:8px}
+
+    /* Confirm dialog */
+    .confirm-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:950;align-items:center;justify-content:center;padding:16px}
+    .confirm-bg.open{display:flex}
+    .confirm-box{background:#071428;border:1px solid rgba(239,68,68,0.35);border-radius:14px;padding:26px 22px;max-width:360px;width:100%;text-align:center}
+    .confirm-box h3{color:#f87171;font-size:16px;margin-bottom:10px}
+    .confirm-box p{color:var(--muted);font-size:13px;margin-bottom:20px;line-height:1.5}
+    .confirm-btns{display:flex;gap:10px;justify-content:center}
+
+    /* Relative grade info */
+    .grade-info-bar{background:rgba(0,163,255,0.07);border:1px solid rgba(0,163,255,0.20);border-radius:10px;padding:11px 16px;margin-bottom:18px;font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:8px}
+    .grade-info-bar strong{color:var(--sky)}
+
+    /* Failure card */
+    .fail-student-card{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.20);border-radius:10px;padding:16px;margin-bottom:12px}
+    .fail-student-card h4{font-size:14px;font-weight:700;color:#fff;margin-bottom:8px}
+    .fail-subjects{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+
+    /* Subject chip in subject management */
+    .sub-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(0,240,255,0.05);border:1px solid rgba(0,240,255,0.15);border-radius:9px;font-size:13px;margin:5px}
+    .sub-chip strong{color:var(--sky)}
+    .sub-chip .credits{color:var(--muted);font-size:11.5px}
+    .sub-chip .del-sub{background:none;border:none;color:#f87171;cursor:pointer;font-size:14px;padding:0;margin-left:4px;line-height:1}
+
+    @media(max-width:768px){
+      .sidebar{position:fixed;left:0;top:0;height:100vh;transform:translateX(-100%);z-index:300}
+      .sidebar.open{transform:translateX(0)}
+      .hamburger{display:block}
+      .layout{overflow:hidden}
+      .form-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ Toast ══ -->
+<div class="toast" id="toast"></div>
+
+<!-- ══ Confirm Dialog ══ -->
+<div class="confirm-bg" id="confirmBg">
+  <div class="confirm-box">
+    <h3>⚠️ Are you sure?</h3>
+    <p id="confirmMsg">This action cannot be undone.</p>
+    <div class="confirm-btns">
+      <button class="btn btn-secondary" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirmOk">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Student Modal ══ -->
+<div class="modal-bg" id="stuModal">
+  <div class="modal" style="max-width:600px">
+    <h2 id="stuModalTitle">➕ Add New Student</h2>
+    <div class="form-grid">
+      <div class="form-field"><label>Full Name *</label><input id="sm_name" placeholder="e.g. Arjun Sharma"/></div>
+      <div class="form-field"><label>Roll Number *</label><input id="sm_roll" placeholder="e.g. CS2021001"/></div>
+      <div class="form-field"><label>Email Address * (Student Login ID)</label><input id="sm_email" type="email" placeholder="e.g. arjun@mits.edu" required/></div>
+      <div class="form-field"><label>Phone</label><input id="sm_phone" placeholder="10-digit mobile"/></div>
+      <div class="form-field"><label>Department *</label>
+        <select id="sm_dept">
+          <option value="Computer Science & Engineering">Computer Science &amp; Engineering</option>
+          <option value="Electronics & Communication">Electronics &amp; Communication</option>
+          <option value="Mechanical Engineering">Mechanical Engineering</option>
+          <option value="Civil Engineering">Civil Engineering</option>
+          <option value="Electrical Engineering">Electrical Engineering</option>
+          <option value="Information Technology">Information Technology</option>
+        </select>
+      </div>
+      <div class="form-field"><label>Branch *</label>
+        <select id="sm_branch">
+          <option value="CSE">CSE</option><option value="ECE">ECE</option>
+          <option value="ME">ME</option><option value="CE">CE</option>
+          <option value="EEE">EEE</option><option value="IT">IT</option>
+        </select>
+      </div>
+      <div class="form-field"><label>Batch Year *</label>
+        <select id="sm_batch">
+          <option value="2024">2024</option><option value="2023">2023</option>
+          <option value="2022">2022</option><option value="2021">2021</option>
+          <option value="2020">2020</option>
+        </select>
+      </div>
+      <div class="form-field"><label>Current Semester * (Sem 1 to 3)</label>
+        <select id="sm_sem">
+          <option value="1">Semester 1</option>
+          <option value="2">Semester 2</option>
+          <option value="3" selected>Semester 3</option>
+        </select>
+      </div>
+    </div>
+    <div class="err" id="stuErr"></div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal('stuModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStudent()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Subject Modal ══ -->
+<div class="modal-bg" id="subModal">
+  <div class="modal" style="max-width:420px">
+    <h2 id="subModalTitle">➕ Add Subject</h2>
+    <div class="form-grid">
+      <div class="form-field"><label>Subject Code *</label><input id="sub_code" placeholder="e.g. CS301"/></div>
+      <div class="form-field"><label>Credits *</label><input id="sub_credits" type="number" min="1" max="6" placeholder="e.g. 4"/></div>
+      <div class="form-field form-full"><label>Subject Name *</label><input id="sub_name" placeholder="e.g. Data Structures"/></div>
+      <div class="form-field"><label>Semester</label>
+        <select id="sub_sem">
+          <option value="1">Semester 1</option>
+          <option value="2">Semester 2</option>
+          <option value="3" selected>Semester 3</option>
+        </select>
+      </div>
+    </div>
+    <div class="err" id="subErr"></div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal('subModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSubject()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ Give Marks Modal (Pop-up Box) ══ -->
+<div class="modal-bg" id="giveMarksModal">
+  <div class="modal" style="max-width:760px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;border-bottom:1px solid rgba(0,240,255,0.15);padding-bottom:12px">
+      <div>
+        <h2 style="margin-bottom:4px;font-size:18px" id="gmModalTitle">📝 Give Marks to Student</h2>
+        <div style="font-size:13px;color:var(--muted)" id="gmStudentSub">Student: —</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label style="font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase">Semester:</label>
+        <select class="sem-select" id="gmSemSelect" onchange="loadStudentMarksInModal()" style="font-weight:700">
+          <option value="1">Semester 1</option>
+          <option value="2">Semester 2</option>
+          <option value="3" selected>Semester 3</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Student details strip -->
+    <div class="grade-info-bar" id="gmStudentInfoBar" style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:16px">
+      <span>👤 <strong id="gmStudentName" style="color:#fff">—</strong></span>
+      <span>• Roll: <strong id="gmStudentRoll" style="color:var(--sky)">—</strong></span>
+      <span>• Email: <strong id="gmStudentEmail" style="color:var(--cyan);font-family:monospace">—</strong></span>
+      <span>• Branch: <strong id="gmStudentBranch" style="color:var(--soft)">—</strong></span>
+    </div>
+
+    <!-- Subjects & Marks entry table inside modal -->
+    <div class="card" style="margin-bottom:16px;background:rgba(2,10,24,0.7);border-color:rgba(56,189,248,0.25)">
+      <div class="table-wrap">
+        <table style="font-size:13px;min-width:600px">
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th style="text-align:center">Credits</th>
+              <th style="text-align:center;width:90px">Internal (/50)</th>
+              <th style="text-align:center;width:90px">External (/50)</th>
+              <th style="text-align:center;width:80px">Total (/100)</th>
+              <th style="text-align:center;width:80px">Relative Grade</th>
+              <th style="text-align:center;width:60px">Points</th>
+              <th style="text-align:center;width:80px">Status</th>
+            </tr>
+          </thead>
+          <tbody id="gmSubjectsBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Live summary calculation footer -->
+      <div style="padding:14px 20px;background:rgba(3,7,18,0.92);border-top:1px solid rgba(0,240,255,0.18);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
+        <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+          <div><span style="font-size:12px;color:var(--muted)">Semester SGPA:</span> <strong id="gmLiveSGPA" style="color:var(--cyan);font-size:17px;margin-left:4px">—</strong></div>
+          <div><span style="font-size:12px;color:var(--muted)">Total Credits:</span> <strong id="gmLiveCredits" style="color:var(--sky);font-size:15px;margin-left:4px">—</strong></div>
+          <div><span style="font-size:12px;color:var(--muted)">Passed:</span> <strong id="gmLivePassed" style="color:#4ade80;font-size:15px;margin-left:4px">—</strong></div>
+        </div>
+        <div style="font-size:11.5px;color:var(--muted)">* Grades and SGPA update live relative to class mean & standard deviation</div>
+      </div>
+    </div>
+
+    <div class="err" id="gmErr"></div>
+
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal('giveMarksModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitGivenMarks()">💾 Save Marks & Calculate Relative GPA</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN LAYOUT ══ -->
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <img class="sb-logo" src="mits_logo.jpg" alt="MITS"/>
+      <div>
+        <div class="sb-title">Result Analyzer</div>
+        <div class="sb-sub">Faculty Portal</div>
+      </div>
+    </div>
+
+    <div class="sb-section-label">Main</div>
+    <nav class="sb-nav">
+      <div class="sb-link active" data-sec="overview" onclick="showSection('overview',this)"><span class="icon">📊</span> Overview</div>
+      <div class="sb-link" data-sec="students" onclick="showSection('students',this)"><span class="icon">👥</span> Students</div>
+      <div class="sb-link" data-sec="subjects" onclick="showSection('subjects',this)"><span class="icon">📚</span> Subjects & Credits</div>
+    </nav>
+
+    <div class="sb-section-label">Academics</div>
+    <nav class="sb-nav">
+      <div class="sb-link" data-sec="marks" onclick="showSection('marks',this)"><span class="icon">✏️</span> Marks Entry</div>
+      <div class="sb-link" data-sec="results" onclick="showSection('results',this)"><span class="icon">📋</span> Results & GPA</div>
+      <div class="sb-link" data-sec="toppers" onclick="showSection('toppers',this)"><span class="icon">🏆</span> Class Toppers</div>
+      <div class="sb-link" data-sec="failures" onclick="showSection('failures',this)"><span class="icon">⚠️</span> Failures</div>
+    </nav>
+
+    <div class="sb-section-label">Student Views</div>
+    <nav class="sb-nav">
+      <a href="dashboard.html" class="sb-link" style="text-decoration:none"><span class="icon">⊞</span> Dashboard</a>
+      <a href="ranking.html" class="sb-link" style="text-decoration:none"><span class="icon">🏆</span> Rankings</a>
+      <a href="doubts.html" class="sb-link" style="text-decoration:none"><span class="icon">💡</span> Doubts &amp; Hub</a>
+    </nav>
+
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-avatar" id="sbAvatar">F</div>
+        <div class="sb-user-info">
+          <div class="name" id="sbName">Faculty</div>
+          <div class="role">🧑‍🏫 Faculty</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="logout()">🚪 Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main area -->
+  <div class="main-area">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <div class="topbar-title" id="topbarTitle">📊 Overview</div>
+      </div>
+      <div class="topbar-right">
+        <label style="font-size:12px;color:var(--muted)">Semester:</label>
+        <select class="sem-select" id="globalSem" onchange="onGlobalSemChange()">
+          <option value="1">Sem 1</option>
+          <option value="2">Sem 2</option>
+          <option value="3" selected>Sem 3</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- ══════════ OVERVIEW ══════════ -->
+      <div class="section active" id="sec-overview">
+        <div class="sec-header">
+          <div><h2>Faculty Dashboard</h2><p id="ov_semLabel">Semester 3 overview</p></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi"><div class="kpi-val" id="ov_total">0</div><div class="kpi-label">Total Students</div></div>
+          <div class="kpi"><div class="kpi-val" id="ov_semStudents">0</div><div class="kpi-label">Students in Semester</div></div>
+          <div class="kpi"><div class="kpi-val" id="ov_avgCGPA">—</div><div class="kpi-label">Avg CGPA</div></div>
+          <div class="kpi"><div class="kpi-val" id="ov_avgSGPA">—</div><div class="kpi-label">Avg SGPA (Sem)</div></div>
+          <div class="kpi"><div class="kpi-val" id="ov_pass">—</div><div class="kpi-label">Pass Rate</div></div>
+          <div class="kpi"><div class="kpi-val" id="ov_fails">0</div><div class="kpi-label">Students with Backlogs</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="card">
+            <div class="card-head"><h3>🏆 Top 3 — Semester</h3></div>
+            <div style="padding:16px" id="ov_toppers"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>📉 Grade Distribution</h3></div>
+            <div style="padding:16px"><canvas id="ov_gradeChart" style="max-height:180px"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ STUDENTS ══════════ -->
+      <div class="section" id="sec-students">
+        <div class="sec-header">
+          <div>
+            <h2>Student Management</h2>
+            <p>Add, edit, view and delete student records (Semesters 1 to 3)</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm" onclick="purgeAllSampleStudents()" title="Remove auto-seeded mock students">🧹 Remove Mock Data</button>
+            <button class="btn btn-primary" onclick="openStuModal()">➕ Add Student</button>
+          </div>
+        </div>
+        <div class="grade-info-bar">💡 <strong>Email-linked Login:</strong> Students log into their dashboard using their registered email address. Ensure each student has their exact email address saved here.</div>
+        <div class="filter-bar">
+          <div class="search-box"><input id="stuSearch" placeholder="Search by name, roll, or email…" oninput="renderStudentsTable()"/></div>
+          <select class="sem-select" id="stuSemFilter" onchange="renderStudentsTable()">
+            <option value="">All Semesters (1-3)</option>
+            <option value="1">Sem 1</option>
+            <option value="2">Sem 2</option>
+            <option value="3">Sem 3</option>
+          </select>
+          <select class="sem-select" id="stuBranchFilter" onchange="renderStudentsTable()">
+            <option value="">All Branches</option>
+            <option>CSE</option><option>ECE</option><option>ME</option><option>CE</option><option>EEE</option><option>IT</option>
+          </select>
+          <span class="count-tag" id="stuCount">0 students</span>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th class="sortable" onclick="sortStudents('rollNo')">Roll No ↕</th>
+                <th class="sortable" onclick="sortStudents('name')">Name ↕</th>
+                <th>Dept / Branch</th>
+                <th>Batch</th>
+                <th>Semester</th>
+                <th>CGPA</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr></thead>
+              <tbody id="stuTableBody"><tr><td colspan="8" class="no-data"><span class="icon">⏳</span>Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ SUBJECTS ══════════ -->
+      <div class="section" id="sec-subjects">
+        <div class="sec-header">
+          <div><h2>Subjects & Credits</h2><p>Manage subjects and course credits per semester</p></div>
+          <button class="btn btn-primary" onclick="openSubModal()">➕ Add Subject</button>
+        </div>
+        <div class="filter-bar">
+          <label style="font-size:13px;color:var(--muted)">Show Semester:</label>
+          <select class="sem-select" id="subSemFilter" onchange="renderSubjects()">
+            <option value="1">Sem 1</option>
+            <option value="2">Sem 2</option>
+            <option value="3" selected>Sem 3</option>
+          </select>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>📚 Subjects List</h3><span id="subSemTitle" style="font-size:12.5px;color:var(--muted)">Semester 3</span></div>
+          <div class="card-body" id="subList"></div>
+        </div>
+      </div>
+
+      <!-- ══════════ MARKS ENTRY ══════════ -->
+      <div class="section" id="sec-marks">
+        <div class="sec-header">
+          <div><h2>Marks Entry</h2><p>Enter marks for all students in the selected semester</p></div>
+          <button class="btn btn-success" onclick="saveAllMarks()">💾 Save All Marks</button>
+        </div>
+        <div class="grade-info-bar">
+          ℹ️ Grades use <strong>Relative Grading</strong> — calculated based on class mean and standard deviation per subject.
+        </div>
+        <div id="marksContent"></div>
+      </div>
+
+      <!-- ══════════ RESULTS ══════════ -->
+      <div class="section" id="sec-results">
+        <div class="sec-header">
+          <div><h2>Results & GPA</h2><p>Relative SGPA and CGPA for all students</p></div>
+        </div>
+        <div class="grade-info-bar">ℹ️ SGPA and CGPA use <strong>Relative Grading</strong> based on class performance distribution.</div>
+        <div class="card">
+          <div class="card-head">
+            <h3>📋 Semester-wise Results</h3>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <button class="btn btn-secondary btn-sm" onclick="exportResultsPDF()">📄 Export PDF</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Roll No</th><th>Name</th><th>Branch</th><th>Batch</th><th>SGPA (Sem)</th><th>CGPA</th><th>Subjects Passed</th><th>Status</th></tr></thead>
+              <tbody id="resultsBody"><tr><td colspan="9" class="no-data"><span class="icon">📭</span>No marks data</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ TOPPERS ══════════ -->
+      <div class="section" id="sec-toppers">
+        <div class="sec-header">
+          <div><h2>Class Toppers</h2><p>Top performers by SGPA (semester) and CGPA (overall)</p></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="card">
+            <div class="card-head"><h3>🏆 Semester Toppers</h3></div>
+            <div class="table-wrap">
+              <table><thead><tr><th>#</th><th>Name</th><th>Roll No</th><th>SGPA</th></tr></thead>
+              <tbody id="semToppersBody"></tbody></table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>🌟 Overall Toppers (CGPA)</h3></div>
+            <div class="table-wrap">
+              <table><thead><tr><th>#</th><th>Name</th><th>Roll No</th><th>CGPA</th></tr></thead>
+              <tbody id="overallToppersBody"></tbody></table>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-head"><h3>📊 SGPA Distribution (Sem)</h3></div>
+          <div style="padding:16px"><canvas id="sgpaDistChart" style="max-height:200px"></canvas></div>
+        </div>
+      </div>
+
+      <!-- ══════════ FAILURES ══════════ -->
+      <div class="section" id="sec-failures">
+        <div class="sec-header">
+          <div><h2>Students with Failures</h2><p>Students who failed one or more subjects in the selected semester</p></div>
+        </div>
+        <div class="card" style="margin-bottom:18px">
+          <div class="card-head"><h3>⚠️ Failure Summary</h3></div>
+          <div class="card-body">
+            <div class="kpi-row" style="margin-bottom:0">
+              <div class="kpi"><div class="kpi-val" id="fail_count" style="color:#f87171">0</div><div class="kpi-label">Students Failed</div></div>
+              <div class="kpi"><div class="kpi-val" id="fail_subjs" style="color:#facc15">0</div><div class="kpi-label">Total Backlogs</div></div>
+              <div class="kpi"><div class="kpi-val" id="fail_pct" style="color:#f87171">0%</div><div class="kpi-label">Failure Rate</div></div>
+            </div>
+          </div>
+        </div>
+        <div id="failuresList"></div>
+      </div>
+
+    </div><!-- .content -->
+  </div><!-- .main-area -->
+</div><!-- .layout -->
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  FACULTY PORTAL SCRIPT
+// ════════════════════════════════════════════════════════════
+
+// ── Session & init ──────────────────────────────────────────
+let session = RA.getSession();
+if (!session || !session.role) {
+  session = { role: 'faculty', name: 'Faculty Member', email: 'faculty@mits.edu' };
+  RA.setSession(session);
+} else if (session.role !== 'faculty') {
+  window.location.href = 'dashboard.html';
+}
+RA.seedSampleData ? RA.seedSampleData() : null;
+
+const sbName   = document.getElementById('sbName');
+const sbAvatar = document.getElementById('sbAvatar');
+if (session.name) {
+  sbName.textContent   = session.name;
+  sbAvatar.textContent = session.name[0].toUpperCase();
+}
+
+// ── Subject storage (faculty-defined) ────────────────────
+const SUB_KEY = 'ra_faculty_subjects';
+
+function getCustomSubjects(sem) {
+  const all = JSON.parse(localStorage.getItem(SUB_KEY) || '[]');
+  return all.filter(s => s.semester === sem);
+}
+
+function getAllCustomSubjects() {
+  return JSON.parse(localStorage.getItem(SUB_KEY) || '[]');
+}
+
+function getSubjectsForSem(sem) {
+  const custom = getCustomSubjects(sem);
+  return custom.length > 0 ? custom : (RA.SUBJECT_CATALOG[sem] || []);
+}
+
+function saveCustomSubject(sub) {
+  const all = getAllCustomSubjects();
+  const idx = all.findIndex(s => s.code === sub.code && s.semester === sub.semester);
+  if (idx >= 0) all[idx] = sub; else all.push(sub);
+  localStorage.setItem(SUB_KEY, JSON.stringify(all));
+}
+
+function deleteCustomSubject(code, sem) {
+  const all = getAllCustomSubjects().filter(s => !(s.code === code && s.semester === sem));
+  localStorage.setItem(SUB_KEY, JSON.stringify(all));
+}
+
+// ── Relative Grading ──────────────────────────────────────
+function getRelativeGrade(score, allScores) {
+  if (score < 40) return { grade: 'F', points: 0 };
+  const valid = allScores.filter(s => typeof s === 'number' && !isNaN(s) && s >= 0);
+  if (valid.length < 3) {
+    // Absolute fallback for small classes
+    return RA.getGrade(score);
+  }
+  const mean = valid.reduce((a,b) => a+b, 0) / valid.length;
+  const sd   = Math.sqrt(valid.reduce((a,b) => a + Math.pow(b-mean,2), 0) / valid.length) || 1;
+
+  if (score >= mean + 2.0*sd)   return { grade: 'O',  points: 10 };
+  if (score >= mean + 1.5*sd)   return { grade: 'A+', points: 9  };
+  if (score >= mean + 1.0*sd)   return { grade: 'A',  points: 8  };
+  if (score >= mean + 0.5*sd)   return { grade: 'B+', points: 7  };
+  if (score >= mean)            return { grade: 'B',  points: 6  };
+  if (score >= mean - 0.5*sd)   return { grade: 'C',  points: 5  };
+  if (score >= 40)              return { grade: 'P',  points: 4  };
+  return { grade: 'F', points: 0 };
+}
+
+// Build class mark map for a semester: { subCode: [totalMark, ...] }
+function buildClassMarkMap(sem) {
+  const allMarks = RA.getAllMarks().filter(m => m.semester === sem);
+  const map = {};
+  for (const record of allMarks) {
+    for (const s of record.subjects) {
+      if (!map[s.code]) map[s.code] = [];
+      map[s.code].push(s.total);
+    }
+  }
+  return map;
+}
+
+function calcRelativeSGPA(subjects, classMarkMap) {
+  let tp = 0, tc = 0;
+  for (const s of subjects) {
+    const allScores = classMarkMap[s.code] || [];
+    const { points } = getRelativeGrade(s.total, allScores);
+    tp += points * s.credits;
+    tc += s.credits;
+  }
+  return tc ? +(tp / tc).toFixed(2) : 0;
+}
+
+function calcRelativeCGPA(studentId) {
+  const allMarks = RA.getMarksForStudent(studentId);
+  if (!allMarks.length) return 0;
+  let tp = 0, tc = 0;
+  for (const record of allMarks) {
+    const map = buildClassMarkMap(record.semester);
+    for (const s of record.subjects) {
+      const allScores = map[s.code] || [];
+      const { points } = getRelativeGrade(s.total, allScores);
+      tp += points * s.credits;
+      tc += s.credits;
+    }
+  }
+  return tc ? +(tp / tc).toFixed(2) : 0;
+}
+
+// ── Section navigation ─────────────────────────────────────
+const SECTION_TITLES = {
+  overview: '📊 Overview', students: '👥 Students',
+  subjects: '📚 Subjects & Credits', marks: '✏️ Marks Entry',
+  results: '📋 Results & GPA', toppers: '🏆 Class Toppers', failures: '⚠️ Failures',
+};
+
+function showSection(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('topbarTitle').textContent = SECTION_TITLES[id] || id;
+  // Close sidebar on mobile
+  if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
+  // Render section
+  const sem = +document.getElementById('globalSem').value;
+  const renders = {
+    overview: () => renderOverview(sem),
+    students: renderStudentsTable,
+    subjects: renderSubjects,
+    marks:    () => renderMarksEntry(sem),
+    results:  () => renderResults(sem),
+    toppers:  () => renderToppers(sem),
+    failures: () => renderFailures(sem),
+  };
+  if (renders[id]) renders[id]();
+}
+
+function onGlobalSemChange() {
+  const active = document.querySelector('.sb-link.active');
+  if (active) showSection(active.dataset.sec, active);
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ── OVERVIEW ───────────────────────────────────────────────
+let ovChart = null;
+function renderOverview(sem) {
+  document.getElementById('ov_semLabel').textContent = 'Semester ' + sem + ' overview';
+  const students   = RA.getStudents();
+  const semMarks   = RA.getAllMarks().filter(m => m.semester === sem);
+  const classMap   = buildClassMarkMap(sem);
+  const semStudents= students.filter(s => s.currentSem == sem);
+
+  document.getElementById('ov_total').textContent       = students.length;
+  document.getElementById('ov_semStudents').textContent = semStudents.length;
+
+  // CGPA avg (relative)
+  const cgpas = students.map(s => calcRelativeCGPA(s.id)).filter(v => v > 0);
+  document.getElementById('ov_avgCGPA').textContent = cgpas.length ? (cgpas.reduce((a,b)=>a+b,0)/cgpas.length).toFixed(2) : '—';
+
+  // SGPA avg for sem
+  const sgpas = semMarks.map(m => calcRelativeSGPA(m.subjects, classMap)).filter(v => v > 0);
+  document.getElementById('ov_avgSGPA').textContent = sgpas.length ? (sgpas.reduce((a,b)=>a+b,0)/sgpas.length).toFixed(2) : '—';
+
+  // Pass rate
+  let passN = 0, totalN = 0;
+  semMarks.forEach(m => m.subjects.forEach(s => { totalN++; if(s.total>=40) passN++; }));
+  document.getElementById('ov_pass').textContent = totalN ? Math.round(passN/totalN*100)+'%' : '—';
+
+  // Failure count
+  const failStudents = semMarks.filter(m => m.subjects.some(s => s.total < 40));
+  document.getElementById('ov_fails').textContent = failStudents.length;
+
+  // Top 3
+  const top3 = semMarks.map(m => {
+    const stu = students.find(s => s.id === m.studentId);
+    return { stu, sgpa: calcRelativeSGPA(m.subjects, classMap) };
+  }).filter(x=>x.stu).sort((a,b)=>b.sgpa-a.sgpa).slice(0,3);
+  const medals = ['🥇','🥈','🥉'];
+  document.getElementById('ov_toppers').innerHTML = top3.length
+    ? top3.map((t,i)=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(56,189,248,0.09)">
+        <span style="font-size:20px">${medals[i]}</span>
+        <div><div style="font-weight:700;font-size:14px">${RA.escHTML(t.stu.name)}</div>
+        <div style="font-size:12px;color:var(--muted)">${RA.escHTML(t.stu.rollNo)}</div></div>
+        <div style="margin-left:auto;font-size:18px;font-weight:800;color:var(--cyan)">${t.sgpa.toFixed(2)}</div>
+      </div>`).join('')
+    : '<div class="no-data"><span class="icon">📭</span>No marks data</div>';
+
+  // Grade distribution chart
+  const grades = {O:0,'A+':0,A:0,'B+':0,B:0,C:0,P:0,F:0};
+  semMarks.forEach(m => m.subjects.forEach(s => {
+    const allS = classMap[s.code] || [];
+    const g = getRelativeGrade(s.total, allS).grade;
+    grades[g] = (grades[g]||0) + 1;
+  }));
+  if (ovChart) ovChart.destroy();
+  const ctx = document.getElementById('ov_gradeChart').getContext('2d');
+  ovChart = new Chart(ctx,{type:'bar',data:{labels:Object.keys(grades),datasets:[{data:Object.values(grades),backgroundColor:['#00F0FF','#38BDF8','#4ade80','#a3e635','#facc15','#fb923c','#f87171','#ef4444'],borderRadius:5,borderSkipped:false}]},
+    options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'rgba(186,230,253,0.7)',font:{family:'DM Sans',size:11}},grid:{color:'rgba(56,189,248,0.07)'}},y:{ticks:{color:'rgba(186,230,253,0.7)',font:{family:'DM Sans',size:11}},grid:{color:'rgba(56,189,248,0.07)'},beginAtZero:true}},responsive:true,maintainAspectRatio:true}});
+}
+
+// ── STUDENTS TABLE ─────────────────────────────────────────
+let stuSortKey = 'rollNo', stuSortAsc = true;
+function renderStudentsTable() {
+  const q  = (document.getElementById('stuSearch').value||'').toLowerCase();
+  const sf = document.getElementById('stuSemFilter').value;
+  const bf = document.getElementById('stuBranchFilter').value;
+  let students = RA.getStudents();
+  if (q)  students = students.filter(s=>s.name.toLowerCase().includes(q)||s.rollNo.toLowerCase().includes(q)||(s.email&&s.email.toLowerCase().includes(q)));
+  if (sf) students = students.filter(s=>String(s.currentSem)===sf);
+  if (bf) students = students.filter(s=>s.branch===bf);
+  students.sort((a,b)=>{ const av=a[stuSortKey]||'',bv=b[stuSortKey]||''; return stuSortAsc?(av>bv?1:-1):(av<bv?1:-1); });
+  document.getElementById('stuCount').textContent = students.length + ' student' + (students.length!==1?'s':'');
+  const tbody = document.getElementById('stuTableBody');
+  if(!students.length){tbody.innerHTML='<tr><td colspan="8" class="no-data"><span class="icon">🔍</span>No students found</td></tr>';return;}
+  tbody.innerHTML = students.map(s=>{
+    const cgpa  = calcRelativeCGPA(s.id);
+    const cgpaC = cgpa>=8?'badge-green':cgpa>=6?'badge-yellow':'badge-red';
+    const hasMarks = RA.getMarksForStudent(s.id).length > 0;
+    const hasFail  = RA.getMarksForStudent(s.id).some(m=>m.subjects.some(sub=>sub.total<40));
+    return `<tr>
+      <td><strong style="color:var(--sky)">${RA.escHTML(s.rollNo)}</strong></td>
+      <td><div><strong>${RA.escHTML(s.name)}</strong></div><div style="font-size:11.5px;color:var(--cyan);margin-top:2px">📧 ${RA.escHTML(s.email||'—')}</div></td>
+      <td style="font-size:12px;color:var(--muted)">${RA.escHTML((s.department||s.branch||''))} / ${RA.escHTML(s.branch||'')}</td>
+      <td>${s.batch||'—'}</td>
+      <td><span class="badge badge-cyan">Sem ${s.currentSem}</span></td>
+      <td>${cgpa>0?`<span class="badge ${cgpaC}">${cgpa.toFixed(2)}</span>`:'<span style="color:var(--muted)">—</span>'}</td>
+      <td>${hasFail?'<span class="badge badge-red">⚠ Backlog</span>':hasMarks?'<span class="badge badge-green">✓ Clear</span>':'<span class="badge badge-blue">No Data</span>'}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-primary btn-xs" onclick="openGiveMarksModal('${s.id}')" style="font-weight:700">📝 Give Marks</button>
+        <button class="btn btn-secondary btn-xs" onclick="openStuModal('${s.id}')" title="Edit Student">✏️ Edit</button>
+        <button class="btn btn-danger btn-xs" onclick="confirmDeleteStu('${s.id}','${RA.escHTML(s.name)}')" title="Delete Student">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function sortStudents(key) {
+  if(stuSortKey===key) stuSortAsc=!stuSortAsc; else{stuSortKey=key;stuSortAsc=true;}
+  renderStudentsTable();
+}
+
+// ── Student Modal ───────────────────────────────────────────
+let stuEditId = null;
+function openStuModal(id) {
+  stuEditId = id||null;
+  document.getElementById('stuModalTitle').textContent = id ? '✏️ Edit Student' : '➕ Add New Student';
+  const err = document.getElementById('stuErr'); err.style.display='none';
+  if(id){
+    const s = RA.getStudent(id);
+    if(!s) return;
+    document.getElementById('sm_name').value  = s.name;
+    document.getElementById('sm_roll').value  = s.rollNo;
+    document.getElementById('sm_email').value = s.email||'';
+    document.getElementById('sm_phone').value = s.phone||'';
+    document.getElementById('sm_dept').value  = s.department||'Computer Science & Engineering';
+    document.getElementById('sm_branch').value= s.branch||'CSE';
+    document.getElementById('sm_batch').value = s.batch||'2021';
+    document.getElementById('sm_sem').value   = String(s.currentSem||3);
+  } else {
+    ['sm_name','sm_roll','sm_email','sm_phone'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('sm_sem').value='3';
+    document.getElementById('sm_batch').value='2021';
+  }
+  openModal('stuModal');
+}
+
+function saveStudent() {
+  const name    = document.getElementById('sm_name').value.trim();
+  const rollNo  = document.getElementById('sm_roll').value.trim();
+  const email   = document.getElementById('sm_email').value.trim().toLowerCase();
+  const phone   = document.getElementById('sm_phone').value.trim();
+  const dept    = document.getElementById('sm_dept').value;
+  const branch  = document.getElementById('sm_branch').value;
+  const batch   = document.getElementById('sm_batch').value;
+  const sem     = +document.getElementById('sm_sem').value;
+  const err     = document.getElementById('stuErr');
+
+  // Mandatory checks
+  if(!name || !rollNo || !email) {
+    err.textContent = 'Full Name, Roll Number, and Email Address are all required.';
+    err.style.display = 'block';
+    return;
+  }
+
+  // Email format check
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!emailRegex.test(email)) {
+    err.textContent = 'Please enter a valid email address (e.g. name@mits.edu).';
+    err.style.display = 'block';
+    return;
+  }
+
+  // Duplicate checks
+  const existing = RA.getStudents();
+  const dupRoll = existing.find(s => s.rollNo.toLowerCase() === rollNo.toLowerCase() && s.id !== stuEditId);
+  if(dupRoll) {
+    err.textContent = 'Roll number "' + rollNo + '" is already used by ' + dupRoll.name + '.';
+    err.style.display = 'block';
+    return;
+  }
+
+  const dupEmail = existing.find(s => s.email && s.email.toLowerCase() === email.toLowerCase() && s.id !== stuEditId);
+  if(dupEmail) {
+    err.textContent = 'Email address "' + email + '" is already assigned to ' + dupEmail.name + ' (' + dupEmail.rollNo + ').';
+    err.style.display = 'block';
+    return;
+  }
+
+  const data = {name, rollNo, email, phone, department:dept, branch, batch, currentSem:sem};
+  if(stuEditId) RA.updateStudent(stuEditId, data); else RA.addStudent(data);
+  closeModal('stuModal');
+  renderStudentsTable();
+  toast('✅ Student saved! Student can now log in with ' + email, 'ok');
+}
+
+function confirmDeleteStu(id,name) {
+  showConfirm('Delete "'+name+'" and all their marks? This cannot be undone.', ()=>{
+    RA.deleteStudent(id); renderStudentsTable(); toast('🗑️ Student deleted','ok');
+  });
+}
+
+function jumpToMarks(sid) {
+  showSection('marks', document.querySelector('[data-sec="marks"]'));
+  // highlight student – handled inside marks entry
+}
+
+// ── SUBJECTS ───────────────────────────────────────────────
+let subEditCode = null;
+function openSubModal(code, sem) {
+  subEditCode = code||null;
+  document.getElementById('subModalTitle').textContent = code ? '✏️ Edit Subject' : '➕ Add Subject';
+  const err = document.getElementById('subErr'); err.style.display='none';
+  if(code && sem){
+    const subList = getSubjectsForSem(sem);
+    const sub = subList.find(s=>s.code===code);
+    if(!sub) return;
+    document.getElementById('sub_code').value   = sub.code;
+    document.getElementById('sub_name').value   = sub.name;
+    document.getElementById('sub_credits').value= sub.credits;
+    document.getElementById('sub_sem').value    = String(sem);
+  } else {
+    ['sub_code','sub_name','sub_credits'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('sub_sem').value = document.getElementById('subSemFilter').value;
+  }
+  openModal('subModal');
+}
+
+function saveSubject() {
+  const code    = document.getElementById('sub_code').value.trim().toUpperCase();
+  const name    = document.getElementById('sub_name').value.trim();
+  const credits = +document.getElementById('sub_credits').value;
+  const sem     = +document.getElementById('sub_sem').value;
+  const err     = document.getElementById('subErr');
+  if(!code||!name){err.textContent='Code and Name are required.';err.style.display='block';return;}
+  if(!credits||credits<1||credits>6){err.textContent='Credits must be 1–6.';err.style.display='block';return;}
+
+  // If custom subjects don't exist yet for this sem, seed from catalog
+  const existing = getCustomSubjects(sem);
+  if(existing.length===0){
+    const catalog = RA.SUBJECT_CATALOG[sem]||[];
+    catalog.forEach(s=>saveCustomSubject({...s,semester:sem}));
+  }
+  saveCustomSubject({code,name,credits,semester:sem});
+  closeModal('subModal');
+  renderSubjects();
+  toast('✅ Subject saved!','ok');
+}
+
+function renderSubjects() {
+  const sem = +document.getElementById('subSemFilter').value;
+  document.getElementById('subSemTitle').textContent = 'Semester ' + sem;
+  const subs = getSubjectsForSem(sem);
+  const hasCustom = getCustomSubjects(sem).length > 0;
+  const list = document.getElementById('subList');
+  if(!subs.length){list.innerHTML='<div class="no-data"><span class="icon">📚</span>No subjects yet. Click Add Subject.</div>';return;}
+  list.innerHTML = `
+    <div style="margin-bottom:12px;font-size:12.5px;color:var(--muted)">${hasCustom?'✏️ Custom subjects':'📋 Default catalog — click Add Subject to customise'} · ${subs.length} subjects · ${subs.reduce((a,b)=>a+b.credits,0)} total credits</div>
+    <div style="display:flex;flex-wrap:wrap;gap:0">
+    ${subs.map(s=>`
+      <div class="sub-chip">
+        <strong>${RA.escHTML(s.code)}</strong>
+        <span>${RA.escHTML(s.name)}</span>
+        <span class="credits">${s.credits} cr</span>
+        <button class="btn btn-xs btn-secondary" onclick="openSubModal('${s.code}',${sem})" style="margin-left:4px;padding:2px 7px">✏️</button>
+        ${hasCustom?`<button class="del-sub" onclick="delSubject('${s.code}',${sem})" title="Remove">×</button>`:''}
+      </div>`).join('')}
+    </div>
+    <div style="margin-top:14px">
+      <table style="font-size:13px"><thead><tr><th>Code</th><th>Subject Name</th><th>Credits</th></tr></thead>
+      <tbody>${subs.map((s,i)=>`<tr><td style="color:var(--sky);font-weight:700">${RA.escHTML(s.code)}</td><td>${RA.escHTML(s.name)}</td><td style="text-align:center">${s.credits}</td></tr>`).join('')}</tbody></table>
+    </div>`;
+}
+
+function delSubject(code,sem) {
+  // Ensure custom list exists
+  const existing = getCustomSubjects(sem);
+  if(existing.length===0){
+    const catalog = RA.SUBJECT_CATALOG[sem]||[];
+    catalog.forEach(s=>saveCustomSubject({...s,semester:sem}));
+  }
+  deleteCustomSubject(code,sem);
+  renderSubjects();
+  toast('Subject removed','ok');
+}
+
+// ── MARKS ENTRY ────────────────────────────────────────────
+function renderMarksEntry(sem) {
+  // Show all enrolled students
+  const students = RA.getStudents().sort((a,b)=>a.rollNo.localeCompare(b.rollNo));
+  const subjects = getSubjectsForSem(sem);
+  const content  = document.getElementById('marksContent');
+
+  if(!students.length){
+    content.innerHTML=`<div class="no-data"><span class="icon">👥</span>No students added yet.<br>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="openStuModal()">➕ Add Student First</button>
+    </div>`;
+    return;
+  }
+  if(!subjects.length){
+    content.innerHTML='<div class="no-data"><span class="icon">📚</span>No subjects defined for Semester '+sem+'.</div>';
+    return;
+  }
+
+  const classMap = RA.buildClassMarkMap(sem);
+
+  // Top Action Bar for Give Marks Modal
+  let html = `
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px;background:rgba(2,10,24,0.7);border:1px solid rgba(0,240,255,0.22);border-radius:12px;padding:16px 20px">
+    <div>
+      <div style="font-weight:700;font-size:14px;color:#fff">📝 Give Marks to Student (Pop-Up Box)</div>
+      <div style="font-size:12px;color:var(--muted)">Select any student to open the dedicated marks entry popup</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <select class="sem-select" id="marksQuickStudentSelect" style="min-width:200px">
+        ${students.map(s => `<option value="${s.id}">${RA.escHTML(s.rollNo)} — ${RA.escHTML(s.name)}</option>`).join('')}
+      </select>
+      <button class="btn btn-primary" onclick="openGiveMarksModal(document.getElementById('marksQuickStudentSelect').value, ${sem})">
+        📝 Open Marks Pop-up Box
+      </button>
+    </div>
+  </div>`;
+
+  // Student Cards with Dedicated "Give Marks" Buttons
+  html += `
+  <div class="card">
+    <div class="card-head">
+      <h3>📋 Semester ${sem} — Student Marks & Action</h3>
+      <span style="font-size:12px;color:var(--muted)">${students.length} student${students.length!==1?'s':''} · Click Give Marks to edit</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Roll No</th>
+            <th>Student Name & Email</th>
+            <th>Branch</th>
+            <th>Current Semester</th>
+            <th>Relative SGPA (Sem ${sem})</th>
+            <th>Relative CGPA</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${students.map(stu => {
+            const semRec = RA.getMarksForStudentSem(stu.id, sem);
+            const sgpa = semRec ? RA.calcRelativeSGPA(semRec.subjects, classMap) : 0;
+            const cgpa = RA.calcRelativeCGPA(stu.id);
+            const hasMarks = !!semRec && semRec.subjects.length > 0;
+            return `<tr>
+              <td><strong style="color:var(--sky)">${RA.escHTML(stu.rollNo)}</strong></td>
+              <td>
+                <div style="font-weight:700">${RA.escHTML(stu.name)}</div>
+                <div style="font-size:11.5px;color:var(--cyan);font-family:monospace">📧 ${RA.escHTML(stu.email || '—')}</div>
+              </td>
+              <td>${RA.escHTML(stu.branch || 'CSE')}</td>
+              <td><span class="badge badge-cyan">Sem ${stu.currentSem || sem}</span></td>
+              <td>
+                ${hasMarks ? `<strong style="font-size:15px;color:var(--cyan)">${sgpa.toFixed(2)}</strong>` : '<span style="color:var(--muted)">Not entered</span>'}
+              </td>
+              <td>
+                ${cgpa > 0 ? `<span class="badge ${cgpa >= 8 ? 'badge-green' : cgpa >= 6 ? 'badge-yellow' : 'badge-red'}">${cgpa.toFixed(2)}</span>` : '<span style="color:var(--muted)">—</span>'}
+              </td>
+              <td>
+                <button class="btn btn-primary btn-sm" onclick="openGiveMarksModal('${stu.id}', ${sem})" style="font-weight:700">
+                  📝 Give Marks
+                </button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+
+  content.innerHTML = html;
+}
+
+function recalcRow(inp) {
+  const sid = inp.dataset.sid;
+  const sem = +document.getElementById('globalSem').value;
+  // Clamp
+  let v = parseFloat(inp.value);
+  if (v > 50) { inp.value = 50; }
+  if (v < 0)  { inp.value = 0;  }
+  recalcStudentSGPA(sid, sem);
+}
+
+function recalcStudentSGPA(sid, sem) {
+  const allInps = document.querySelectorAll(`[data-sid="${sid}"][data-type="int"]`);
+  const subjects = [];
+  allInps.forEach(inp=>{
+    const code    = inp.dataset.code;
+    const credits = +inp.dataset.credits;
+    const extInp  = document.querySelector(`[data-sid="${sid}"][data-code="${code}"][data-type="ext"]`);
+    const intV    = parseFloat(inp.value);
+    const extV    = parseFloat(extInp?extInp.value:'');
+    if(!isNaN(intV)&&!isNaN(extV)) subjects.push({code,credits,total:intV+extV});
+  });
+  // Get class map (rough, for live preview use current saved)
+  const classMap = buildClassMarkMap(sem);
+  // Also include current unsaved marks
+  allInps.forEach(inp=>{
+    const code = inp.dataset.code;
+    const extInp = document.querySelector(`[data-sid="${sid}"][data-code="${code}"][data-type="ext"]`);
+    const intV = parseFloat(inp.value), extV = parseFloat(extInp?extInp.value:'');
+    if(!isNaN(intV)&&!isNaN(extV)) {
+      if(!classMap[code]) classMap[code]=[];
+      if(!classMap[code].includes(intV+extV)) classMap[code].push(intV+extV);
+    }
+  });
+  const sgpa = subjects.length ? calcRelativeSGPA(subjects,classMap) : 0;
+  const el   = document.getElementById('sgpa_'+sid);
+  if(el) el.textContent = subjects.length ? sgpa.toFixed(2) : '—';
+}
+
+function saveAllMarks() {
+  const sem      = +document.getElementById('globalSem').value;
+  const students = RA.getStudents().filter(s=>s.currentSem>=sem);
+  const subjects = getSubjectsForSem(sem);
+  let saved = 0;
+
+  students.forEach(stu=>{
+    const subjectData = [];
+    let hasAny = false;
+    subjects.forEach(sub=>{
+      const intInp = document.querySelector(`[data-sid="${stu.id}"][data-code="${sub.code}"][data-type="int"]`);
+      const extInp = document.querySelector(`[data-sid="${stu.id}"][data-code="${sub.code}"][data-type="ext"]`);
+      if(!intInp||!extInp) return;
+      const intV = Math.min(50,Math.max(0,parseFloat(intInp.value)||0));
+      const extV = Math.min(50,Math.max(0,parseFloat(extInp.value)||0));
+      if(intInp.value!==''||extInp.value!=='') hasAny=true;
+      subjectData.push({code:sub.code,name:sub.name,credits:sub.credits,internal:intV,external:extV,total:intV+extV});
+    });
+    if(hasAny){ RA.saveMarks(stu.id,sem,subjectData); saved++; }
+  });
+
+  toast(`✅ Marks saved for ${saved} student${saved!==1?'s':''}!`,'ok');
+  renderMarksEntry(sem); // refresh to recalc SGPAs with saved data
+}
+
+// ── RESULTS ────────────────────────────────────────────────
+function renderResults(sem) {
+  const allMarks = RA.getAllMarks().filter(m=>m.semester===sem);
+  const students = RA.getStudents();
+  const classMap = buildClassMarkMap(sem);
+  const tbody    = document.getElementById('resultsBody');
+
+  if(!allMarks.length){tbody.innerHTML='<tr><td colspan="9" class="no-data"><span class="icon">📭</span>No marks data for Semester '+sem+'</td></tr>';return;}
+
+  const rows = allMarks.map(m=>{
+    const stu    = students.find(s=>s.id===m.studentId);
+    if(!stu) return null;
+    const sgpa   = calcRelativeSGPA(m.subjects,classMap);
+    const cgpa   = calcRelativeCGPA(m.studentId);
+    const passed = m.subjects.filter(s=>s.total>=40).length;
+    const failed = m.subjects.length - passed;
+    return {stu,sgpa,cgpa,passed,failed,total:m.subjects.length};
+  }).filter(Boolean).sort((a,b)=>b.sgpa-a.sgpa);
+
+  tbody.innerHTML = rows.map((r,i)=>{
+    const sgpaC = r.sgpa>=8?'#4ade80':r.sgpa>=6?'#facc15':'#f87171';
+    const cgpaC = r.cgpa>=8?'badge-green':r.cgpa>=6?'badge-yellow':'badge-red';
+    return `<tr>
+      <td><span class="medal ${['medal-1','medal-2','medal-3'][i]||'medal-n'}">${['🥇','🥈','🥉'][i]||(i+1)}</span></td>
+      <td style="color:var(--sky);font-weight:700">${RA.escHTML(r.stu.rollNo)}</td>
+      <td><strong>${RA.escHTML(r.stu.name)}</strong></td>
+      <td style="color:var(--muted);font-size:12.5px">${RA.escHTML(r.stu.branch)}</td>
+      <td style="color:var(--muted);font-size:12.5px">${r.stu.batch||'—'}</td>
+      <td><strong style="font-size:15px;color:${sgpaC}">${r.sgpa.toFixed(2)}</strong></td>
+      <td>${r.cgpa>0?`<span class="badge ${cgpaC}">${r.cgpa.toFixed(2)}</span>`:'—'}</td>
+      <td>${r.passed}/${r.total} ${r.failed>0?'<span class="badge badge-red">'+r.failed+' fail</span>':''}</td>
+      <td>${r.failed>0?'<span class="badge badge-red">⚠ Backlog</span>':'<span class="badge badge-green">✓ Clear</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function exportResultsPDF() {
+  const { jsPDF } = window.jspdf;
+  const sem      = +document.getElementById('globalSem').value;
+  const allMarks = RA.getAllMarks().filter(m=>m.semester===sem);
+  const students = RA.getStudents();
+  const classMap = buildClassMarkMap(sem);
+  const doc      = new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+  const W=297, pad=14;
+  let y=pad;
+
+  doc.setFillColor(27,54,93); doc.rect(0,0,W,28,'F');
+  doc.setFontSize(14);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+  doc.text('MITS — Semester '+sem+' Results (Relative Grading)',pad,12);
+  doc.setFontSize(9);doc.setFont('helvetica','normal');
+  doc.text('Generated: '+new Date().toLocaleDateString('en-IN'),pad,20);
+  y=36;
+
+  doc.setFontSize(8);
+  const cols=[pad,pad+30,pad+80,pad+100,pad+115,pad+135,pad+155,pad+175];
+  const heads=['Rank','Roll No','Name','Branch','Batch','SGPA','CGPA','Status'];
+  doc.setFillColor(200,215,240); doc.rect(pad,y,W-2*pad,7,'F');
+  doc.setTextColor(10,20,50);doc.setFont('helvetica','bold');
+  heads.forEach((h,i)=>doc.text(h,cols[i],y+5));
+  y+=9;
+
+  const rows = allMarks.map(m=>{
+    const stu=students.find(s=>s.id===m.studentId);
+    if(!stu) return null;
+    return {stu,sgpa:calcRelativeSGPA(m.subjects,classMap),cgpa:calcRelativeCGPA(m.studentId),failed:m.subjects.filter(s=>s.total<40).length};
+  }).filter(Boolean).sort((a,b)=>b.sgpa-a.sgpa);
+
+  rows.forEach((r,i)=>{
+    if(y>185){doc.addPage();y=pad;}
+    if(i%2===0){doc.setFillColor(248,250,255);doc.rect(pad,y,W-2*pad,7,'F');}
+    doc.setTextColor(30,40,60);doc.setFont('helvetica','normal');doc.setFontSize(7.5);
+    doc.text(String(i+1),cols[0],y+5);
+    doc.text(r.stu.rollNo,cols[1],y+5);
+    doc.text(r.stu.name.substring(0,22),cols[2],y+5);
+    doc.text(r.stu.branch||'',cols[3],y+5);
+    doc.text(String(r.stu.batch||''),cols[4],y+5);
+    doc.setFont('helvetica','bold');
+    doc.text(r.sgpa.toFixed(2),cols[5],y+5);
+    doc.text(r.cgpa>0?r.cgpa.toFixed(2):'—',cols[6],y+5);
+    doc.text(r.failed>0?'Backlog':'Clear',cols[7],y+5);
+    y+=7.5;
+  });
+  doc.save('Results_Sem'+sem+'_'+new Date().toISOString().slice(0,10)+'.pdf');
+}
+
+// ── TOPPERS ────────────────────────────────────────────────
+let sgpaDistChart = null;
+function renderToppers(sem) {
+  const allMarks = RA.getAllMarks().filter(m=>m.semester===sem);
+  const students = RA.getStudents();
+  const classMap = buildClassMarkMap(sem);
+  const medals   = ['🥇','🥈','🥉'];
+
+  const semRows = allMarks.map(m=>{
+    const stu=students.find(s=>s.id===m.studentId);
+    return stu?{stu,sgpa:calcRelativeSGPA(m.subjects,classMap)}:null;
+  }).filter(Boolean).sort((a,b)=>b.sgpa-a.sgpa);
+
+  const tbody1 = document.getElementById('semToppersBody');
+  tbody1.innerHTML = semRows.length
+    ? semRows.map((r,i)=>`<tr><td>${medals[i]||`<span class="medal medal-n">${i+1}</span>`}</td><td><strong>${RA.escHTML(r.stu.name)}</strong></td><td style="color:var(--sky)">${RA.escHTML(r.stu.rollNo)}</td><td><strong style="color:var(--cyan)">${r.sgpa.toFixed(2)}</strong></td></tr>`).join('')
+    : '<tr><td colspan="4" class="no-data"><span class="icon">📭</span>No data</td></tr>';
+
+  const overallRows = students.map(s=>({stu:s,cgpa:calcRelativeCGPA(s.id)})).filter(x=>x.cgpa>0).sort((a,b)=>b.cgpa-a.cgpa);
+  const tbody2=document.getElementById('overallToppersBody');
+  tbody2.innerHTML = overallRows.length
+    ? overallRows.map((r,i)=>`<tr><td>${medals[i]||`<span class="medal medal-n">${i+1}</span>`}</td><td><strong>${RA.escHTML(r.stu.name)}</strong></td><td style="color:var(--sky)">${RA.escHTML(r.stu.rollNo)}</td><td><span class="badge ${r.cgpa>=8?'badge-green':r.cgpa>=6?'badge-yellow':'badge-red'}">${r.cgpa.toFixed(2)}</span></td></tr>`).join('')
+    : '<tr><td colspan="4" class="no-data"><span class="icon">📭</span>No data</td></tr>';
+
+  // SGPA distribution
+  if(sgpaDistChart) sgpaDistChart.destroy();
+  const bands={'<4':0,'4-5':0,'5-6':0,'6-7':0,'7-8':0,'8-9':0,'9-10':0};
+  semRows.forEach(r=>{
+    const v=r.sgpa;
+    if(v<4) bands['<4']++; else if(v<5) bands['4-5']++; else if(v<6) bands['5-6']++;
+    else if(v<7) bands['6-7']++; else if(v<8) bands['7-8']++; else if(v<9) bands['8-9']++; else bands['9-10']++;
+  });
+  const ctx=document.getElementById('sgpaDistChart').getContext('2d');
+  sgpaDistChart=new Chart(ctx,{type:'bar',data:{labels:Object.keys(bands),datasets:[{data:Object.values(bands),backgroundColor:['#ef4444','#f87171','#facc15','#a3e635','#4ade80','#38BDF8','#00F0FF'],borderRadius:6,borderSkipped:false}]},
+    options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'rgba(186,230,253,0.7)',font:{family:'DM Sans',size:12}},grid:{color:'rgba(56,189,248,0.07)'}},y:{ticks:{color:'rgba(186,230,253,0.7)',font:{family:'DM Sans',size:12}},grid:{color:'rgba(56,189,248,0.07)'},beginAtZero:true}},responsive:true,maintainAspectRatio:true}});
+}
+
+// ── FAILURES ───────────────────────────────────────────────
+function renderFailures(sem) {
+  const allMarks = RA.getAllMarks().filter(m=>m.semester===sem);
+  const students = RA.getStudents();
+  const classMap = buildClassMarkMap(sem);
+  const list     = document.getElementById('failuresList');
+
+  const failed = allMarks.map(m=>{
+    const stu = students.find(s=>s.id===m.studentId);
+    if(!stu) return null;
+    const failSubs = m.subjects.filter(s=>s.total<40);
+    return failSubs.length>0?{stu,failSubs,sgpa:calcRelativeSGPA(m.subjects,classMap),total:m.subjects.length}:null;
+  }).filter(Boolean).sort((a,b)=>b.failSubs.length-a.failSubs.length);
+
+  const allBacklogs = failed.reduce((a,f)=>a+f.failSubs.length,0);
+  document.getElementById('fail_count').textContent = failed.length;
+  document.getElementById('fail_subjs').textContent = allBacklogs;
+  document.getElementById('fail_pct').textContent   = allMarks.length?Math.round(failed.length/allMarks.length*100)+'%':'—';
+
+  if(!failed.length){
+    list.innerHTML='<div class="no-data" style="padding:40px"><span class="icon">🎉</span>No failures in Semester '+sem+'! All students cleared.</div>';
+    return;
+  }
+
+  list.innerHTML = failed.map(f=>`
+    <div class="fail-student-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div>
+          <h4>⚠️ ${RA.escHTML(f.stu.name)} <span style="color:var(--muted);font-weight:400;font-size:12px">${RA.escHTML(f.stu.rollNo)} · ${RA.escHTML(f.stu.branch)}</span></h4>
+          <div style="font-size:12.5px;color:var(--muted);margin-top:4px">SGPA: <strong style="color:var(--cyan)">${f.sgpa.toFixed(2)}</strong> · ${f.failSubs.length} backlog${f.failSubs.length>1?'s':''} out of ${f.total} subjects</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="openStuModal('${f.stu.id}')">✏️ Edit</button>
+      </div>
+      <div class="fail-subjects">
+        ${f.failSubs.map(s=>`<span class="badge badge-red">⚡ ${RA.escHTML(s.code)} — ${RA.escHTML(s.name)} (${s.total}/100)</span>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// ── Modal helpers ────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Confirm dialog
+let confirmCallback = null;
+function showConfirm(msg, cb) {
+  confirmCallback = cb;
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmBg').classList.add('open');
+  document.getElementById('confirmOk').onclick = ()=>{ confirmCallback&&confirmCallback(); closeConfirm(); };
+}
+function closeConfirm() { document.getElementById('confirmBg').classList.remove('open'); }
+
+// Toast
+function toast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className='toast '+(type||'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// Close modals on overlay click / Escape
+['stuModal','subModal','confirmBg','giveMarksModal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',e=>{ if(e.target===document.getElementById(id)) { closeModal(id); if(id==='confirmBg') closeConfirm(); } });
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){['stuModal','subModal','giveMarksModal'].forEach(closeModal);closeConfirm();} });
+
+
+// ════════════════════════════════════════════════════════════
+//  GIVE MARKS POP-UP MODAL LOGIC (Relative Grading)
+// ════════════════════════════════════════════════════════════
+let currentMarksStudentId = null;
+
+function openGiveMarksModal(studentId, defaultSem) {
+  const stu = RA.getStudent(studentId);
+  if (!stu) return;
+  currentMarksStudentId = studentId;
+
+  document.getElementById('gmModalTitle').textContent = '📝 Give Marks — ' + stu.name;
+  document.getElementById('gmStudentSub').textContent = stu.rollNo + ' · ' + (stu.branch || 'CSE') + ' · ' + stu.email;
+  document.getElementById('gmStudentName').textContent = stu.name;
+  document.getElementById('gmStudentRoll').textContent = stu.rollNo;
+  document.getElementById('gmStudentEmail').textContent = stu.email;
+  document.getElementById('gmStudentBranch').textContent = (stu.department || stu.branch || 'CSE') + ' (' + stu.branch + ')';
+  document.getElementById('gmErr').style.display = 'none';
+
+  // Set semester (default to 1-3)
+  const targetSem = defaultSem || stu.currentSem || 3;
+  document.getElementById('gmSemSelect').value = String(Math.min(3, Math.max(1, targetSem)));
+
+  loadStudentMarksInModal();
+  openModal('giveMarksModal');
+}
+
+function loadStudentMarksInModal() {
+  if (!currentMarksStudentId) return;
+  const sem = +document.getElementById('gmSemSelect').value;
+  const subjects = getSubjectsForSem(sem);
+  const existing = RA.getMarksForStudentSem(currentMarksStudentId, sem);
+  const classMap = RA.buildClassMarkMap(sem);
+  const tbody = document.getElementById('gmSubjectsBody');
+
+  if (!subjects.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:26px;color:var(--muted)">No subjects configured for Semester ' + sem + '.</td></tr>';
+    updateModalSummary();
+    return;
+  }
+
+  tbody.innerHTML = subjects.map(sub => {
+    const ex = existing ? existing.subjects.find(s => s.code === sub.code) : null;
+    const intV = ex && typeof ex.internal === 'number' ? ex.internal : '';
+    const extV = ex && typeof ex.external === 'number' ? ex.external : '';
+    const hasTotal = ex && typeof ex.total === 'number' && (intV !== '' || extV !== '');
+    const totalVal = hasTotal ? ex.total : '—';
+
+    const allScores = classMap[sub.code] || [];
+    const relGrade = hasTotal ? RA.getRelativeGrade(ex.total, allScores) : null;
+    const gCol = relGrade ? RA.gradeColor(relGrade.grade) : 'var(--muted)';
+    const isPass = hasTotal ? ex.total >= 40 : null;
+
+    return `<tr>
+      <td>
+        <strong style="color:var(--sky)">${RA.escHTML(sub.code)}</strong>
+        <div style="font-size:11.5px;color:var(--soft)">${RA.escHTML(sub.name)}</div>
+      </td>
+      <td style="text-align:center;font-weight:600;color:var(--muted)">${sub.credits} cr</td>
+      <td style="text-align:center">
+        <input class="mark-inp" style="width:72px;font-size:13px;padding:6px"
+               data-code="${sub.code}" data-credits="${sub.credits}" data-type="int"
+               type="number" min="0" max="50" value="${intV}"
+               oninput="recalcModalRow(this)" placeholder="0-50" />
+      </td>
+      <td style="text-align:center">
+        <input class="mark-inp" style="width:72px;font-size:13px;padding:6px"
+               data-code="${sub.code}" data-credits="${sub.credits}" data-type="ext"
+               type="number" min="0" max="50" value="${extV}"
+               oninput="recalcModalRow(this)" placeholder="0-50" />
+      </td>
+      <td style="text-align:center">
+        <strong class="tot-cell" id="gmtot_${sub.code}" style="font-size:15px;color:${hasTotal ? gCol : 'var(--muted)'}">${totalVal}</strong>
+      </td>
+      <td style="text-align:center">
+        <span class="badge" id="gmgrade_${sub.code}" style="color:${gCol};border-color:${gCol}40;background:${gCol}15">
+          ${relGrade ? relGrade.grade : '—'}
+        </span>
+      </td>
+      <td style="text-align:center;color:var(--muted);font-weight:600" id="gmpoints_${sub.code}">
+        ${relGrade ? relGrade.points : '—'}
+      </td>
+      <td style="text-align:center" id="gmstatus_${sub.code}">
+        ${isPass !== null ? (isPass ? '<span class="badge badge-green">✓ Pass</span>' : '<span class="badge badge-red">✗ Fail</span>') : '—'}
+      </td>
+    </tr>`;
+  }).join('');
+
+  updateModalSummary();
+}
+
+function recalcModalRow(inp) {
+  // Validate limits (0 to 50)
+  let val = parseFloat(inp.value);
+  if (val > 50) { inp.value = 50; val = 50; }
+  if (val < 0)  { inp.value = 0;  val = 0;  }
+
+  const code = inp.dataset.code;
+  const sem  = +document.getElementById('gmSemSelect').value;
+  const row  = inp.closest('tr');
+  const intInp = row.querySelector('[data-type="int"]');
+  const extInp = row.querySelector('[data-type="ext"]');
+
+  const intV = parseFloat(intInp.value);
+  const extV = parseFloat(extInp.value);
+  const hasInt = !isNaN(intV);
+  const hasExt = !isNaN(extV);
+
+  const totEl    = document.getElementById('gmtot_' + code);
+  const gradeEl  = document.getElementById('gmgrade_' + code);
+  const pointsEl = document.getElementById('gmpoints_' + code);
+  const statusEl = document.getElementById('gmstatus_' + code);
+
+  if (hasInt || hasExt) {
+    const total = (hasInt ? intV : 0) + (hasExt ? extV : 0);
+    const classMap = RA.buildClassMarkMap(sem);
+    const allScores = classMap[code] || [];
+    const relGrade  = RA.getRelativeGrade(total, allScores);
+    const gCol      = RA.gradeColor(relGrade.grade);
+    const isPass    = total >= 40;
+
+    totEl.textContent = total;
+    totEl.style.color = gCol;
+    gradeEl.textContent = relGrade.grade;
+    gradeEl.style.color = gCol;
+    gradeEl.style.borderColor = gCol + '40';
+    gradeEl.style.background = gCol + '15';
+    pointsEl.textContent = relGrade.points;
+    statusEl.innerHTML = isPass ? '<span class="badge badge-green">✓ Pass</span>' : '<span class="badge badge-red">✗ Fail</span>';
+  } else {
+    totEl.textContent = '—';
+    totEl.style.color = 'var(--muted)';
+    gradeEl.textContent = '—';
+    gradeEl.style.color = 'var(--muted)';
+    gradeEl.style.borderColor = 'rgba(56,189,248,0.2)';
+    gradeEl.style.background = 'transparent';
+    pointsEl.textContent = '—';
+    statusEl.textContent = '—';
+  }
+
+  updateModalSummary();
+}
+
+function updateModalSummary() {
+  const sem = +document.getElementById('gmSemSelect').value;
+  const rows = document.querySelectorAll('#gmSubjectsBody tr');
+  const validSubjects = [];
+  let totalCredits = 0;
+  let passedCount  = 0;
+
+  rows.forEach(r => {
+    const intInp = r.querySelector('[data-type="int"]');
+    const extInp = r.querySelector('[data-type="ext"]');
+    if (!intInp || !extInp) return;
+
+    const code = intInp.dataset.code;
+    const credits = +intInp.dataset.credits;
+    const intV = parseFloat(intInp.value);
+    const extV = parseFloat(extInp.value);
+    const hasInt = !isNaN(intV);
+    const hasExt = !isNaN(extV);
+
+    totalCredits += credits;
+
+    if (hasInt || hasExt) {
+      const tot = (hasInt ? intV : 0) + (hasExt ? extV : 0);
+      validSubjects.push({ code, credits, total: tot });
+      if (tot >= 40) passedCount++;
+    }
+  });
+
+  const classMap = RA.buildClassMarkMap(sem);
+  const sgpa = validSubjects.length ? RA.calcRelativeSGPA(validSubjects, classMap) : 0;
+
+  document.getElementById('gmLiveSGPA').textContent    = validSubjects.length ? sgpa.toFixed(2) : '—';
+  document.getElementById('gmLiveCredits').textContent = totalCredits ? totalCredits + ' cr' : '—';
+  document.getElementById('gmLivePassed').textContent  = validSubjects.length ? (passedCount + ' / ' + validSubjects.length) : '—';
+}
+
+function submitGivenMarks() {
+  const err = document.getElementById('gmErr');
+  if (err) err.style.display = 'none';
+
+  if (!currentMarksStudentId) {
+    if (err) { err.textContent = 'No student selected.'; err.style.display = 'block'; }
+    return;
+  }
+
+  const sem = +document.getElementById('gmSemSelect').value || 1;
+  const subjects = getSubjectsForSem(sem);
+  const stu = RA.getStudent(currentMarksStudentId);
+
+  if (!subjects || !subjects.length) {
+    if (err) {
+      err.textContent = 'No subjects defined for Semester ' + sem + '. Please add subjects first under Subjects & Credits.';
+      err.style.display = 'block';
+    }
+    return;
+  }
+
+  try {
+    const subjectData = [];
+    let hasAnyMarks = false;
+
+    subjects.forEach(sub => {
+      const intInp = document.querySelector(`#gmSubjectsBody [data-code="${sub.code}"][data-type="int"]`);
+      const extInp = document.querySelector(`#gmSubjectsBody [data-code="${sub.code}"][data-type="ext"]`);
+
+      const intStr = intInp ? intInp.value.trim() : '';
+      const extStr = extInp ? extInp.value.trim() : '';
+
+      const intV = intStr !== '' ? parseFloat(intStr) : 0;
+      const extV = extStr !== '' ? parseFloat(extStr) : 0;
+
+      if (intStr !== '' || extStr !== '') {
+        hasAnyMarks = true;
+      }
+
+      const i = Math.min(50, Math.max(0, isNaN(intV) ? 0 : intV));
+      const e = Math.min(50, Math.max(0, isNaN(extV) ? 0 : extV));
+
+      subjectData.push({
+        code: sub.code,
+        name: sub.name,
+        credits: Number(sub.credits) || 3,
+        internal: i,
+        external: e,
+        total: i + e
+      });
+    });
+
+    if (!hasAnyMarks) {
+      if (err) {
+        err.textContent = 'Please enter marks for at least one subject before saving.';
+        err.style.display = 'block';
+      }
+      return;
+    }
+
+    // Save in database
+    RA.saveMarks(currentMarksStudentId, sem, subjectData);
+
+    // Compute calculated relative SGPA for toast
+    const classMap = RA.buildClassMarkMap(sem);
+    const newSGPA = RA.calcRelativeSGPA(subjectData, classMap);
+
+    closeModal('giveMarksModal');
+    toast('✅ Marks saved for ' + (stu ? stu.name : 'student') + '! Relative SGPA: ' + newSGPA.toFixed(2), 'ok');
+
+    // Refresh current view
+    renderStudentsTable();
+    const activeLink = document.querySelector('.sb-link.active');
+    const activeSec = activeLink ? activeLink.dataset.sec : 'overview';
+    const curSem = +document.getElementById('globalSem').value;
+
+    if (activeSec === 'marks') renderMarksEntry(curSem);
+    else if (activeSec === 'results') renderResults(curSem);
+    else if (activeSec === 'overview') renderOverview(curSem);
+    else if (activeSec === 'toppers') renderToppers(curSem);
+    else if (activeSec === 'failures') renderFailures(curSem);
+
+  } catch (error) {
+    console.error('Error saving marks:', error);
+    if (err) {
+      err.textContent = 'Error saving marks: ' + error.message;
+      err.style.display = 'block';
+    }
+    toast('❌ Error: ' + error.message, 'fail');
+  }
+}
+
+// ── Clean / Purge Mock Sample Students ──
+function purgeAllSampleStudents() {
+  showConfirm('Remove auto-generated mock students? (Students you added manually will be preserved)', () => {
+    const list = RA.getStudents();
+    const mockRolls = new Set([
+      'CS2021001','CS2021002','CS2021003','CS2021004','CS2021005',
+      'CS2021006','CS2021007','CS2021008','CS2021009','CS2021010',
+      'CS2021011','CS2021012','CS2021013','CS2021014','CS2021015'
+    ]);
+    const filtered = list.filter(s => !mockRolls.has(s.rollNo));
+    RA.saveStudents(filtered);
+    const keepIds = new Set(filtered.map(s => s.id));
+    const cleanMarks = RA.getAllMarks().filter(m => keepIds.has(m.studentId));
+    localStorage.setItem(DB.MARKS, JSON.stringify(cleanMarks));
+
+    renderStudentsTable();
+    toast('🧹 Mock students removed. Ready for faculty-added students.', 'ok');
+  });
+}
+
+// ── Bootstrap ────────────────────────────────────────────────
+renderOverview(3);
+renderStudentsTable();
+</script>
+</body>
+</html>

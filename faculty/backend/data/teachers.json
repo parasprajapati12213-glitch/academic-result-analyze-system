@@ -1,0 +1,122 @@
+[
+  {
+    "id": "tch_101",
+    "employeeId": "EMP101",
+    "name": "Dr. Abhishek Dixit",
+    "designation": "Professor & Head of Department",
+    "department": "Centre for Computer Science and Technology",
+    "email": "abhishek.dixit@mitsgwalior.in",
+    "assignedSubjectIds": ["sub17929322764852", "sub179293227653510"],
+    "assignedClasses": ["CSBS-A", "CSBS-B"]
+  },
+  {
+    "id": "tch_102",
+    "employeeId": "EMP102",
+    "name": "Dr. Tejaswita Mishra",
+    "designation": "Associate Professor & Class Coordinator",
+    "department": "Centre for Computer Science and Technology",
+    "email": "tejaswita.mishra@mitsgwalior.in",
+    "assignedSubjectIds": ["sub17929322764983", "sub17929322765187"],
+    "assignedClasses": ["CSBS-A", "CSBS-B"]
+  },
+  {
+    "id": "tch_103",
+    "employeeId": "EMP103",
+    "name": "Dr. Saumil Maheshwari",
+    "designation": "Associate Professor",
+    "department": "Centre for Computer Science and Technology",
+    "email": "saumil.maheshwari@mitsgwalior.in",
+    "assignedSubjectIds": ["sub17929322764994"],
+    "assignedClasses": ["CSBS-A", "CSBS-B"]
+  },
+  {
+    "id": "tch_104",
+    "employeeId": "EMP104",
+    "name": "Dr. Devanshu Tiwari",
+    "designation": "Assistant Professor",
+    "department": "Centre for Computer Science and Technology",
+    "email": "devanshu.tiwari@mitsgwalior.in",
+    "assignedSubjectIds": ["sub17929322765065", "sub17929322765238"],
+    "assignedClasses": ["CSBS-B"]
+  },
+  {
+    "id": "tch_105",
+    "employeeId": "EMP105",
+    "name": "Dr. Shradha Dubey",
+    "designation": "Assistant Professor",
+    "department": "Centre for Computer Science and Technology",
+    "email": "shradha.dubey@mitsgwalior.in",
+    "assignedSubjectIds": ["sub17929322765126"],
+    "assignedClasses": ["CSBS-A", "CSBS-B"]
+  },
+  {
+    "id": "tch_106",
+    "employeeId": "EMP106",
+    "name": "Dr. Vivek Sharma",
+    "designation": "Assistant Professor",
+    "department": "Centre for Computer Science and Technology",
+    "email": "vivek.sharma@mitsgwalior.in",
+    "assignedSubjectIds": ["sub17929322765187"],
+    "assignedClasses": ["CSBS-A"]
+  },
+  {
+    "id": "tch_107",
+    "employeeId": "EMP107",
+    "name": "Mr. Mithun Sahay Shrivastava",
+    "designation": "Assistant Professor & Project Mentor",
+    "department": "Centre for Computer Science and Technology",
+    "email": "mithun.shrivastava@mitsgwalior.in",
+    "assignedSubjectIds": ["sub17929322764852", "sub17929322765065"],
+    "assignedClasses": ["CSBS-B"]
+  },
+  {
+    "id": "tch_108",
+    "employeeId": "EMP108",
+    "name": "Mr. Anil Kumar Fathepuria",
+    "designation": "Assistant Professor",
+    "department": "Centre for Computer Science and Technology",
+    "email": "anil.fathepuria@mitsgwalior.in",
+    "assignedSubjectIds": ["sub17929322765299"],
+    "assignedClasses": ["CSBS-B"]
+  },
+  {
+    "id": "tch_109",
+    "employeeId": "EMP109",
+    "name": "Ms. Vandana Jaiswal",
+    "designation": "Assistant Professor",
+    "department": "Centre for Computer Science and Technology",
+    "email": "vandana.jaiswal@mitsgwalior.in",
+    "assignedSubjectIds": ["sub179293227655511"],
+    "assignedClasses": ["CSBS-A", "CSBS-B"]
+  },
+  {
+    "id": "tch_110",
+    "employeeId": "EMP110",
+    "name": "Ms. Aditi Samadhiya",
+    "designation": "Assistant Professor",
+    "department": "Centre for Computer Science and Technology",
+    "email": "aditi.samadhiya@mitsgwalior.in",
+    "assignedSubjectIds": ["sub17929322765238"],
+    "assignedClasses": ["CSBS-B"]
+  },
+  {
+    "id": "tch_111",
+    "employeeId": "EMP111",
+    "name": "Mr. Utkarsh Sharma",
+    "designation": "Assistant Professor",
+    "department": "Centre for Computer Science and Technology",
+    "email": "utkarsh.sharma@mitsgwalior.in",
+    "assignedSubjectIds": ["sub179293227655512"],
+    "assignedClasses": ["CSBS-B"]
+  },
+  {
+    "id": "tch_112",
+    "employeeId": "EMP112",
+    "name": "Mr. Kuldeep Singh Rathore",
+    "designation": "Assistant Professor",
+    "department": "Centre for Computer Science and Technology",
+    "email": "kuldeep.rathore@mitsgwalior.in",
+    "assignedSubjectIds": ["sub17929322764983"],
+    "assignedClasses": ["CSBS-B"]
+  }
+]

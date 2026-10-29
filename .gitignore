@@ -1,0 +1,31 @@
+# Operating System Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Compiled Executables & Objects
+*.exe
+*.obj
+*.o
+*.pdb
+*.ilk
+
+# Temporary Test Directories
+faculty/test_non_existent_dir_safe/
+faculty/test_safe_dir/
+faculty/tests/test_safe_dir/
+
+# Node / Scratch
+scratch/
+node_modules/
+npm-debug.log*

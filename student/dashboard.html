@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Result Analyzer – Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="app.js"></script>
+  <script src="leo_chatbot.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --cyan:#00F0FF;--blue:#00A3FF;--sky:#38BDF8;
+      --navy:#030712;--navy2:#050C1A;--navy3:#071428;
+      --glass:rgba(6,18,38,0.72);--border:rgba(56,189,248,0.20);
+      --soft:rgba(255,255,255,0.88);--muted:rgba(186,230,253,0.60);
+      --r:14px;
+    }
+    html,body{height:100%;font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#030712,#050C1A 50%,#071428);color:#fff;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,240,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,0.03) 1px,transparent 1px);background-size:52px 52px;pointer-events:none;z-index:0}
+    #appNav{position:relative;z-index:200}
+    .page{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:26px 20px 70px}
+
+    /* Common Buttons */
+    .btn{display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:8px 16px;border-radius:9px;border:none;cursor:pointer;transition:all .2s;text-decoration:none}
+    .btn-primary{background:linear-gradient(135deg,var(--cyan),var(--blue));color:#030712}
+    .btn-primary:hover{opacity:.88;transform:translateY(-1px)}
+    .btn-secondary{background:rgba(56,189,248,0.10);border:1px solid rgba(56,189,248,0.28);color:var(--sky)}
+    .btn-secondary:hover{background:rgba(56,189,248,0.20)}
+    .btn-pdf{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);color:#f87171}
+    .btn-pdf:hover{background:rgba(239,68,68,0.22)}
+
+    /* ── Student Profile Header Card ── */
+    .student-hero{background:linear-gradient(145deg,rgba(6,18,38,0.85),rgba(4,12,28,0.70));border:1px solid rgba(0,240,255,0.22);border-radius:18px;padding:24px 28px;margin-bottom:24px;backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;box-shadow:0 12px 36px rgba(0,0,0,0.45)}
+    .student-hero-left{display:flex;align-items:center;gap:18px}
+    .student-avatar{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,var(--cyan),var(--blue));color:#030712;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;flex-shrink:0;box-shadow:0 0 20px rgba(0,240,255,0.35)}
+    .student-name-box h2{font-size:22px;font-weight:800;color:#fff;margin-bottom:4px}
+    .student-badges{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px}
+    .stu-tag{font-size:12px;font-weight:600;padding:3px 10px;border-radius:8px;background:rgba(56,189,248,0.10);border:1px solid rgba(56,189,248,0.25);color:var(--sky)}
+    .stu-tag-email{background:rgba(0,240,255,0.08);border-color:rgba(0,240,255,0.30);color:var(--cyan);font-family:monospace}
+    .stu-tag-verified{background:rgba(74,222,128,0.10);border-color:rgba(74,222,128,0.30);color:#4ade80}
+
+    /* ── KPI cards ── */
+    .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:26px}
+    .kpi{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:18px 16px;backdrop-filter:blur(14px);transition:border-color .25s,transform .2s}
+    .kpi:hover{border-color:rgba(0,240,255,0.40);transform:translateY(-2px)}
+    .kpi-val{font-size:28px;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:5px}
+    .kpi-label{font-size:12px;color:var(--muted);font-weight:500}
+
+    /* ── Semester Tabs ── */
+    .sem-tab-bar{display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+    .sem-tab-btn{padding:8px 18px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid rgba(56,189,248,0.20);background:rgba(5,12,26,0.70);color:var(--muted);cursor:pointer;transition:all .2s;user-select:none}
+    .sem-tab-btn:hover{color:var(--cyan);border-color:rgba(0,240,255,0.35);background:rgba(0,240,255,0.06)}
+    .sem-tab-btn.active{color:var(--cyan);border-color:rgba(0,240,255,0.45);background:rgba(0,240,255,0.14);font-weight:700}
+
+    /* ── Table & Cards ── */
+    .card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;backdrop-filter:blur(14px);margin-bottom:22px}
+    .card-head{background:linear-gradient(90deg,#1B365D,#14274f);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+    .card-head h3{font-size:15px;font-weight:700;color:#fff}
+    .card-body{padding:20px}
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:13.5px}
+    thead th{background:#1B365D;padding:11px 16px;text-align:left;font-weight:700;font-size:12px;color:#fff;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap}
+    tbody tr{border-bottom:1px solid rgba(56,189,248,0.10);transition:background .18s}
+    tbody tr:hover{background:rgba(0,240,255,0.05)}
+    tbody td{padding:12px 16px;color:var(--soft);vertical-align:middle}
+
+    /* Badges & Chips */
+    .grade-badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:800;border:1px solid}
+    .badge-pass{background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.32);color:#4ade80}
+    .badge-fail{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.32);color:#f87171}
+
+    /* Marksheet Summary Footer */
+    .marksheet-foot{padding:16px 22px;background:rgba(2,10,24,0.65);border-top:1px solid rgba(56,189,248,0.14);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+    .foot-stat{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+    .foot-stat strong{color:var(--cyan);font-size:16px}
+
+    /* Charts Grid */
+    .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
+    @media(max-width:768px){.chart-grid{grid-template-columns:1fr}}
+
+    /* Notice / Alert Box */
+    .notice-box{background:rgba(0,163,255,0.07);border:1px solid rgba(0,240,255,0.22);border-radius:12px;padding:14px 18px;font-size:13px;color:var(--soft);display:flex;align-items:center;gap:12px;margin-bottom:20px}
+    .warning-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.30);border-radius:16px;padding:32px 24px;text-align:center;margin:40px auto;max-width:540px}
+    .warning-card h3{color:#f87171;font-size:18px;margin-bottom:8px}
+    .warning-card p{color:var(--muted);font-size:13.5px;margin-bottom:20px;line-height:1.6}
+
+    /* Rank Medals */
+    .medal{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:12px;font-weight:800}
+    .m1{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#000}
+    .m2{background:linear-gradient(135deg,#9ca3af,#d1d5db);color:#000}
+    .m3{background:linear-gradient(135deg,#b45309,#d97706);color:#fff}
+  </style>
+</head>
+<body>
+<div id="appNav"></div>
+
+<main class="page">
+
+  <!-- ══════════════════════════════════════════════════════════════
+       STUDENT VIEW (Auto-shown when logged in as a student)
+  ══════════════════════════════════════════════════════════════ -->
+  <div id="studentSection" style="display:none">
+
+    <!-- Hero Card -->
+    <div class="student-hero">
+      <div class="student-hero-left">
+        <div class="student-avatar" id="stuAvatar">S</div>
+        <div class="student-name-box">
+          <h2 id="stuName">—</h2>
+          <div style="font-size:13px;color:var(--muted)" id="stuRollAndBranch">—</div>
+          <div class="student-badges">
+            <span class="stu-tag stu-tag-email" id="stuEmailTag">📧 —</span>
+            <span class="stu-tag stu-tag-verified">✓ Linked Profile</span>
+            <span class="stu-tag" id="stuSemTag">Sem —</span>
+            <span class="stu-tag" id="stuBatchTag">Batch —</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <button class="btn btn-pdf" onclick="downloadMyPDF()">📄 Download Marksheet (PDF)</button>
+      </div>
+    </div>
+
+    <!-- Student KPIs -->
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi-val" id="kpiCGPA">0.00</div>
+        <div class="kpi-label">Cumulative CGPA (Relative)</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-val" id="kpiSGPA">0.00</div>
+        <div class="kpi-label" id="kpiSGPALabel">Semester SGPA</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-val" id="kpiCredits">0</div>
+        <div class="kpi-label">Total Credits Earned</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-val" id="kpiRank">#—</div>
+        <div class="kpi-label" id="kpiRankLabel">Class Rank (Sem)</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-val" id="kpiStatus" style="font-size:22px">Clear</div>
+        <div class="kpi-label">Academic Standing</div>
+      </div>
+    </div>
+
+    <!-- Relative Grading Note -->
+    <div class="notice-box">
+      <span>ℹ️</span>
+      <div>
+        <strong>Relative Grading in effect:</strong> Your grades and SGPA/CGPA are automatically calibrated relative to your class's statistical distribution (mean and standard deviation).
+      </div>
+    </div>
+
+    <!-- Semester Selector Tabs -->
+    <div class="sem-tab-bar" id="studentSemTabs"></div>
+
+    <!-- Semester Marksheet Card -->
+    <div class="card">
+      <div class="card-head">
+        <h3 id="marksheetTitle">Detailed Marksheet</h3>
+        <span style="font-size:12.5px;color:var(--muted)" id="marksheetSub">Semester —</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Course Code</th>
+              <th>Subject Name</th>
+              <th>Credits</th>
+              <th>Minor (/20)</th>
+              <th>Lab (/30)</th>
+              <th>Major (/50)</th>
+              <th>Total (/100)</th>
+              <th>Relative Grade</th>
+              <th>Grade Points</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody id="studentMarksBody"></tbody>
+        </table>
+      </div>
+      <div class="marksheet-foot">
+        <div class="foot-stat">Semester Credits: <strong id="footCredits">—</strong></div>
+        <div class="foot-stat">Semester SGPA: <strong id="footSGPA" style="font-size:18px">—</strong></div>
+        <div class="foot-stat">Subjects Passed: <strong id="footPassed" style="color:#4ade80">—</strong></div>
+        <button class="btn btn-secondary btn-sm" onclick="downloadMyPDF()">📄 Export PDF</button>
+      </div>
+    </div>
+
+    <!-- Semester-Wise SGPA & CGPA Progression Table Card -->
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-head">
+        <div>
+          <h3>📅 Semester Progression Summary</h3>
+          <p style="font-size:12px;color:var(--muted);margin-top:2px">Numeric & Tabular History of Relative SGPA, CGPA & Credits</p>
+        </div>
+        <span class="stu-tag stu-tag-verified">Multi-Semester Records</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Semester</th>
+              <th style="text-align:center">Credits Attempted</th>
+              <th style="text-align:center">Semester SGPA</th>
+              <th style="text-align:center">Cumulative CGPA</th>
+              <th style="text-align:center">Average Score</th>
+              <th style="text-align:center">Academic Standing</th>
+            </tr>
+          </thead>
+          <tbody id="progressionTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3D Interactive Charts Grid (Large Visualizations with Pop-up Part Highlights & Detailed Insights) -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:24px;margin-bottom:28px">
+
+      <!-- 1. 3D Line Graph: SGPA Progression -->
+      <div class="card chart-card-3d">
+        <div class="chart-3d-inner">
+          <div class="card-head">
+            <h3>📈 3D SGPA Progression Curve (Line Graph)</h3>
+            <span class="stu-tag stu-tag-verified">Multi-Semester Trendline</span>
+          </div>
+          <div class="chart-inspector" id="sgpaInspector">
+            <span>💡</span> <span>Hover over any semester point to pop up full academic details</span>
+          </div>
+          <div class="card-body" style="padding:10px 18px 18px;height:320px;position:relative">
+            <canvas id="sgpaChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 3D Pie Graph: Relative Grades Distribution -->
+      <div class="card chart-card-3d">
+        <div class="chart-3d-inner">
+          <div class="card-head">
+            <h3>🥧 3D Relative Grades Distribution (Pie Graph)</h3>
+            <span class="stu-tag stu-tag-gold">Interactive 3D Pop-up Slices</span>
+          </div>
+          <div class="chart-inspector" id="pieInspector">
+            <span>💡</span> <span>Hover over any pie slice to pop up grade share &amp; course details</span>
+          </div>
+          <div class="card-body" style="padding:10px 18px 18px;height:320px;position:relative;display:flex;justify-content:center">
+            <canvas id="gradesPieChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. 3D Histogram: Class Marks Frequency Distribution -->
+      <div class="card chart-card-3d">
+        <div class="chart-3d-inner">
+          <div class="card-head">
+            <h3>📊 3D Academic Marks Distribution (Histogram)</h3>
+            <span class="stu-tag" style="background:rgba(167,139,250,0.15);color:#a78bfa">Score Frequency Bins</span>
+          </div>
+          <div class="chart-inspector" id="histInspector">
+            <span>💡</span> <span>Hover over any score bracket bar to pop up student counts &amp; standings</span>
+          </div>
+          <div class="card-body" style="padding:10px 18px 18px;height:320px;position:relative">
+            <canvas id="marksHistogramChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. 3D Stacked Histogram: Exam Component Breakdown -->
+      <div class="card chart-card-3d">
+        <div class="chart-3d-inner">
+          <div class="card-head">
+            <h3>🧱 3D Exam Component Breakdown (Stacked Histogram)</h3>
+            <span style="font-size:11.5px;color:var(--muted)">Minor / Lab / Major Pillars</span>
+          </div>
+          <div class="chart-inspector" id="componentInspector">
+            <span>💡</span> <span>Hover over any subject bar to pop up Minor, Lab, and Major breakdown</span>
+          </div>
+          <div class="card-body" style="padding:10px 18px 18px;height:320px;position:relative">
+            <canvas id="marksBarChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. 3D Subject Benchmark vs Class Mean (Dual Pillar) -->
+      <div class="card chart-card-3d" style="grid-column: 1 / -1">
+        <div class="chart-3d-inner">
+          <div class="card-head">
+            <h3>🎯 3D Subject Score vs Class Mean (Dual-Pillar Benchmark)</h3>
+            <span style="font-size:11.5px;color:var(--muted)">Your Score vs Class Mean (μ)</span>
+          </div>
+          <div class="chart-inspector" id="benchmarkInspector">
+            <span>💡</span> <span>Hover over any subject bar to pop up comparison with class mean</span>
+          </div>
+          <div class="card-body" style="padding:10px 18px 18px;height:320px;position:relative">
+            <canvas id="classAvgChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       UNLINKED STUDENT NOTICE (If email is not in records)
+  ══════════════════════════════════════════════════════════════ -->
+  <div id="unlinkedSection" style="display:none">
+    <div class="warning-card">
+      <div style="font-size:48px;margin-bottom:12px">⚠️</div>
+      <h3>Academic Record Not Linked</h3>
+      <p>
+        You are currently logged in with email:<br/>
+        <strong style="color:var(--cyan);font-family:monospace" id="unlinkedEmail">user@email.com</strong>
+      </p>
+      <p style="text-align:left;background:rgba(2,10,24,0.6);padding:14px;border-radius:10px;border:1px solid rgba(239,68,68,0.25)">
+        • Your faculty has not yet added your student record with this email address.<br/>
+        • Please contact your course coordinator or faculty to register your email in the <strong>Faculty Portal</strong> under <strong>Students</strong>.<br/>
+        • Once added, your SGPA, CGPA, and relative grading results will automatically appear here!
+      </p>
+      <button class="btn btn-primary" onclick="RA.logout()">Switch Account / Logout</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       FACULTY NOTICE VIEW (Redirect / Quick Link to Faculty Portal)
+  ══════════════════════════════════════════════════════════════ -->
+  <div id="facultyNoticeSection" style="display:none;padding:30px 10px;text-align:center">
+    <div class="card" style="max-width:620px;margin:30px auto;padding:36px 28px;border:1px solid rgba(0,240,255,0.3);background:var(--glass-bg-card);box-shadow:0 14px 40px rgba(0,0,0,0.5)">
+      <div style="font-size:46px;margin-bottom:12px">🧑‍🏫</div>
+      <h2 style="font-size:22px;font-weight:800;color:#fff;margin-bottom:8px">Faculty Account Active</h2>
+      <p style="color:var(--muted);font-size:13.5px;line-height:1.6;margin-bottom:22px">
+        You are logged in with Faculty credentials. The student dashboard displays personalized metrics for individual students. Use the Faculty Portal to access your workspace.
+      </p>
+      <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap">
+        <a href="../faculty/frontend/index.html" class="btn btn-primary" style="padding:11px 24px;font-size:14px">🧑‍🏫 Open Faculty Portal</a>
+        <a href="results.html" class="btn btn-secondary" style="padding:11px 20px;font-size:14px">📊 Browse All Student Results</a>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  initPage('dashboard');
+
+  let currentStudent = null;
+  let activeSemester = 1;
+  let sgpaChartInst  = null;
+  let marksChartInst = null;
+  let classAvgChartInst = null;
+  let gradesPieChartInst = null;
+  let histogramChartInst = null;
+
+  const session = RA.getSession();
+  const isStudent = session.role === 'student';
+
+  if (isStudent) {
+    // 🎓 Student Experience
+    const userEmail = (session.email || '').trim().toLowerCase();
+    const student = RA.getStudentByEmail ? RA.getStudentByEmail(userEmail) : null;
+
+    if (student) {
+      currentStudent = student;
+      document.getElementById('studentSection').style.display = 'block';
+      renderStudentDashboard(student);
+    } else {
+      document.getElementById('unlinkedSection').style.display = 'block';
+      document.getElementById('unlinkedEmail').textContent = userEmail || 'unknown';
+    }
+  } else {
+    // 🧑‍🏫 Faculty Experience
+    document.getElementById('facultyNoticeSection').style.display = 'block';
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  //  STUDENT DASHBOARD RENDERING
+  // ══════════════════════════════════════════════════════════════
+  function renderStudentDashboard(stu) {
+    // Populate header details
+    document.getElementById('stuAvatar').textContent = stu.name.charAt(0).toUpperCase();
+    document.getElementById('stuName').textContent   = stu.name;
+    document.getElementById('stuRollAndBranch').textContent =
+      stu.rollNo + ' · ' + (stu.department || 'CSE') + ' (' + (stu.branch || 'CSE') + ')';
+    document.getElementById('stuEmailTag').textContent = '📧 ' + stu.email;
+    document.getElementById('stuSemTag').textContent   = 'Semester ' + (stu.currentSem || 3);
+    document.getElementById('stuBatchTag').textContent = 'Batch ' + (stu.batch || '2021');
+
+    // Retrieve all marks for this student
+    const allMarks = RA.getMarksForStudent(stu.id).sort((a,b) => a.semester - b.semester);
+
+    // Compute relative CGPA
+    const cgpa = RA.calcRelativeCGPA ? RA.calcRelativeCGPA(stu.id) : RA.calcCGPA(stu.id);
+    document.getElementById('kpiCGPA').textContent = cgpa > 0 ? cgpa.toFixed(2) : '—';
+
+    // Total credits earned
+    const totalCredits = allMarks.reduce((sum, m) => sum + m.subjects.reduce((s, sub) => s + sub.credits, 0), 0);
+    document.getElementById('kpiCredits').textContent = totalCredits || '0';
+
+    // Backlog status
+    let totalBacklogs = 0;
+    allMarks.forEach(m => m.subjects.forEach(sub => { if (sub.total < 40) totalBacklogs++; }));
+    const statusEl = document.getElementById('kpiStatus');
+    if (totalBacklogs === 0) {
+      statusEl.textContent = '✓ All Clear';
+      statusEl.style.color = '#4ade80';
+    } else {
+      statusEl.textContent = '⚠ ' + totalBacklogs + ' Backlog' + (totalBacklogs > 1 ? 's' : '');
+      statusEl.style.color = '#f87171';
+    }
+
+    // Determine available semesters
+    const semTabsEl = document.getElementById('studentSemTabs');
+    if (!allMarks.length) {
+      semTabsEl.innerHTML = '<div style="color:var(--muted);font-size:13px">No semester marks entered yet by your faculty.</div>';
+      document.getElementById('studentMarksBody').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:36px;color:var(--muted)">No marks available yet.</td></tr>';
+      return;
+    }
+
+    // Render semester tabs
+    semTabsEl.innerHTML = allMarks.map(m => {
+      return `<button class="sem-tab-btn ${m.semester === activeSemester ? 'active' : ''}" onclick="switchStudentSem(${m.semester})">
+        Semester ${m.semester}
+      </button>`;
+    }).join('');
+
+    // Default to the highest available semester
+    activeSemester = allMarks[allMarks.length - 1].semester;
+    switchStudentSem(activeSemester);
+
+    // Render multi-semester progression table & SGPA trend line chart
+    renderProgressionTable(allMarks, currentStudent.id);
+    renderSGPATrendChart(allMarks);
+  }
+
+  function switchStudentSem(sem) {
+    activeSemester = sem;
+
+    // Update active tab styling
+    document.querySelectorAll('.sem-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.textContent.trim() === 'Semester ' + sem);
+    });
+
+    const semRecord = RA.getMarksForStudentSem(currentStudent.id, sem);
+    const marksBody = document.getElementById('studentMarksBody');
+    const classMap  = RA.buildClassMarkMap ? RA.buildClassMarkMap(sem) : {};
+
+    document.getElementById('marksheetTitle').textContent = 'Semester ' + sem + ' Detailed Marksheet';
+    document.getElementById('marksheetSub').textContent   = currentStudent.name + ' · ' + currentStudent.rollNo;
+
+    if (!semRecord || !semRecord.subjects.length) {
+      marksBody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:36px;color:var(--muted)">No marks recorded for Semester ' + sem + '</td></tr>';
+      return;
+    }
+
+    // Compute relative SGPA for this semester
+    const sgpa = RA.calcRelativeSGPA ? RA.calcRelativeSGPA(semRecord.subjects, classMap) : RA.calcSGPA(semRecord.subjects);
+    document.getElementById('kpiSGPA').textContent = sgpa.toFixed(2);
+    document.getElementById('kpiSGPALabel').textContent = 'Semester ' + sem + ' SGPA (Rel.)';
+    document.getElementById('footSGPA').textContent = sgpa.toFixed(2);
+
+    // Compute Class Rank in this semester
+    const allSemMarks = RA.getAllMarks().filter(m => m.semester === sem);
+    const rankedStudents = allSemMarks.map(m => {
+      const s = RA.getStudent(m.studentId);
+      const s_sgpa = RA.calcRelativeSGPA ? RA.calcRelativeSGPA(m.subjects, classMap) : RA.calcSGPA(m.subjects);
+      return { id: m.studentId, sgpa: s_sgpa };
+    }).sort((a,b) => b.sgpa - a.sgpa);
+
+    const myRankIdx = rankedStudents.findIndex(r => r.id === currentStudent.id);
+    const rankStr = myRankIdx >= 0 ? '#' + (myRankIdx + 1) + ' of ' + rankedStudents.length : '—';
+    document.getElementById('kpiRank').textContent = rankStr;
+    document.getElementById('kpiRankLabel').textContent = 'Class Rank (Sem ' + sem + ')';
+
+    let semCredits = 0;
+    let passedCount = 0;
+
+    // Render table rows with relative grading and Minor/Lab/Major breakdown
+    marksBody.innerHTML = semRecord.subjects.map(s => {
+      const bd        = RA.getExamBreakdown ? RA.getExamBreakdown(s) : { minor: Math.round(s.internal*0.4), lab: Math.round(s.internal*0.6), major: s.external, total: s.total };
+      const allScores = classMap[s.code] || [];
+      const relGrade  = RA.getRelativeGrade ? RA.getRelativeGrade(s.total, allScores) : RA.getGrade(s.total);
+      const gColor    = RA.gradeColor(relGrade.grade);
+      const isPassed  = s.total >= 40;
+
+      semCredits += s.credits;
+      if (isPassed) passedCount++;
+
+      return `<tr>
+        <td><strong style="color:var(--sky)">${RA.escHTML(s.code)}</strong></td>
+        <td><strong>${RA.escHTML(s.name)}</strong></td>
+        <td style="text-align:center;color:var(--muted)">${s.credits}</td>
+        <td style="text-align:center"><span style="color:var(--sky);font-weight:600">${bd.minor}</span><span style="font-size:10.5px;color:var(--muted)"> /20</span></td>
+        <td style="text-align:center"><span style="color:#a78bfa;font-weight:600">${bd.lab}</span><span style="font-size:10.5px;color:var(--muted)"> /30</span></td>
+        <td style="text-align:center"><span style="color:var(--cyan);font-weight:600">${bd.major}</span><span style="font-size:10.5px;color:var(--muted)"> /50</span></td>
+        <td style="text-align:center"><strong style="font-size:15px;color:${gColor}">${bd.total}</strong><span style="font-size:10.5px;color:var(--muted)"> /100</span></td>
+        <td style="text-align:center">
+          <span class="grade-badge" style="color:${gColor};border-color:${gColor}45;background:${gColor}15">
+            ${relGrade.grade}
+          </span>
+        </td>
+        <td style="text-align:center;color:var(--muted);font-weight:600">${relGrade.points}</td>
+        <td style="text-align:center">
+          <span class="grade-badge ${isPassed ? 'badge-pass' : 'badge-fail'}">
+            ${isPassed ? '✓ Pass' : '✗ Fail'}
+          </span>
+        </td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('footCredits').textContent = semCredits;
+    document.getElementById('footPassed').textContent  = passedCount + ' / ' + semRecord.subjects.length;
+
+    // Render all current semester 3D charts
+    renderSubjectMarksChart(semRecord.subjects);
+    renderClassComparisonChart(semRecord.subjects, sem);
+    renderGradesPieChart(semRecord.subjects, sem);
+    renderMarksHistogramChart(semRecord, sem);
+    if (window.init3DGraphCards) window.init3DGraphCards();
+  }
+
+  function renderProgressionTable(allMarks, studentId) {
+    const tbody = document.getElementById('progressionTableBody');
+    if (!tbody) return;
+    if (!allMarks.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No progression data available.</td></tr>';
+      return;
+    }
+
+    let cumPoints = 0;
+    let cumCredits = 0;
+
+    tbody.innerHTML = allMarks.map(m => {
+      const classMap = RA.buildClassMarkMap ? RA.buildClassMarkMap(m.semester) : {};
+      const sgpa = RA.calcRelativeSGPA ? RA.calcRelativeSGPA(m.subjects, classMap) : RA.calcSGPA(m.subjects);
+      const semCredits = m.subjects.reduce((sum, s) => sum + s.credits, 0);
+
+      m.subjects.forEach(s => {
+        const scores = classMap[s.code] || [];
+        const relGrade = RA.getRelativeGrade ? RA.getRelativeGrade(s.total, scores) : RA.getGrade(s.total);
+        cumPoints += relGrade.points * s.credits;
+        cumCredits += s.credits;
+      });
+      const cgpaAtSem = cumCredits > 0 ? (cumPoints / cumCredits) : 0;
+      const avgScore = m.subjects.length ? (m.subjects.reduce((a,b)=>a+b.total, 0) / m.subjects.length).toFixed(1) : '0';
+      const backlogs = m.subjects.filter(s => s.total < 40).length;
+      const standingHtml = backlogs === 0
+        ? '<span class="grade-badge badge-pass">✓ All Clear</span>'
+        : '<span class="grade-badge badge-fail">⚠ ' + backlogs + ' Backlog' + (backlogs>1?'s':'') + '</span>';
+
+      return `<tr>
+        <td><strong style="color:var(--cyan)">Semester ${m.semester}</strong></td>
+        <td style="text-align:center">${semCredits} Credits</td>
+        <td style="text-align:center"><strong style="font-size:14.5px;color:var(--sky)">${sgpa.toFixed(2)}</strong></td>
+        <td style="text-align:center"><strong style="font-size:14.5px;color:#a78bfa">${cgpaAtSem.toFixed(2)}</strong></td>
+        <td style="text-align:center;font-weight:600">${avgScore}%</td>
+        <td style="text-align:center">${standingHtml}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── 1. 3D Line Graph: SGPA Progression ─────────────────────
+  function renderSGPATrendChart(allMarks) {
+    if (sgpaChartInst) { sgpaChartInst.destroy(); }
+    const canvas = document.getElementById('sgpaChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const labels = allMarks.map(m => 'Sem ' + m.semester);
+    const data   = allMarks.map(m => {
+      const classMap = RA.buildClassMarkMap ? RA.buildClassMarkMap(m.semester) : {};
+      return RA.calcRelativeSGPA ? RA.calcRelativeSGPA(m.subjects, classMap) : RA.calcSGPA(m.subjects);
+    });
+
+    const strokeGrad = ctx.createLinearGradient(0, 0, 500, 0);
+    strokeGrad.addColorStop(0, '#00F0FF');
+    strokeGrad.addColorStop(0.5, '#38BDF8');
+    strokeGrad.addColorStop(1, '#00A3FF');
+
+    const fillGrad = ctx.createLinearGradient(0, 0, 0, 320);
+    fillGrad.addColorStop(0, 'rgba(0, 240, 255, 0.40)');
+    fillGrad.addColorStop(0.5, 'rgba(0, 163, 255, 0.15)');
+    fillGrad.addColorStop(1, 'rgba(3, 7, 18, 0)');
+
+    const inspector = document.getElementById('sgpaInspector');
+
+    sgpaChartInst = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Relative SGPA',
+          data,
+          borderColor: strokeGrad,
+          backgroundColor: fillGrad,
+          pointBackgroundColor: '#00F0FF',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2.5,
+          pointRadius: 8,
+          pointHoverRadius: 14,
+          pointHoverBackgroundColor: '#ffffff',
+          pointHoverBorderColor: '#00F0FF',
+          pointHoverBorderWidth: 4,
+          borderWidth: 3.5,
+          tension: 0.38,
+          fill: true
+        }]
+      },
+      options: {
+        onHover: (event, activeElements) => {
+          if (!inspector) return;
+          if (activeElements.length > 0) {
+            const idx = activeElements[0].index;
+            const m = allMarks[idx];
+            const sgpaVal = data[idx];
+            const credits = m.subjects.reduce((sum, s) => sum + s.credits, 0);
+            const backlogs = m.subjects.filter(s => s.total < 40).length;
+            const status = backlogs === 0 ? '✓ All Clear' : `⚠ ${backlogs} Backlog(s)`;
+            inspector.classList.add('active');
+            inspector.innerHTML = `<strong>✨ Pop-up Info: Semester ${m.semester} Record:</strong> Relative SGPA: <strong>${sgpaVal.toFixed(2)} / 10</strong> · Credits Attempted: <strong>${credits}</strong> · Standing: <strong>${status}</strong>`;
+          } else {
+            inspector.classList.remove('active');
+            inspector.innerHTML = `<span>💡</span> <span>Hover over any semester point to pop up full academic details</span>`;
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            padding: 14,
+            backgroundColor: 'rgba(3, 7, 18, 0.95)',
+            titleColor: '#00F0FF',
+            bodyColor: '#ffffff',
+            borderColor: '#00F0FF',
+            borderWidth: 2,
+            cornerRadius: 10,
+            callbacks: {
+              title: (items) => `📅 Semester ${allMarks[items[0].dataIndex].semester} Performance`,
+              label: (ctx) => ` Relative SGPA: ${ctx.parsed.y.toFixed(2)} / 10.00`,
+              afterLabel: (ctx) => {
+                const m = allMarks[ctx.dataIndex];
+                const credits = m.subjects.reduce((sum, s) => sum + s.credits, 0);
+                const passCount = m.subjects.filter(s => s.total >= 40).length;
+                return `Passed: ${passCount}/${m.subjects.length} Courses (${credits} Credits)`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: 'rgba(186,230,253,0.8)', font: { family: 'DM Sans', size: 12, weight: 600 } }, grid: { color: 'rgba(56,189,248,0.08)' } },
+          y: { ticks: { color: 'rgba(186,230,253,0.8)', font: { family: 'DM Sans', size: 12 } }, grid: { color: 'rgba(56,189,248,0.08)' }, min: 0, max: 10 }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+
+  // ── 2. 3D Pie Graph: Exploded Relative Grade Distribution ──
+  function renderGradesPieChart(subjects, sem) {
+    if (gradesPieChartInst) { gradesPieChartInst.destroy(); }
+    const canvas = document.getElementById('gradesPieChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const classMap = RA.buildClassMarkMap ? RA.buildClassMarkMap(sem) : {};
+
+    const gradeCounts = {};
+    const gradeCourses = {};
+
+    subjects.forEach(s => {
+      const arr = classMap[s.code] || [];
+      const relGrade = RA.getRelativeGrade ? RA.getRelativeGrade(s.total, arr) : RA.getGrade(s.total);
+      const g = relGrade.grade;
+      gradeCounts[g] = (gradeCounts[g] || 0) + 1;
+      if (!gradeCourses[g]) gradeCourses[g] = [];
+      gradeCourses[g].push(s.code);
+    });
+
+    const labels = Object.keys(gradeCounts);
+    const data   = labels.map(g => gradeCounts[g]);
+    const colors = labels.map(g => RA.gradeColor(g));
+    const totalCourses = subjects.length || 1;
+    const inspector = document.getElementById('pieInspector');
+
+    gradesPieChartInst = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: colors,
+          borderColor: '#030712',
+          borderWidth: 3,
+          hoverOffset: 34,
+          hoverBorderColor: '#ffffff',
+          hoverBorderWidth: 4
+        }]
+      },
+      options: {
+        onHover: (event, activeElements) => {
+          if (!inspector) return;
+          if (activeElements.length > 0) {
+            const idx = activeElements[0].index;
+            const grade = labels[idx];
+            const count = data[idx];
+            const pctVal = ((count / totalCourses) * 100).toFixed(1);
+            const coursesList = (gradeCourses[grade] || []).join(', ');
+            inspector.classList.add('active');
+            inspector.innerHTML = `<strong>✨ Pop-up Slice: Grade ${grade}:</strong> <strong>${count} Course(s)</strong> (${pctVal}% of semester) — Courses: <strong>${coursesList}</strong>`;
+          } else {
+            inspector.classList.remove('active');
+            inspector.innerHTML = `<span>💡</span> <span>Hover over any pie slice to pop up grade share &amp; course details</span>`;
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: 'rgba(186,230,253,0.85)', font: { family: 'DM Sans', size: 12, weight: 600 }, boxWidth: 14, padding: 16 }
+          },
+          tooltip: {
+            padding: 14,
+            backgroundColor: 'rgba(3, 7, 18, 0.95)',
+            borderColor: '#00F0FF',
+            borderWidth: 2,
+            cornerRadius: 10,
+            callbacks: {
+              title: (items) => `🎖️ Relative Grade: ${items[0].label}`,
+              label: (ctx) => {
+                const count = ctx.raw;
+                const pctVal = ((count / totalCourses) * 100).toFixed(1);
+                return ` ${count} Subject(s) (${pctVal}% of semester courses)`;
+              },
+              afterLabel: (ctx) => {
+                const g = ctx.label;
+                const courses = gradeCourses[g] ? gradeCourses[g].join(', ') : '';
+                return `Subjects: ${courses}`;
+              }
+            }
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+
+  // ── 3. 3D Academic Marks Distribution (Histogram) ───────────
+  function renderMarksHistogramChart(semRecord, sem) {
+    if (histogramChartInst) { histogramChartInst.destroy(); }
+    const canvas = document.getElementById('marksHistogramChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const classMap = RA.buildClassMarkMap ? RA.buildClassMarkMap(sem) : {};
+
+    const binLabels = ['<40 (Fail)', '40-49 (C)', '50-59 (B)', '60-69 (B+)', '70-79 (A)', '80-89 (A+)', '90-100 (O)'];
+    const classFrequencies = [0, 0, 0, 0, 0, 0, 0];
+    const myFrequencies = [0, 0, 0, 0, 0, 0, 0];
+
+    Object.values(classMap).forEach(scores => {
+      scores.forEach(val => {
+        if (val < 40) classFrequencies[0]++;
+        else if (val < 50) classFrequencies[1]++;
+        else if (val < 60) classFrequencies[2]++;
+        else if (val < 70) classFrequencies[3]++;
+        else if (val < 80) classFrequencies[4]++;
+        else if (val < 90) classFrequencies[5]++;
+        else classFrequencies[6]++;
+      });
+    });
+
+    semRecord.subjects.forEach(s => {
+      const val = s.total;
+      if (val < 40) myFrequencies[0]++;
+      else if (val < 50) myFrequencies[1]++;
+      else if (val < 60) myFrequencies[2]++;
+      else if (val < 70) myFrequencies[3]++;
+      else if (val < 80) myFrequencies[4]++;
+      else if (val < 90) myFrequencies[5]++;
+      else myFrequencies[6]++;
+    });
+
+    const histGrad = ctx.createLinearGradient(0, 0, 0, 320);
+    histGrad.addColorStop(0, '#c084fc');
+    histGrad.addColorStop(0.5, '#a855f7');
+    histGrad.addColorStop(1, 'rgba(126, 34, 206, 0.45)');
+
+    const myGrad = ctx.createLinearGradient(0, 0, 0, 320);
+    myGrad.addColorStop(0, '#00F0FF');
+    myGrad.addColorStop(0.5, '#00A3FF');
+    myGrad.addColorStop(1, 'rgba(2, 132, 199, 0.45)');
+
+    const inspector = document.getElementById('histInspector');
+
+    histogramChartInst = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: binLabels,
+        datasets: [
+          {
+            label: 'Class Frequency Count',
+            data: classFrequencies,
+            backgroundColor: histGrad,
+            borderColor: '#c084fc',
+            borderWidth: 1.5,
+            borderRadius: 7,
+            barPercentage: 0.85,
+            hoverBorderWidth: 3.5,
+            hoverBorderColor: '#ffffff'
+          },
+          {
+            label: 'My Subjects Count',
+            data: myFrequencies,
+            backgroundColor: myGrad,
+            borderColor: '#00F0FF',
+            borderWidth: 1.5,
+            borderRadius: 7,
+            barPercentage: 0.85,
+            hoverBorderWidth: 3.5,
+            hoverBorderColor: '#ffffff'
+          }
+        ]
+      },
+      options: {
+        onHover: (event, activeElements) => {
+          if (!inspector) return;
+          if (activeElements.length > 0) {
+            const idx = activeElements[0].index;
+            const bracket = binLabels[idx];
+            const classCount = classFrequencies[idx];
+            const myCount = myFrequencies[idx];
+            inspector.classList.add('active');
+            inspector.innerHTML = `<strong>📊 Pop-up Bar: Score Bracket ${bracket}:</strong> Class Scores: <strong>${classCount}</strong> · Your Subjects in this Range: <strong>${myCount}</strong>`;
+          } else {
+            inspector.classList.remove('active');
+            inspector.innerHTML = `<span>💡</span> <span>Hover over any score bracket bar to pop up student counts &amp; standings</span>`;
+          }
+        },
+        plugins: {
+          legend: { labels: { color: 'rgba(186,230,253,0.85)', font: { family: 'DM Sans', size: 11, weight: 600 } } },
+          tooltip: {
+            padding: 14,
+            backgroundColor: 'rgba(3, 7, 18, 0.95)',
+            borderColor: '#00F0FF',
+            borderWidth: 2,
+            cornerRadius: 10,
+            callbacks: {
+              title: (items) => `Score Bracket: ${items[0].label}`,
+              label: (item) => ` ${item.dataset.label}: ${item.raw} score(s)`,
+              afterBody: (items) => {
+                const idx = items[0].dataIndex;
+                return `Total class scores in bracket: ${classFrequencies[idx]}\nYour subjects in bracket: ${myFrequencies[idx]}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 11, weight: 600 } }, grid: { color: 'rgba(56,189,248,0.08)' } },
+          y: { ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 11 } }, grid: { color: 'rgba(56,189,248,0.08)' }, beginAtZero: true }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+
+  // ── 4. 3D Stacked Histogram: Exam Component Breakdown ───────
+  function renderSubjectMarksChart(subjects) {
+    if (marksChartInst) { marksChartInst.destroy(); }
+    const canvas = document.getElementById('marksBarChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const breakdowns = subjects.map(s => RA.getExamBreakdown ? RA.getExamBreakdown(s) : { minor: Math.round(s.internal*0.4), lab: Math.round(s.internal*0.6), major: s.external, total: s.total });
+
+    const minorGrad = ctx.createLinearGradient(0, 0, 0, 300);
+    minorGrad.addColorStop(0, '#7dd3fc');
+    minorGrad.addColorStop(1, 'rgba(56, 189, 248, 0.55)');
+
+    const labGrad = ctx.createLinearGradient(0, 0, 0, 300);
+    labGrad.addColorStop(0, '#c4b5fd');
+    labGrad.addColorStop(1, 'rgba(167, 139, 250, 0.55)');
+
+    const majorGrad = ctx.createLinearGradient(0, 0, 0, 300);
+    majorGrad.addColorStop(0, '#67e8f9');
+    majorGrad.addColorStop(1, 'rgba(0, 240, 255, 0.55)');
+
+    const inspector = document.getElementById('componentInspector');
+
+    marksChartInst = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: subjects.map(s => s.code),
+        datasets: [
+          { label: 'Minor Exam (/20)', data: breakdowns.map(b => b.minor), backgroundColor: minorGrad, borderColor: '#38BDF8', borderWidth: 1, borderRadius: 4, hoverBorderWidth: 3, hoverBorderColor: '#ffffff' },
+          { label: 'Lab / Practical (/30)', data: breakdowns.map(b => b.lab), backgroundColor: labGrad, borderColor: '#a78bfa', borderWidth: 1, borderRadius: 4, hoverBorderWidth: 3, hoverBorderColor: '#ffffff' },
+          { label: 'Major Exam (/50)', data: breakdowns.map(b => b.major), backgroundColor: majorGrad, borderColor: '#00F0FF', borderWidth: 1, borderRadius: 4, hoverBorderWidth: 3, hoverBorderColor: '#ffffff' }
+        ]
+      },
+      options: {
+        onHover: (event, activeElements) => {
+          if (!inspector) return;
+          if (activeElements.length > 0) {
+            const idx = activeElements[0].index;
+            const s = subjects[idx];
+            const bd = breakdowns[idx];
+            const status = bd.total >= 40 ? '✓ Pass' : '✗ Backlog';
+            inspector.classList.add('active');
+            inspector.innerHTML = `<strong>🧱 Pop-up Bar: ${s.code} (${s.name}):</strong> Minor: <strong>${bd.minor}/20</strong> · Lab: <strong>${bd.lab}/30</strong> · Major: <strong>${bd.major}/50</strong> → Total: <strong>${bd.total}/100</strong> (${status})`;
+          } else {
+            inspector.classList.remove('active');
+            inspector.innerHTML = `<span>💡</span> <span>Hover over any subject bar to pop up Minor, Lab, and Major breakdown</span>`;
+          }
+        },
+        plugins: {
+          legend: { labels: { color: 'rgba(186,230,253,0.85)', font: { family: 'DM Sans', size: 11, weight: 600 } } },
+          tooltip: {
+            padding: 14,
+            backgroundColor: 'rgba(3, 7, 18, 0.95)',
+            borderColor: '#00F0FF',
+            borderWidth: 2,
+            cornerRadius: 10,
+            callbacks: {
+              title: (items) => {
+                const s = subjects[items[0].dataIndex];
+                return `${s.code} – ${s.name}`;
+              },
+              afterBody: function(items) {
+                const idx = items[0].dataIndex;
+                const b = breakdowns[idx];
+                const res = b.total >= 40 ? '✓ Pass' : '✗ Fail';
+                return `──────────────────\nMinor: ${b.minor}/20\nLab: ${b.lab}/30\nMajor: ${b.major}/50\nTotal Score: ${b.total}/100 (${res})`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 11, weight: 600 } }, grid: { color: 'rgba(56,189,248,0.08)' }, stacked: true },
+          y: { ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 11 } }, grid: { color: 'rgba(56,189,248,0.08)' }, stacked: true, min: 0, max: 100 }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+
+  // ── 5. 3D Subject Benchmark vs Class Mean (Dual Pillar) ──────
+  function renderClassComparisonChart(subjects, sem) {
+    if (classAvgChartInst) { classAvgChartInst.destroy(); }
+    const canvas = document.getElementById('classAvgChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const classMap = RA.buildClassMarkMap ? RA.buildClassMarkMap(sem) : {};
+
+    const labels = subjects.map(s => s.code);
+    const myScores = subjects.map(s => s.total);
+    const classAvgs = subjects.map(s => {
+      const arr = classMap[s.code] || [s.total];
+      return +(arr.reduce((a,b)=>a+b, 0) / arr.length).toFixed(1);
+    });
+
+    const myGrad = ctx.createLinearGradient(0, 0, 0, 320);
+    myGrad.addColorStop(0, '#00F0FF');
+    myGrad.addColorStop(1, 'rgba(0, 163, 255, 0.45)');
+
+    const avgGrad = ctx.createLinearGradient(0, 0, 0, 320);
+    avgGrad.addColorStop(0, '#fde047');
+    avgGrad.addColorStop(1, 'rgba(251, 191, 36, 0.45)');
+
+    const inspector = document.getElementById('benchmarkInspector');
+
+    classAvgChartInst = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'My Score (/100)',
+            data: myScores,
+            backgroundColor: myGrad,
+            borderColor: '#00F0FF',
+            borderWidth: 1.5,
+            borderRadius: 6,
+            hoverBorderWidth: 3.5,
+            hoverBorderColor: '#ffffff'
+          },
+          {
+            label: 'Class Mean μ (/100)',
+            data: classAvgs,
+            backgroundColor: avgGrad,
+            borderColor: '#fbbf24',
+            borderWidth: 1.5,
+            borderRadius: 6,
+            hoverBorderWidth: 3.5,
+            hoverBorderColor: '#ffffff'
+          }
+        ]
+      },
+      options: {
+        onHover: (event, activeElements) => {
+          if (!inspector) return;
+          if (activeElements.length > 0) {
+            const idx = activeElements[0].index;
+            const s = subjects[idx];
+            const myScore = myScores[idx];
+            const avg = classAvgs[idx];
+            const diff = +(myScore - avg).toFixed(1);
+            const comp = diff >= 0 ? `+${diff} Above Class Mean` : `${diff} Below Class Mean`;
+            inspector.classList.add('active');
+            inspector.innerHTML = `<strong>🎯 Pop-up Comparison: ${s.code} (${s.name}):</strong> Your Score: <strong>${myScore}/100</strong> · Class Mean: <strong>${avg}/100</strong> (<strong>${comp}</strong>)`;
+          } else {
+            inspector.classList.remove('active');
+            inspector.innerHTML = `<span>💡</span> <span>Hover over any subject bar to pop up comparison with class mean</span>`;
+          }
+        },
+        plugins: {
+          legend: { labels: { color: 'rgba(186,230,253,0.85)', font: { family: 'DM Sans', size: 12, weight: 600 } } },
+          tooltip: {
+            padding: 14,
+            backgroundColor: 'rgba(3, 7, 18, 0.95)',
+            borderColor: '#00F0FF',
+            borderWidth: 2,
+            cornerRadius: 10,
+            callbacks: {
+              title: (items) => {
+                const s = subjects[items[0].dataIndex];
+                return `${s.code} – ${s.name}`;
+              },
+              afterBody: (items) => {
+                const idx = items[0].dataIndex;
+                const my = myScores[idx];
+                const avg = classAvgs[idx];
+                const diff = (my - avg).toFixed(1);
+                return `Difference: ${diff >= 0 ? '+' : ''}${diff} pts relative to class average`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 11, weight: 600 } }, grid: { color: 'rgba(56,189,248,0.08)' } },
+          y: { ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 11 } }, grid: { color: 'rgba(56,189,248,0.08)' }, min: 0, max: 100 }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  //  OFFICIAL PDF DOWNLOAD (For the Logged-in Student)
+  // ══════════════════════════════════════════════════════════════
+  function downloadMyPDF() {
+    if (!currentStudent) return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const W = 210, pad = 15;
+    let y = pad;
+
+    // Header bar
+    doc.setFillColor(27, 54, 93);
+    doc.rect(0, 0, W, 32, 'F');
+    doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255);
+    doc.text('MADHAV INSTITUTE OF TECHNOLOGY & SCIENCE (MITS)', pad, 12);
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+    doc.text('Official Student Academic Result Gazette (Relative Grading)', pad, 19);
+    doc.text('Generated On: ' + new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'}), pad, 26);
+    y = 40;
+
+    // Student identity card
+    const cgpa = RA.calcRelativeCGPA ? RA.calcRelativeCGPA(currentStudent.id) : RA.calcCGPA(currentStudent.id);
+    doc.setFillColor(242, 246, 254);
+    doc.roundedRect(pad, y, W - 2*pad, 30, 3, 3, 'F');
+    doc.setTextColor(15, 30, 60);
+    doc.setFontSize(13); doc.setFont('helvetica', 'bold');
+    doc.text(currentStudent.name, pad + 5, y + 8);
+    doc.setFontSize(9.5); doc.setFont('helvetica', 'normal');
+    doc.text('Roll No: ' + currentStudent.rollNo + '  |  Department: ' + (currentStudent.department || 'CSE'), pad + 5, y + 15);
+    doc.text('Email (Login ID): ' + currentStudent.email + '  |  Batch: ' + (currentStudent.batch || '2021'), pad + 5, y + 21);
+    doc.text('Branch: ' + currentStudent.branch + '  |  Current Semester: ' + (currentStudent.currentSem || '3'), pad + 5, y + 27);
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(0, 102, 204);
+    doc.text('CGPA: ' + (cgpa > 0 ? cgpa.toFixed(2) : '—'), W - pad - 35, y + 17);
+    y += 37;
+
+    // Semester marks
+    const semRecord = RA.getMarksForStudentSem(currentStudent.id, activeSemester);
+    if (semRecord) {
+      const classMap = RA.buildClassMarkMap ? RA.buildClassMarkMap(activeSemester) : {};
+      const sgpa = RA.calcRelativeSGPA ? RA.calcRelativeSGPA(semRecord.subjects, classMap) : RA.calcSGPA(semRecord.subjects);
+
+      doc.setFillColor(27, 54, 93);
+      doc.rect(pad, y, W - 2*pad, 8, 'F');
+      doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255);
+      doc.text('Semester ' + activeSemester + ' Detailed Result — Relative SGPA: ' + sgpa.toFixed(2), pad + 3, y + 5.5);
+      y += 10;
+
+      // Table Header
+      doc.setFillColor(210, 225, 248);
+      doc.rect(pad, y, W - 2*pad, 7, 'F');
+      doc.setFontSize(8.2); doc.setTextColor(15, 30, 60);
+      const cols = [pad + 2, pad + 18, pad + 76, pad + 91, pad + 107, pad + 123, pad + 139, pad + 155, pad + 168];
+      const heads = ['Code', 'Subject Name', 'Credits', 'Minor/20', 'Lab/30', 'Major/50', 'Tot/100', 'Grade', 'Pts'];
+      heads.forEach((h, i) => doc.text(h, cols[i], y + 4.8));
+      y += 8;
+
+      semRecord.subjects.forEach((s, idx) => {
+        const bd = RA.getExamBreakdown ? RA.getExamBreakdown(s) : { minor: Math.round(s.internal*0.4), lab: Math.round(s.internal*0.6), major: s.external, total: s.total };
+        const allScores = classMap[s.code] || [];
+        const relGrade = RA.getRelativeGrade ? RA.getRelativeGrade(s.total, allScores) : RA.getGrade(s.total);
+        if (idx % 2 === 0) {
+          doc.setFillColor(248, 250, 255);
+          doc.rect(pad, y, W - 2*pad, 6.5, 'F');
+        }
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(30, 45, 70);
+        doc.text(s.code, cols[0], y + 4.5);
+        doc.text(s.name.substring(0, 30), cols[1], y + 4.5);
+        doc.text(String(s.credits), cols[2], y + 4.5);
+        doc.text(String(bd.minor), cols[3], y + 4.5);
+        doc.text(String(bd.lab), cols[4], y + 4.5);
+        doc.text(String(bd.major), cols[5], y + 4.5);
+        doc.setFont('helvetica', 'bold');
+        doc.text(String(bd.total), cols[6], y + 4.5);
+        doc.text(relGrade.grade, cols[7], y + 4.5);
+        doc.text(String(relGrade.points), cols[8], y + 4.5);
+        y += 7;
+      });
+    }
+
+    // Official footer
+    doc.setFontSize(8); doc.setFont('helvetica', 'italic'); doc.setTextColor(120, 140, 170);
+    doc.text('This is a verified academic report issued by MITS Result Analyzer Platform. Evaluated under Relative Grading System.', pad, 286);
+
+    doc.save('MITS_Result_' + currentStudent.rollNo + '_Sem' + activeSemester + '.pdf');
+  }
+</script>
+</body>
+</html>

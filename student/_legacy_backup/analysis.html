@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Result Analyzer – Analysis</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+  <script src="leo_chatbot.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--cyan:#00F0FF;--blue:#00A3FF;--sky:#38BDF8;--navy:#030712;--glass:rgba(6,18,38,0.70);--border:rgba(56,189,248,0.20);--soft:rgba(255,255,255,0.87);--muted:rgba(186,230,253,0.60);--r:14px}
+    html,body{height:100%;font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#030712,#050C1A 50%,#071428);color:#fff;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,240,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,0.03) 1px,transparent 1px);background-size:52px 52px;pointer-events:none;z-index:0}
+    #appNav{position:relative;z-index:200}
+    .page{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:28px 20px 70px}
+    .pg-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+    .pg-header h1{font-size:22px;font-weight:800;background:linear-gradient(135deg,#fff,var(--sky));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+    /* Selector */
+    .form-field label{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+    select{padding:9px 13px;background:rgba(2,10,24,0.80);border:1px solid rgba(56,189,248,0.22);border-radius:8px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13.5px;outline:none;cursor:pointer;transition:border .2s}
+    select:focus{border-color:var(--cyan)}
+
+    /* Two-col layout */
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+    @media(max-width:760px){.two-col{grid-template-columns:1fr}}
+    .one-col{margin-bottom:18px}
+
+    /* Section cards */
+    .section-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;backdrop-filter:blur(14px)}
+    .section-head{background:linear-gradient(90deg,#1B365D,#14274f);padding:14px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+    .section-head h3{font-size:15px;font-weight:700;color:#fff}
+    .section-head span{font-size:12.5px;color:var(--muted)}
+    .section-body{padding:20px 22px}
+    .chart-wrap canvas{height:320px;max-height:360px}
+
+    /* Tables */
+    table{width:100%;border-collapse:collapse;font-size:13.5px}
+    thead th{background:#1B365D;padding:10px 16px;text-align:left;font-weight:700;font-size:12px;color:#fff;letter-spacing:.4px;text-transform:uppercase}
+    tbody tr{border-bottom:1px solid rgba(56,189,248,0.09);transition:background .18s}
+    tbody tr:hover{background:rgba(0,240,255,0.05)}
+    tbody td{padding:11px 16px;color:var(--soft);vertical-align:middle}
+
+    /* Rank badge */
+    .rank-badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-size:13px;font-weight:800}
+    .r1{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#000}
+    .r2{background:linear-gradient(135deg,#9ca3af,#d1d5db);color:#000}
+    .r3{background:linear-gradient(135deg,#b45309,#d97706);color:#fff}
+    .rn{background:rgba(56,189,248,0.12);color:var(--sky)}
+
+    /* Difficulty bars */
+    .diff-bar-wrap{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(56,189,248,0.08)}
+    .diff-bar-wrap:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+    .diff-bar-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+    .diff-bar-top .sub-name{font-size:13.5px;font-weight:600;color:var(--soft)}
+    .diff-bar-top .sub-stats{font-size:12px;color:var(--muted)}
+    .diff-bar-bg{height:8px;border-radius:4px;background:rgba(56,189,248,0.10);overflow:hidden}
+    .diff-bar-fill{height:100%;border-radius:4px;transition:width .6s ease}
+
+    /* GPA pill */
+    .gpa-pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:800;border:1px solid}
+    .gpa-hi{color:#4ade80;border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.08)}
+    .gpa-md{color:#facc15;border-color:rgba(250,204,21,.3);background:rgba(250,204,21,.08)}
+    .gpa-lo{color:#f87171;border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.08)}
+
+    .no-data{text-align:center;padding:36px;color:var(--muted);font-size:14px}
+    .no-data span{display:block;font-size:36px;margin-bottom:8px}
+
+    /* Filter row */
+    .filter-row{display:flex;gap:12px;align-items:flex-end;margin-bottom:22px;flex-wrap:wrap}
+  </style>
+</head>
+<body>
+<div id="appNav"></div>
+<main class="page">
+  <div class="pg-header">
+    <div><h1>🔍 Academic Analysis</h1></div>
+  </div>
+
+  <!-- Semester selector -->
+  <div class="filter-row">
+    <div class="form-field">
+      <label>Semester</label>
+      <select id="semSel" onchange="renderAll()">
+        <option value="1">Semester 1</option>
+        <option value="2">Semester 2</option>
+        <option value="3" selected>Semester 3</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <!-- Toppers — Semester -->
+    <div class="section-card">
+      <div class="section-head">
+        <h3>🏆 Toppers — Semester</h3>
+        <span id="topperSemLabel">Sem 3</span>
+      </div>
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th>Roll No</th><th>SGPA</th></tr></thead>
+        <tbody id="semTopperBody"><tr><td colspan="4" class="no-data"><span>📭</span>No data</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- Overall CGPA Toppers -->
+    <div class="section-card">
+      <div class="section-head">
+        <h3>🌟 Overall Toppers — All Semesters</h3>
+        <span>By CGPA</span>
+      </div>
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th>Roll No</th><th>CGPA</th></tr></thead>
+        <tbody id="overallTopperBody"><tr><td colspan="4" class="no-data"><span>📭</span>No data</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Subject Difficulty Analysis -->
+  <div class="section-card one-col">
+    <div class="section-head">
+      <h3>📉 Subject Difficulty Analysis</h3>
+      <span id="diffSemLabel">Semester 3</span>
+    </div>
+    <div class="section-body">
+      <div class="two-col" style="margin-bottom:20px">
+        <div class="chart-wrap">
+          <canvas id="avgChart"></canvas>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="passRateChart"></canvas>
+        </div>
+      </div>
+      <div id="diffBars"></div>
+    </div>
+  </div>
+
+  <!-- Student-wise comparison -->
+  <div class="section-card one-col">
+    <div class="section-head">
+      <h3>📋 All Students — Semester Performance</h3>
+      <span id="allSemLabel">Semester 3</span>
+    </div>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Name</th><th>Roll No</th><th>SGPA</th><th>CGPA</th><th>Passed</th><th>Action</th></tr>
+      </thead>
+      <tbody id="allStudentsBody"><tr><td colspan="7" class="no-data"><span>📭</span>No marks data for this semester</td></tr></tbody>
+    </table>
+  </div>
+
+</main>
+
+<script>
+  initPage('analysis');
+
+  let avgChart = null, passRateChart = null;
+
+  function getSem() { return +document.getElementById('semSel').value; }
+
+  function gpaClass(v) { return v >= 8 ? 'gpa-hi' : v >= 6 ? 'gpa-md' : 'gpa-lo'; }
+
+  function rankBadge(i) {
+    const cls   = ['r1','r2','r3'][i] || 'rn';
+    const label = ['🥇','🥈','🥉'][i] || (i + 1);
+    return '<span class="rank-badge ' + cls + '">' + label + '</span>';
+  }
+
+  function renderAll() {
+    const sem = getSem();
+    document.getElementById('topperSemLabel').textContent  = 'Sem ' + sem;
+    document.getElementById('diffSemLabel').textContent    = 'Semester ' + sem;
+    document.getElementById('allSemLabel').textContent     = 'Semester ' + sem;
+
+    renderSemToppers(sem);
+    renderOverallToppers();
+    renderDifficulty(sem);
+    renderAllStudents(sem);
+  }
+
+  function renderSemToppers(sem) {
+    const toppers = RA.getToppers(sem, 10);
+    const tbody   = document.getElementById('semTopperBody');
+    if (!toppers.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="no-data"><span>📭</span>No marks data for Semester ' + sem + '</td></tr>';
+      return;
+    }
+    tbody.innerHTML = toppers.map((t, i) =>
+      '<tr><td>' + rankBadge(i) + '</td>' +
+      '<td><strong>' + RA.escHTML(t.student.name) + '</strong></td>' +
+      '<td style="color:var(--sky)">' + RA.escHTML(t.student.rollNo) + '</td>' +
+      '<td><strong style="color:var(--cyan)">' + t.sgpa.toFixed(2) + '</strong></td></tr>'
+    ).join('');
+  }
+
+  function renderOverallToppers() {
+    const toppers = RA.getOverallToppers(10);
+    const tbody   = document.getElementById('overallTopperBody');
+    if (!toppers.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="no-data"><span>📭</span>No data yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = toppers.map((t, i) =>
+      '<tr><td>' + rankBadge(i) + '</td>' +
+      '<td><strong>' + RA.escHTML(t.student.name) + '</strong></td>' +
+      '<td style="color:var(--sky)">' + RA.escHTML(t.student.rollNo) + '</td>' +
+      '<td><span class="gpa-pill ' + gpaClass(t.cgpa) + '">' + t.cgpa.toFixed(2) + '</span></td></tr>'
+    ).join('');
+  }
+
+  function renderDifficulty(sem) {
+    const diff = RA.getSubjectDifficulty(sem);
+
+    // Destroy old charts
+    if (avgChart)      { avgChart.destroy();      avgChart = null; }
+    if (passRateChart) { passRateChart.destroy();  passRateChart = null; }
+
+    // Avg marks chart
+    const ctx1 = document.getElementById('avgChart').getContext('2d');
+    avgChart = new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: diff.map(s => s.code),
+        datasets: [{
+          label: 'Avg Marks', data: diff.map(s => s.avg),
+          backgroundColor: diff.map(s => {
+            if (s.avg === null) return 'rgba(56,189,248,0.15)';
+            return s.avg < 50 ? 'rgba(239,68,68,0.55)' : s.avg < 65 ? 'rgba(250,204,21,0.55)' : 'rgba(74,222,128,0.55)';
+          }),
+          borderWidth: 1, borderRadius: 6,
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false }, title: { display: true, text: 'Average Marks per Subject', color: 'rgba(186,230,253,0.8)', font: { family: 'DM Sans', size: 12 } } },
+        scales: {
+          x: { ticks: { color: 'rgba(186,230,253,0.7)', font: { family: 'DM Sans', size: 11 } }, grid: { color: 'rgba(56,189,248,0.07)' } },
+          y: { ticks: { color: 'rgba(186,230,253,0.7)', font: { family: 'DM Sans', size: 11 } }, grid: { color: 'rgba(56,189,248,0.07)' }, min: 0, max: 100 }
+        },
+        responsive: true, maintainAspectRatio: true
+      }
+    });
+
+    // Pass rate chart
+    const ctx2 = document.getElementById('passRateChart').getContext('2d');
+    passRateChart = new Chart(ctx2, {
+      type: 'doughnut',
+      data: {
+        labels: diff.filter(s => s.passRate !== null).map(s => s.code),
+        datasets: [{
+          data: diff.filter(s => s.passRate !== null).map(s => s.passRate),
+          backgroundColor: ['#00F0FF','#38BDF8','#4ade80','#a3e635','#facc15'],
+          borderColor: 'rgba(3,7,18,0.6)', borderWidth: 2
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { labels: { color: 'rgba(186,230,253,0.8)', font: { family: 'DM Sans', size: 11 } } },
+          title:  { display: true, text: 'Pass Rate per Subject (%)', color: 'rgba(186,230,253,0.8)', font: { family: 'DM Sans', size: 12 } }
+        },
+        responsive: true, maintainAspectRatio: true
+      }
+    });
+
+    // Difficulty bars
+    const barsEl = document.getElementById('diffBars');
+    if (!diff.some(s => s.count > 0)) {
+      barsEl.innerHTML = '<div class="no-data"><span>📊</span>No marks data to analyze for this semester.</div>';
+      return;
+    }
+    barsEl.innerHTML = diff.map(s => {
+      const pct   = s.passRate !== null ? s.passRate : 0;
+      const color = pct < 60 ? '#f87171' : pct < 80 ? '#facc15' : '#4ade80';
+      return '<div class="diff-bar-wrap">' +
+        '<div class="diff-bar-top">' +
+          '<span class="sub-name">' + RA.escHTML(s.code + ' — ' + s.name) + '</span>' +
+          '<span class="sub-stats">Avg: ' + (s.avg !== null ? s.avg : '—') + ' | Pass Rate: ' + (s.passRate !== null ? s.passRate + '%' : '—') + ' | ' + s.count + ' students</span>' +
+        '</div>' +
+        '<div class="diff-bar-bg"><div class="diff-bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderAllStudents(sem) {
+    const marks    = RA.getAllMarks().filter(m => m.semester === sem);
+    const students = RA.getStudents();
+    const tbody    = document.getElementById('allStudentsBody');
+
+    if (!marks.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="no-data"><span>📭</span>No marks data for Semester ' + sem + '</td></tr>';
+      return;
+    }
+
+    const rows = marks.map(m => {
+      const stu    = students.find(s => s.id === m.studentId);
+      if (!stu) return null;
+      const sgpa   = RA.calcSGPA(m.subjects);
+      const cgpa   = RA.calcCGPA(m.studentId);
+      const passed = m.subjects.filter(s => s.total >= 40).length;
+      return { stu, sgpa, cgpa, passed, total: m.subjects.length };
+    }).filter(Boolean).sort((a, b) => b.sgpa - a.sgpa);
+
+    tbody.innerHTML = rows.map((r, i) => {
+      const cgpaClass = gpaClass(r.cgpa);
+      return '<tr>' +
+        '<td>' + rankBadge(i) + '</td>' +
+        '<td><strong>' + RA.escHTML(r.stu.name) + '</strong></td>' +
+        '<td style="color:var(--sky)">' + RA.escHTML(r.stu.rollNo) + '</td>' +
+        '<td><strong style="color:var(--cyan)">' + r.sgpa.toFixed(2) + '</strong></td>' +
+        '<td><span class="gpa-pill ' + cgpaClass + '">' + (r.cgpa > 0 ? r.cgpa.toFixed(2) : '—') + '</span></td>' +
+        '<td>' + r.passed + '/' + r.total + (r.passed === r.total ? ' ✓' : ' <span style="color:#f87171">⚠</span>') + '</td>' +
+        '<td><a href="results.html?sid=' + r.stu.id + '" style="color:var(--sky);font-size:12px;font-weight:600;text-decoration:none;padding:4px 10px;border:1px solid rgba(56,189,248,0.25);border-radius:6px">View →</a></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  renderAll();
+</script>
+</body>
+</html>

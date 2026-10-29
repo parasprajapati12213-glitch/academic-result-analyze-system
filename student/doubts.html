@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Result Analyzer – Doubts, Video Lectures & Notes Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet"/>
+  <script src="app.js"></script>
+  <script src="leo_chatbot.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --cyan:#00F0FF;--blue:#00A3FF;--sky:#38BDF8;
+      --navy:#030712;--navy2:#050C1A;--navy3:#071428;
+      --glass:rgba(6,18,38,0.78);--border:rgba(56,189,248,0.20);
+      --soft:rgba(255,255,255,0.88);--muted:rgba(186,230,253,0.60);
+      --r:14px;
+    }
+    html,body{min-height:100%;font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#030712,#050C1A 50%,#071428);color:#fff;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,240,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,0.03) 1px,transparent 1px);background-size:52px 52px;pointer-events:none;z-index:0}
+    #appNav{position:relative;z-index:200}
+    .page{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:26px 20px 70px}
+
+    /* Common Buttons */
+    .btn{display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:8px 16px;border-radius:9px;border:none;cursor:pointer;transition:all .2s;text-decoration:none}
+    .btn-primary{background:linear-gradient(135deg,var(--cyan),var(--blue));color:#030712}
+    .btn-primary:hover{opacity:.88;transform:translateY(-1px)}
+    .btn-secondary{background:rgba(56,189,248,0.10);border:1px solid rgba(56,189,248,0.28);color:var(--sky)}
+    .btn-secondary:hover{background:rgba(56,189,248,0.20)}
+    .btn-amber{background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.35);color:#fbbf24}
+    .btn-amber:hover{background:rgba(245,158,11,0.25)}
+
+    /* Hero Banner */
+    .hero-banner{background:linear-gradient(145deg,rgba(6,18,38,0.88),rgba(4,12,28,0.72));border:1px solid rgba(0,240,255,0.22);border-radius:18px;padding:24px 28px;margin-bottom:24px;backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;box-shadow:0 12px 36px rgba(0,0,0,0.45)}
+    .hero-left{display:flex;align-items:center;gap:18px}
+    .hero-avatar{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#8b5cf6,#00F0FF);color:#030712;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;flex-shrink:0;box-shadow:0 0 24px rgba(0,240,255,0.35)}
+    .hero-title h2{font-size:22px;font-weight:800;color:#fff;margin-bottom:4px}
+    .hero-badges{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px}
+    .stu-tag{font-size:12px;font-weight:600;padding:3px 10px;border-radius:8px;background:rgba(56,189,248,0.10);border:1px solid rgba(56,189,248,0.25);color:var(--sky)}
+
+    /* Alert / Attention Banner */
+    .alert-card{background:linear-gradient(135deg,rgba(239,68,68,0.12),rgba(6,18,38,0.85));border:1px solid rgba(239,68,68,0.35);border-radius:16px;padding:18px 22px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+    .alert-left{display:flex;align-items:center;gap:14px}
+    .alert-icon{font-size:32px;background:rgba(239,68,68,0.18);width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center}
+
+    /* Subject Tabs */
+    .subject-tab-bar{display:flex;align-items:center;gap:10px;margin-bottom:22px;overflow-x:auto;padding-bottom:6px}
+    .subject-tab-btn{padding:10px 20px;border-radius:12px;font-size:13.5px;font-weight:600;border:1px solid rgba(56,189,248,0.20);background:rgba(5,12,26,0.70);color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:8px}
+    .subject-tab-btn:hover{color:var(--cyan);border-color:rgba(0,240,255,0.35);background:rgba(0,240,255,0.06)}
+    .subject-tab-btn.active{color:var(--cyan);border-color:rgba(0,240,255,0.5);background:rgba(0,240,255,0.15);font-weight:700;box-shadow:0 0 16px rgba(0,240,255,0.2)}
+
+    /* Section Headers */
+    .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+    .section-head h3{font-size:17px;font-weight:800;color:#fff;display:flex;align-items:center;gap:8px}
+
+    /* Teacher Cards Grid (Choose Teacher by Interest) */
+    .teacher-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;margin-bottom:28px}
+    .teacher-card{background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:20px;backdrop-filter:blur(14px);transition:transform .2s,border-color .25s,box-shadow .2s;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer}
+    .teacher-card:hover{transform:translateY(-3px);border-color:rgba(0,240,255,0.45);box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+    .teacher-card.selected{border-color:var(--cyan);box-shadow:0 0 20px rgba(0,240,255,0.25);background:rgba(0,240,255,0.05)}
+    .teacher-top{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+    .teacher-avatar{width:50px;height:50px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--cyan));color:#030712;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800}
+    .teacher-name{font-size:15px;font-weight:700;color:#fff}
+    .teacher-dept{font-size:12px;color:var(--muted)}
+    .style-pill{display:inline-block;padding:4px 10px;border-radius:8px;font-size:11.5px;font-weight:700;margin-bottom:10px}
+    .style-theory{background:rgba(167,139,250,0.15);color:#a78bfa;border:1px solid rgba(167,139,250,0.35)}
+    .style-practical{background:rgba(0,240,255,0.15);color:var(--cyan);border:1px solid rgba(0,240,255,0.35)}
+    .style-exam{background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.35)}
+    .style-visual{background:rgba(74,222,128,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.35)}
+    .teacher-stats{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);padding-top:10px;border-top:1px solid rgba(56,189,248,0.10);margin-top:12px}
+
+    /* Video Lectures Grid */
+    .lecture-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;margin-bottom:32px}
+    .lecture-card{background:var(--glass);border:1px solid var(--border);border-radius:16px;overflow:hidden;backdrop-filter:blur(14px);transition:transform .2s,border-color .25s;display:flex;flex-direction:column}
+    .lecture-card:hover{transform:translateY(-3px);border-color:rgba(0,240,255,0.4)}
+    .lecture-thumb{height:160px;background:linear-gradient(135deg,#0a1b3a,#040c1d);position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .lecture-thumb::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,rgba(0,240,255,0.15),transparent 70%)}
+    .lecture-duration{position:absolute;bottom:10px;right:10px;background:rgba(2,10,24,0.85);padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;color:var(--cyan);border:1px solid rgba(0,240,255,0.25)}
+    .play-btn{width:52px;height:52px;border-radius:50%;background:rgba(0,240,255,0.9);color:#030712;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;transition:transform .2s,box-shadow .2s;border:none}
+    .play-btn:hover{transform:scale(1.1);box-shadow:0 0 24px rgba(0,240,255,0.6)}
+    .lecture-body{padding:16px;display:flex;flex-direction:column;flex-grow:1;justify-content:space-between}
+    .lecture-title{font-size:14.5px;font-weight:700;color:#fff;margin-bottom:6px;line-height:1.4}
+    .lecture-meta{font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+
+    /* Notes & Materials Cards */
+    .notes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:30px}
+    .note-card{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:18px;backdrop-filter:blur(14px);display:flex;align-items:flex-start;gap:14px;transition:all .2s}
+    .note-card:hover{border-color:rgba(0,240,255,0.4);transform:translateY(-2px)}
+    .note-icon{font-size:28px;background:rgba(56,189,248,0.12);width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+    /* Modal for Video & Doubt Booking */
+    .modal-overlay{position:fixed;inset:0;background:rgba(2,10,24,0.85);backdrop-filter:blur(8px);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px}
+    .modal-box{background:#071428;border:1px solid rgba(0,240,255,0.3);border-radius:18px;width:100%;max-width:750px;box-shadow:0 24px 60px rgba(0,0,0,0.8);overflow:hidden}
+    .modal-head{background:linear-gradient(90deg,#1B365D,#14274f);padding:16px 22px;display:flex;align-items:center;justify-content:space-between}
+    .modal-head h3{font-size:16px;font-weight:700;color:#fff}
+    .modal-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer}
+    .modal-close:hover{color:#fff}
+    .modal-body{padding:22px;max-height:80vh;overflow-y:auto}
+
+    .form-group{margin-bottom:16px}
+    .form-group label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px}
+    .form-input,.form-select,.form-textarea{width:100%;background:rgba(2,10,24,0.7);border:1px solid rgba(56,189,248,0.25);border-radius:8px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#fff}
+    .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--cyan);outline:none;box-shadow:0 0 10px rgba(0,240,255,0.2)}
+
+    /* Direct Leo Doubt Shortcut */
+    .leo-ask-bar{background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(139,92,246,0.1));border:1px solid rgba(0,240,255,0.3);border-radius:16px;padding:20px 24px;margin-bottom:30px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+  </style>
+</head>
+<body>
+<div id="appNav"></div>
+
+<main class="page">
+
+  <!-- ══════════════════════════════════════════════════════════════
+       HERO / STUDENT PROFILE
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="hero-banner">
+    <div class="hero-left">
+      <div class="hero-avatar" id="stuAvatar">💡</div>
+      <div class="hero-title">
+        <h2 id="stuName">Learning & Doubts Hub</h2>
+        <div style="font-size:13px;color:var(--muted)" id="stuRollAndBranch">Choose faculty mentors by teaching style, watch lectures & access notes</div>
+        <div class="hero-badges">
+          <span class="stu-tag" id="stuSemTag">Semester 3</span>
+          <span class="stu-tag" id="stuDeptTag">Dept: Computer Science</span>
+          <span class="stu-tag" style="background:rgba(74,222,128,0.12);color:#4ade80;border-color:rgba(74,222,128,0.3)">✓ 24/7 AI Leo Assistant Ready</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <button class="btn btn-primary" onclick="openAskDoubtModal()">💬 Book Faculty Doubt Slot</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       AI SUBJECT DIFFICULTY ALERT (Smart Attention Banner)
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="alert-card" id="difficultyAlert" style="display:none">
+    <div class="alert-left">
+      <div class="alert-icon">⚠️</div>
+      <div>
+        <div style="font-size:12px;color:#f87171;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Subject Recommendation Alert</div>
+        <div style="font-size:15px;font-weight:700;color:#fff" id="alertTitle">Need Review in Mathematics III</div>
+        <div style="font-size:12.5px;color:var(--muted)" id="alertDesc">Your current score is below the class benchmark or the paper was rated Tough. We recommend reviewing these selected lectures.</div>
+      </div>
+    </div>
+    <div>
+      <button class="btn btn-amber" id="alertActionBtn" onclick="focusAlertSubject()">Review Subject Lectures</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       SUBJECT SELECTION TABS
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="subject-tab-bar" id="subjectTabs"></div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       DIRECT LEO AI DOUBT SHORTCUT
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="leo-ask-bar">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="font-size:32px">🤖</div>
+      <div>
+        <h4 style="font-size:15px;font-weight:800;color:#fff">Have an Instant Doubt in this Subject?</h4>
+        <p style="font-size:12.5px;color:var(--muted);margin-top:2px">Leo AI answers questions, explains complex algorithms, debugs code, and solves past papers immediately.</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-secondary" onclick="askLeoTopic('Explain key concepts of ' + activeSubject.name)">💡 Explain Key Concepts</button>
+      <button class="btn btn-secondary" onclick="askLeoTopic('Give me 3 tough practice questions on ' + activeSubject.name + ' with detailed step-by-step solutions')">📝 Practice Questions</button>
+      <button class="btn btn-primary" onclick="openLeoChatbot()">⚡ Chat with Leo AI</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       CHOOSE TEACHER ACCORDING TO YOUR INTEREST / LEARNING STYLE
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="section-head">
+    <div>
+      <h3>🧑‍🏫 Choose Teacher According to Your Learning Style</h3>
+      <p style="font-size:12.5px;color:var(--muted);margin-top:2px">Select a faculty mentor aligned with your preferred method: Deep Theory, Practical Coding, Exam Strategy, or Visual Diagrams.</p>
+    </div>
+    <span class="stu-tag" id="teacherCountTag">4 Faculty Mentors</span>
+  </div>
+
+  <div class="teacher-grid" id="teachersGrid"></div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       CURATED VIDEO LECTURES FOR ACTIVE SUBJECT
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="section-head">
+    <div>
+      <h3 id="lecturesHeadTitle">🎥 Curated Video Lectures</h3>
+      <p style="font-size:12.5px;color:var(--muted);margin-top:2px" id="lecturesHeadSub">Topic-by-topic breakdowns, problem solving sessions, and recorded classes.</p>
+    </div>
+    <button class="btn btn-secondary btn-sm" onclick="filterTeacher(null)" id="clearTeacherFilterBtn" style="display:none">Clear Teacher Filter</button>
+  </div>
+
+  <div class="lecture-grid" id="lecturesGrid"></div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       SUBJECT NOTES, CHEAT SHEETS & PAST PAPERS
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="section-head">
+    <div>
+      <h3 id="notesHeadTitle">📚 Subject Notes, Formula Sheets & Solved Papers</h3>
+      <p style="font-size:12.5px;color:var(--muted);margin-top:2px">High-yield study materials verified by faculty for semester end exams.</p>
+    </div>
+  </div>
+
+  <div class="notes-grid" id="notesGrid"></div>
+
+</main>
+
+<!-- ══════════════════════════════════════════════════════════════
+     MODAL: WATCH VIDEO LECTURE
+══════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="videoModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="videoModalTitle">Lecture Player</h3>
+      <button class="modal-close" onclick="closeVideoModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:0">
+      <div id="videoContainer" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;background:#000">
+        <iframe id="videoIframe" src="" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+      </div>
+      <div style="padding:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+          <div>
+            <h4 style="font-size:16px;font-weight:700;color:#fff" id="videoLectureTitle">—</h4>
+            <div style="font-size:12.5px;color:var(--muted)" id="videoLectureMeta">—</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="askLeoAboutCurrentVideo()">🤖 Ask Leo About This Video</button>
+        </div>
+        <p style="font-size:13px;color:var(--soft);line-height:1.5;background:rgba(2,10,24,0.6);padding:14px;border-radius:10px;border:1px solid rgba(56,189,248,0.15)" id="videoLectureDesc">
+          Video lecture description and syllabus coverage summary.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     MODAL: BOOK DOUBT SLOT / ASK TEACHER
+══════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="doubtModal">
+  <div class="modal-box" style="max-width:560px">
+    <div class="modal-head">
+      <h3>📅 Book Faculty Doubt Clearing Slot</h3>
+      <button class="modal-close" onclick="closeAskDoubtModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <form onsubmit="handleDoubtSubmit(event)">
+        <div class="form-group">
+          <label>Select Subject</label>
+          <select class="form-select" id="doubtSubjectSelect"></select>
+        </div>
+        <div class="form-group">
+          <label>Choose Teacher (by Interest / Style)</label>
+          <select class="form-select" id="doubtTeacherSelect"></select>
+        </div>
+        <div class="form-group">
+          <label>Topic / Concept of Doubt</label>
+          <input type="text" class="form-input" id="doubtTopic" placeholder="e.g. BCNF Normalization & Multivalued Dependency" required/>
+        </div>
+        <div class="form-group">
+          <label>Describe your question or difficulty in detail</label>
+          <textarea class="form-textarea" id="doubtDesc" rows="4" placeholder="Explain what part is confusing, or paste the question text..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Preferred Mode of Resolution</label>
+          <select class="form-select" id="doubtMode">
+            <option value="Online Slot">1-on-1 Online Doubt Session (Google Meet)</option>
+            <option value="Offline Lab">In-Person Department Consultation (Faculty Cabin)</option>
+            <option value="Portal Solution">Written Step-by-Step Response in Portal</option>
+          </select>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+          <button type="button" class="btn btn-secondary" onclick="closeAskDoubtModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit Doubt Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  initPage('doubts');
+
+  // ══════════════════════════════════════════════════════════════
+  //  MODULAR TEACHER DATABASE ARCHITECTURE (Easily expandable)
+  // ══════════════════════════════════════════════════════════════
+  const DEFAULT_TEACHERS = [
+    {
+      id: 't_sharma',
+      name: 'Dr. Rajesh Sharma',
+      dept: 'Dept of Computer Science & Engg',
+      degree: 'Ph.D. IIT Delhi',
+      style: 'Deep Theory & Mathematical Rigor',
+      styleTag: 'theory',
+      styleDesc: 'Focuses on core proofs, algorithmic fundamentals, and axiomatic understanding.',
+      rating: 4.9,
+      reviews: 420,
+      exp: '14 Yrs Exp',
+      avatar: 'RS',
+      subjects: ['DB301', 'OJ301', 'MA301', 'CP101', 'DS201']
+    },
+    {
+      id: 't_verma',
+      name: 'Prof. Neha Verma',
+      dept: 'Dept of Computer Science & Engg',
+      degree: 'M.Tech NIT, Ex-Amazon SDE',
+      style: 'Practical & Code-First',
+      styleTag: 'practical',
+      styleDesc: 'Emphasizes hands-on coding, live debugging, practical project architecture, and industry patterns.',
+      rating: 4.8,
+      reviews: 385,
+      exp: '8 Yrs Exp',
+      avatar: 'NV',
+      subjects: ['DB301', 'OJ301', 'CP101', 'DS201', 'CO301']
+    },
+    {
+      id: 't_kulkarni',
+      name: 'Dr. Amit Kulkarni',
+      dept: 'Dept of Computer Science & Engg',
+      degree: 'GATE AIR 42, Senior Faculty',
+      style: 'Exam Strategy & Past Papers',
+      styleTag: 'exam',
+      styleDesc: 'Focuses on 5-year university past papers, scoring tips, frequent questions, and mark distribution.',
+      rating: 4.9,
+      reviews: 512,
+      exp: '12 Yrs Exp',
+      avatar: 'AK',
+      subjects: ['MA301', 'DB301', 'DE301', 'CO301', 'MA101']
+    },
+    {
+      id: 't_nair',
+      name: 'Prof. Priya Nair',
+      dept: 'Dept of Electronics & Computer Tech',
+      degree: 'M.E. BITS Pilani',
+      style: 'Visual & Animated Diagrams',
+      styleTag: 'visual',
+      styleDesc: 'Translates complex hardware, circuits, and memory architectures into intuitive visual animations.',
+      rating: 4.8,
+      reviews: 290,
+      exp: '7 Yrs Exp',
+      avatar: 'PN',
+      subjects: ['DE301', 'CO301', 'OJ301', 'PH101']
+    }
+  ];
+
+  // ══════════════════════════════════════════════════════════════
+  //  SUBJECT LECTURES DATABASE
+  // ══════════════════════════════════════════════════════════════
+  const LECTURES_DATA = {
+    'DB301': [
+      {
+        id: 'db_l1',
+        title: 'Lecture 1: Relational Model, ER Diagrams & Schema Conversion',
+        teacherId: 't_sharma',
+        teacherName: 'Dr. Rajesh Sharma',
+        duration: '48 min',
+        diff: 'Moderate',
+        tags: ['ER Diagrams', 'Relational Model', 'Cardinality'],
+        videoUrl: 'https://www.youtube.com/embed/HXV3zeQKqGY',
+        desc: 'Deep dive into Entity-Relationship mapping, entity integrity constraints, foreign keys, and translating conceptual ER schemas into normalized relational tables.'
+      },
+      {
+        id: 'db_l2',
+        title: 'Lecture 2: SQL Joins, Subqueries & Practical Hands-on Querying',
+        teacherId: 't_verma',
+        teacherName: 'Prof. Neha Verma',
+        duration: '54 min',
+        diff: 'Beginner',
+        tags: ['SQL', 'Inner & Outer Joins', 'Group By', 'Live Coding'],
+        videoUrl: 'https://www.youtube.com/embed/7S_tz1z_5bA',
+        desc: 'Hands-on practical session executing complex nested queries, aggregation with HAVING, Window functions, and performance profiling on MySQL & PostgreSQL.'
+      },
+      {
+        id: 'db_l3',
+        title: 'Lecture 3: Normalization Masterclass — 1NF, 2NF, 3NF & BCNF',
+        teacherId: 't_kulkarni',
+        teacherName: 'Dr. Amit Kulkarni',
+        duration: '42 min',
+        diff: 'Tough',
+        tags: ['Functional Dependency', 'Lossless Join', 'BCNF Decomposition'],
+        videoUrl: 'https://www.youtube.com/embed/UrYLYV7WSHM',
+        desc: 'Exam-focused shortcut methods to find candidate keys, compute attribute closures, check dependency preservation, and solve BCNF decompositions with 100% accuracy.'
+      },
+      {
+        id: 'db_l4',
+        title: 'Lecture 4: Transaction Processing, ACID Properties & 2PL Concurrency',
+        teacherId: 't_nair',
+        teacherName: 'Prof. Priya Nair',
+        duration: '38 min',
+        diff: 'Moderate',
+        tags: ['ACID', 'Serializability', 'Two-Phase Locking', 'Deadlocks'],
+        videoUrl: 'https://www.youtube.com/embed/bVL4d_y5b64',
+        desc: 'Animated visualizations of conflict and view serializability, precedence graphs, shared vs exclusive locks, and cascading rollbacks.'
+      }
+    ],
+    'OJ301': [
+      {
+        id: 'oj_l1',
+        title: 'Lecture 1: OOP Foundations — Classes, Encapsulation & Memory Layout',
+        teacherId: 't_verma',
+        teacherName: 'Prof. Neha Verma',
+        duration: '45 min',
+        diff: 'Beginner',
+        tags: ['Java', 'Heap vs Stack', 'Constructors', 'this keyword'],
+        videoUrl: 'https://www.youtube.com/embed/eIrMbG64428',
+        desc: 'Complete architectural walkthrough of JVM heap vs stack memory, object creation lifecycle, access specifiers, and writing clean maintainable Java code.'
+      },
+      {
+        id: 'oj_l2',
+        title: 'Lecture 2: Polymorphism, Abstract Classes & Interfaces Deep Dive',
+        teacherId: 't_sharma',
+        teacherName: 'Dr. Rajesh Sharma',
+        duration: '52 min',
+        diff: 'Moderate',
+        tags: ['Dynamic Dispatch', 'Interfaces', 'Virtual Method Table'],
+        videoUrl: 'https://www.youtube.com/embed/grEKMHGYyns',
+        desc: 'Theoretical and design principles behind runtime dynamic method dispatch, the diamond problem resolution in Java 8 default methods, and loose coupling.'
+      },
+      {
+        id: 'oj_l3',
+        title: 'Lecture 3: Java Collections Framework & Generics Masterclass',
+        teacherId: 't_verma',
+        teacherName: 'Prof. Neha Verma',
+        duration: '60 min',
+        diff: 'Moderate',
+        tags: ['ArrayList', 'HashMap Internal Working', 'Generics'],
+        videoUrl: 'https://www.youtube.com/embed/9nzb3OwhB2U',
+        desc: 'Under the hood of HashMap bucketing, hash collisions, equals() vs hashCode() contract, and writing custom generic classes and wildcards.'
+      },
+      {
+        id: 'oj_l4',
+        title: 'Lecture 4: Multi-threading, Synchronization & Concurrency',
+        teacherId: 't_kulkarni',
+        teacherName: 'Dr. Amit Kulkarni',
+        duration: '40 min',
+        diff: 'Tough',
+        tags: ['Threads', 'synchronized', 'Inter-thread Communication'],
+        videoUrl: 'https://www.youtube.com/embed/r_MbozD32eo',
+        desc: 'Exam questions on thread life cycle, producer-consumer problem using wait() & notify(), daemon threads, and avoiding race conditions.'
+      }
+    ],
+    'MA301': [
+      {
+        id: 'ma_l1',
+        title: 'Lecture 1: Fourier Series, Dirichlet Conditions & Half Range Expansions',
+        teacherId: 't_sharma',
+        teacherName: 'Dr. Rajesh Sharma',
+        duration: '50 min',
+        diff: 'Tough',
+        tags: ['Fourier Series', 'Euler Formulas', 'Even/Odd Functions'],
+        videoUrl: 'https://www.youtube.com/embed/r6sGWTCMz2k',
+        desc: 'Rigorous derivation of Euler Fourier coefficients, convergence criteria, Parseval identity, and practical problems on triangular and square waves.'
+      },
+      {
+        id: 'ma_l2',
+        title: 'Lecture 2: Laplace Transforms & Inverse Transforms Step-by-Step',
+        teacherId: 't_kulkarni',
+        teacherName: 'Dr. Amit Kulkarni',
+        duration: '46 min',
+        diff: 'Moderate',
+        tags: ['Laplace Transform', 'First Shifting Theorem', 'Differential Equations'],
+        videoUrl: 'https://www.youtube.com/embed/6Xb7N37iPmg',
+        desc: 'High-speed exam methods to solve second-order ordinary differential equations with initial boundary conditions using Laplace transform tables.'
+      },
+      {
+        id: 'ma_l3',
+        title: 'Lecture 3: Partial Differential Equations — Separation of Variables',
+        teacherId: 't_kulkarni',
+        teacherName: 'Dr. Amit Kulkarni',
+        duration: '44 min',
+        diff: 'Tough',
+        tags: ['Wave Equation', 'Heat Conduction', 'Boundary Value Problems'],
+        videoUrl: 'https://www.youtube.com/embed/bW_xQhK3qU4',
+        desc: 'Standard 14-mark university exam questions on one-dimensional wave equation and one-dimensional heat conduction equation solved in full detail.'
+      }
+    ],
+    'DE301': [
+      {
+        id: 'de_l1',
+        title: 'Lecture 1: Boolean Algebra, K-Maps (2 to 5 Variables) & Logic Minimization',
+        teacherId: 't_kulkarni',
+        teacherName: 'Dr. Amit Kulkarni',
+        duration: '42 min',
+        diff: 'Beginner',
+        tags: ['K-Map', 'SOP/POS', 'Don’t Care Conditions'],
+        videoUrl: 'https://www.youtube.com/embed/RO5alU6PpSU',
+        desc: 'Minimizing boolean equations using Karnaugh Maps with grouping rules, handling don’t care terms, and NAND-NAND implementation.'
+      },
+      {
+        id: 'de_l2',
+        title: 'Lecture 2: Sequential Logic — Flip-Flops (SR, JK, D, T) & Conversions',
+        teacherId: 't_nair',
+        teacherName: 'Prof. Priya Nair',
+        duration: '48 min',
+        diff: 'Moderate',
+        tags: ['JK Flip-Flop', 'Master-Slave', 'Race Around Condition', 'Excitation Tables'],
+        videoUrl: 'https://www.youtube.com/embed/4y8w9gq91Uo',
+        desc: 'Animated waveform diagrams showing clock triggering, race around condition elimination in Master-Slave JK flip-flop, and flip-flop excitation conversion tables.'
+      },
+      {
+        id: 'de_l3',
+        title: 'Lecture 3: Synchronous & Asynchronous Counter Design',
+        teacherId: 't_nair',
+        teacherName: 'Prof. Priya Nair',
+        duration: '45 min',
+        diff: 'Tough',
+        tags: ['Mod-N Counters', 'State Diagrams', 'Decade Counter'],
+        videoUrl: 'https://www.youtube.com/embed/7KjY8hU2G0g',
+        desc: 'Step-by-step state diagrams, state transition tables, and circuit synthesis for Mod-6, Mod-10 synchronous counters and ripple counters.'
+      }
+    ],
+    'CO301': [
+      {
+        id: 'co_l1',
+        title: 'Lecture 1: Von Neumann Architecture, Bus Systems & Instruction Cycles',
+        teacherId: 't_nair',
+        teacherName: 'Prof. Priya Nair',
+        duration: '40 min',
+        diff: 'Beginner',
+        tags: ['Von Neumann', 'Fetch-Decode-Execute', 'ALU & Control Unit'],
+        videoUrl: 'https://www.youtube.com/embed/HEjPokUsm18',
+        desc: 'Data flow between CPU registers (PC, MAR, MDR, IR, Accumulator), system buses, timing diagrams, and micro-operations.'
+      },
+      {
+        id: 'co_l2',
+        title: 'Lecture 2: Memory Hierarchy & Cache Mapping Techniques',
+        teacherId: 't_sharma',
+        teacherName: 'Dr. Rajesh Sharma',
+        duration: '50 min',
+        diff: 'Tough',
+        tags: ['Direct Mapping', 'Set-Associative', 'Cache Hit/Miss', 'Locality'],
+        videoUrl: 'https://www.youtube.com/embed/5FhN8QfG50c',
+        desc: 'Mathematical calculation of Tag, Line/Index, and Word bits in Direct Mapped, Fully Associative, and 4-Way Set Associative caches with hit ratio formulas.'
+      },
+      {
+        id: 'co_l3',
+        title: 'Lecture 3: CPU Pipelining, Hazards (Structural, Data, Control) & Speedup',
+        teacherId: 't_verma',
+        teacherName: 'Prof. Neha Verma',
+        duration: '46 min',
+        diff: 'Moderate',
+        tags: ['5-Stage Pipeline', 'Data Forwarding', 'Branch Prediction', 'Speedup Formula'],
+        videoUrl: 'https://www.youtube.com/embed/GSo8kX2q8U0',
+        desc: 'Instruction level parallelism, space-time diagrams, resolving RAW (Read After Write) hazards via forwarding, and computing ideal vs real speedup.'
+      }
+    ]
+  };
+
+  // ══════════════════════════════════════════════════════════════
+  //  SUBJECT NOTES DATABASE
+  // ══════════════════════════════════════════════════════════════
+  const NOTES_DATA = {
+    'DB301': [
+      { title: 'Complete DBMS Faculty Lecture Notes (Units 1-5)', type: 'Comprehensive PDF Notes', pages: '142 Pages', size: '12.4 MB', icon: '📖', desc: 'Handwritten & typed notes covering ER Modeling, Relational Algebra, SQL, Normalization, and Transactions with diagrams.' },
+      { title: 'DBMS High-Speed Formula & Concept Cheat Sheet', type: 'Quick Revision Sheet', pages: '6 Pages', size: '1.2 MB', icon: '⚡', desc: 'Summary of Candidate Key rules, Armstrong Axioms, 1NF-BCNF criteria, ACID properties, and SQL syntax.' },
+      { title: 'Last 5-Year MITS University Solved Question Papers', type: 'Solved Exam Papers', pages: '68 Pages', size: '8.5 MB', icon: '📝', desc: 'Step-by-step solved question papers from 2019-2024 with examiner marking keys and answer structuring tips.' }
+    ],
+    'OJ301': [
+      { title: 'OOP with Java Faculty Complete Study Guide', type: 'Comprehensive PDF Notes', pages: '120 Pages', size: '10.8 MB', icon: '📖', desc: 'Covers Object-Oriented principles, JVM memory internals, Exception handling, Collections framework, and Multithreading.' },
+      { title: 'Java Core Syntax, Collections & OOP Cheat Sheet', type: 'Quick Revision Sheet', pages: '5 Pages', size: '980 KB', icon: '⚡', desc: 'Quick syntax reference for Lambda expressions, Stream API, Collection hierarchy, and Thread lifecycle.' },
+      { title: 'Last 5-Year OOP with Java Solved Question Papers', type: 'Solved Exam Papers', pages: '56 Pages', size: '7.1 MB', icon: '📝', desc: 'Complete solved coding problems and theoretical derivations from previous mid-term and end-term examinations.' }
+    ],
+    'MA301': [
+      { title: 'Engineering Mathematics III Complete Notes', type: 'Comprehensive PDF Notes', pages: '160 Pages', size: '14.2 MB', icon: '📖', desc: 'Full theoretical notes with solved examples on Fourier Series, Laplace Transforms, and Partial Differential Equations.' },
+      { title: 'All Math III Formula Booklet (Laplace & Fourier)', type: 'Quick Revision Sheet', pages: '8 Pages', size: '1.5 MB', icon: '⚡', desc: 'Handy formula table with standard Laplace transform pairs, Inverse Laplace properties, and Euler formulas.' },
+      { title: 'Last 5-Year Engineering Math III Solved Papers', type: 'Solved Exam Papers', pages: '74 Pages', size: '9.2 MB', icon: '📝', desc: 'Fully solved numerical problems with detailed intermediate integration steps.' }
+    ],
+    'DE301': [
+      { title: 'Digital Electronics Class Notes & Circuit Designs', type: 'Comprehensive PDF Notes', pages: '115 Pages', size: '9.8 MB', icon: '📖', desc: 'Number systems, Boolean logic, K-Maps, Combinational circuits (Adders, Multiplexers), and Sequential flip-flops.' },
+      { title: 'Flip-Flop Conversion & Counter Design Cheat Sheet', type: 'Quick Revision Sheet', pages: '4 Pages', size: '850 KB', icon: '⚡', desc: 'Complete truth tables, excitation tables, and characteristic equations for SR, JK, D, and T flip-flops.' },
+      { title: 'Last 5-Year Digital Electronics Solved Papers', type: 'Solved Exam Papers', pages: '60 Pages', size: '6.9 MB', icon: '📝', desc: 'Solved university papers including K-Map minimization and Modulo counter state diagrams.' }
+    ],
+    'CO301': [
+      { title: 'Computer Organization & Architecture Complete Guide', type: 'Comprehensive PDF Notes', pages: '130 Pages', size: '11.5 MB', icon: '📖', desc: 'Data representation, CPU architecture, Cache mapping, Pipelining, and Interrupt handling.' },
+      { title: 'Cache Mapping & Pipelining Formula Cheat Sheet', type: 'Quick Revision Sheet', pages: '5 Pages', size: '1.1 MB', icon: '⚡', desc: 'Direct, Associative, and Set-Associative index formulas, CPI, and Speedup calculation reference.' },
+      { title: 'Last 5-Year Computer Organization Solved Papers', type: 'Solved Exam Papers', pages: '62 Pages', size: '7.8 MB', icon: '📝', desc: 'Solved theoretical and numerical questions from past 5 examination cycles.' }
+    ]
+  };
+
+  // State
+  let currentStudent = null;
+  let activeSemester = 3;
+  let activeSubject = { code: 'DB301', name: 'Database Management Systems' };
+  let selectedTeacherId = null;
+  let activeVideoLecture = null;
+
+  // Initialize
+  const session = RA.getSession();
+  const isStudent = session.role === 'student';
+
+  if (isStudent) {
+    const userEmail = (session.email || '').trim().toLowerCase();
+    const student = RA.getStudentByEmail ? RA.getStudentByEmail(userEmail) : null;
+    if (student) {
+      currentStudent = student;
+      document.getElementById('stuAvatar').textContent = student.name.charAt(0).toUpperCase();
+      document.getElementById('stuName').textContent = student.name + "'s Doubts & Study Hub";
+      document.getElementById('stuRollAndBranch').textContent = student.rollNo + ' · ' + (student.branch || 'CSE') + ' · Batch ' + (student.batch || '2021');
+      activeSemester = student.currentSem || 3;
+      document.getElementById('stuSemTag').textContent = 'Semester ' + activeSemester;
+      document.getElementById('stuDeptTag').textContent = 'Dept: ' + (student.department || (RA.getDepartmentForBranch ? RA.getDepartmentForBranch(student.branch) : 'CSE'));
+    }
+  }
+
+  // Load Semester Subjects
+  initSubjectTabs();
+  checkDifficultyAlert();
+
+  function initSubjectTabs() {
+    const semSubjects = (RA.getSubjectsForSem ? RA.getSubjectsForSem(activeSemester) : null) || [
+      { code: 'DB301', name: 'Database Management Systems' },
+      { code: 'OJ301', name: 'OOP with Java' },
+      { code: 'MA301', name: 'Engineering Mathematics III' },
+      { code: 'DE301', name: 'Digital Electronics' },
+      { code: 'CO301', name: 'Computer Organization' }
+    ];
+
+    activeSubject = semSubjects[0];
+    const tabsEl = document.getElementById('subjectTabs');
+    tabsEl.innerHTML = semSubjects.map((s, idx) => {
+      return `<button class="subject-tab-btn ${idx === 0 ? 'active' : ''}" onclick="selectSubject('${s.code}', '${s.name}', this)">
+        <span>📘</span> ${s.name} (${s.code})
+      </button>`;
+    }).join('');
+
+    renderHub();
+  }
+
+  function selectSubject(code, name, btnEl) {
+    activeSubject = { code, name };
+    selectedTeacherId = null; // reset filter
+    document.querySelectorAll('.subject-tab-btn').forEach(b => b.classList.remove('active'));
+    if (btnEl) btnEl.classList.add('active');
+    renderHub();
+  }
+
+  function checkDifficultyAlert() {
+    if (!currentStudent) return;
+    const rankings = RA.getSubjectWiseRanking ? RA.getSubjectWiseRanking(currentStudent.id, activeSemester) : [];
+    if (!rankings.length) return;
+
+    // Find toughest or lowest scoring subject
+    let needy = rankings.find(r => r.myScore < 50 || r.diffLabel.includes('Tough'));
+    if (!needy) needy = rankings.sort((a,b) => a.myScore - b.myScore)[0];
+
+    if (needy) {
+      document.getElementById('difficultyAlert').style.display = 'flex';
+      document.getElementById('alertTitle').textContent = `Review Recommended in ${needy.name} (${needy.code})`;
+      document.getElementById('alertDesc').textContent = `Your current score is ${needy.myScore}/100 and paper difficulty was rated ${needy.diffLabel}. Reviewing these video lectures and cheat sheets will help boost your grade.`;
+      document.getElementById('alertActionBtn').setAttribute('data-code', needy.code);
+      document.getElementById('alertActionBtn').setAttribute('data-name', needy.name);
+    }
+  }
+
+  function focusAlertSubject() {
+    const btn = document.getElementById('alertActionBtn');
+    const code = btn.getAttribute('data-code');
+    const name = btn.getAttribute('data-name');
+    if (!code) return;
+
+    const tabBtn = Array.from(document.querySelectorAll('.subject-tab-btn')).find(b => b.textContent.includes(code));
+    selectSubject(code, name, tabBtn);
+    window.scrollTo({ top: 380, behavior: 'smooth' });
+  }
+
+  function renderHub() {
+    renderTeachers();
+    renderLectures();
+    renderNotes();
+  }
+
+  // 1. Render Teachers
+  function renderTeachers() {
+    const grid = document.getElementById('teachersGrid');
+    const teachers = DEFAULT_TEACHERS;
+    document.getElementById('teacherCountTag').textContent = `${teachers.length} Faculty Mentors`;
+
+    grid.innerHTML = teachers.map(t => {
+      const isSelected = selectedTeacherId === t.id;
+      let styleClass = 'style-theory';
+      if (t.styleTag === 'practical') styleClass = 'style-practical';
+      if (t.styleTag === 'exam') styleClass = 'style-exam';
+      if (t.styleTag === 'visual') styleClass = 'style-visual';
+
+      return `<div class="teacher-card ${isSelected ? 'selected' : ''}" onclick="filterTeacher('${t.id}')">
+        <div>
+          <div class="teacher-top">
+            <div class="teacher-avatar">${t.avatar}</div>
+            <div>
+              <div class="teacher-name">${RA.escHTML(t.name)}</div>
+              <div class="teacher-dept">${RA.escHTML(t.degree)}</div>
+            </div>
+          </div>
+          <span class="style-pill ${styleClass}">🎯 ${RA.escHTML(t.style)}</span>
+          <p style="font-size:12px;color:var(--soft);line-height:1.45;margin-bottom:8px">
+            ${RA.escHTML(t.styleDesc)}
+          </p>
+        </div>
+        <div>
+          <div class="teacher-stats">
+            <span>⭐ <strong style="color:#fbbf24">${t.rating}</strong> (${t.reviews} reviews)</span>
+            <span>${t.exp}</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-secondary btn-sm" style="flex:1" onclick="event.stopPropagation();filterTeacher('${t.id}')">
+              ${isSelected ? '✓ Showing Lectures' : 'View Lectures'}
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openAskDoubtForTeacher('${t.id}')">
+              📅 Book Slot
+            </button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function filterTeacher(teacherId) {
+    if (selectedTeacherId === teacherId) {
+      selectedTeacherId = null; // toggle off
+    } else {
+      selectedTeacherId = teacherId;
+    }
+    const clearBtn = document.getElementById('clearTeacherFilterBtn');
+    if (selectedTeacherId) {
+      clearBtn.style.display = 'inline-flex';
+      const t = DEFAULT_TEACHERS.find(x => x.id === selectedTeacherId);
+      document.getElementById('lecturesHeadTitle').textContent = `🎥 Lectures by ${t.name} (${t.style})`;
+    } else {
+      clearBtn.style.display = 'none';
+      document.getElementById('lecturesHeadTitle').textContent = `🎥 Curated Video Lectures for ${activeSubject.name}`;
+    }
+    renderTeachers();
+    renderLectures();
+  }
+
+  // 2. Render Lectures
+  function renderLectures() {
+    const grid = document.getElementById('lecturesGrid');
+    const allLectures = LECTURES_DATA[activeSubject.code] || LECTURES_DATA['DB301'] || [];
+    let lectures = allLectures;
+
+    if (selectedTeacherId) {
+      lectures = allLectures.filter(l => l.teacherId === selectedTeacherId);
+    }
+
+    if (!lectures.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;background:var(--glass);border-radius:16px;border:1px solid var(--border)">
+        <div style="font-size:36px;margin-bottom:10px">🎬</div>
+        <p style="color:var(--muted);font-size:14px">No video lectures recorded for this teacher filter yet. Showing all available lectures below.</p>
+        <button class="btn btn-secondary btn-sm" style="margin-top:12px" onclick="filterTeacher(null)">Show All Lectures</button>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = lectures.map(l => {
+      const teacher = DEFAULT_TEACHERS.find(t => t.id === l.teacherId);
+      const styleTag = teacher ? teacher.style : 'Concept Class';
+
+      return `<div class="lecture-card">
+        <div class="lecture-thumb">
+          <button class="play-btn" onclick="openVideoModal('${l.id}')">▶</button>
+          <div class="lecture-duration">⏱️ ${l.duration}</div>
+        </div>
+        <div class="lecture-body">
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">
+              <span class="stu-tag" style="font-size:11px">🧑‍🏫 ${RA.escHTML(l.teacherName)}</span>
+              <span class="stu-tag" style="font-size:11px;background:rgba(251,191,36,0.12);color:#fbbf24;border-color:rgba(251,191,36,0.3)">${l.diff}</span>
+            </div>
+            <h4 class="lecture-title">${RA.escHTML(l.title)}</h4>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">
+              ${l.tags.map(tag => `<span style="font-size:11px;background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;color:var(--muted)">#${tag}</span>`).join('')}
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(56,189,248,0.1);padding-top:12px;margin-top:8px">
+            <button class="btn btn-primary btn-sm" onclick="openVideoModal('${l.id}')">▶ Watch Lecture</button>
+            <button class="btn btn-secondary btn-sm" onclick="askLeoTopic('Explain the topic: ' + '${RA.escHTML(l.title)}')">🤖 Ask Leo</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // 3. Render Notes
+  function renderNotes() {
+    const grid = document.getElementById('notesGrid');
+    const notes = NOTES_DATA[activeSubject.code] || NOTES_DATA['DB301'] || [];
+
+    grid.innerHTML = notes.map(n => {
+      return `<div class="note-card">
+        <div class="note-icon">${n.icon}</div>
+        <div style="flex-grow:1">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:var(--cyan);text-transform:uppercase">${n.type}</span>
+            <span style="font-size:11px;color:var(--muted)">${n.pages} · ${n.size}</span>
+          </div>
+          <h4 style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px">${RA.escHTML(n.title)}</h4>
+          <p style="font-size:12px;color:var(--muted);line-height:1.45;margin-bottom:12px">${RA.escHTML(n.desc)}</p>
+          <button class="btn btn-secondary btn-sm" onclick="downloadNoteDoc('${RA.escHTML(n.title)}')">📥 Download PDF Material</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  //  MODAL HANDLERS
+  // ══════════════════════════════════════════════════════════════
+  function openVideoModal(lectureId) {
+    const allLectures = Object.values(LECTURES_DATA).flat();
+    const lecture = allLectures.find(l => l.id === lectureId);
+    if (!lecture) return;
+
+    activeVideoLecture = lecture;
+    document.getElementById('videoModalTitle').textContent = lecture.title;
+    document.getElementById('videoLectureTitle').textContent = lecture.title;
+    document.getElementById('videoLectureMeta').textContent = `Faculty: ${lecture.teacherName} · Duration: ${lecture.duration} · Level: ${lecture.diff}`;
+    document.getElementById('videoLectureDesc').textContent = lecture.desc;
+    document.getElementById('videoIframe').src = lecture.videoUrl;
+
+    document.getElementById('videoModal').style.display = 'flex';
+  }
+
+  function closeVideoModal() {
+    document.getElementById('videoModal').style.display = 'none';
+    document.getElementById('videoIframe').src = '';
+  }
+
+  function openAskDoubtModal() {
+    populateDoubtForm();
+    document.getElementById('doubtModal').style.display = 'flex';
+  }
+
+  function openAskDoubtForTeacher(teacherId) {
+    populateDoubtForm();
+    const select = document.getElementById('doubtTeacherSelect');
+    select.value = teacherId;
+    document.getElementById('doubtModal').style.display = 'flex';
+  }
+
+  function populateDoubtForm() {
+    const semSubjects = (RA.getSubjectsForSem ? RA.getSubjectsForSem(activeSemester) : null) || [
+      { code: 'DB301', name: 'Database Management Systems' },
+      { code: 'OJ301', name: 'OOP with Java' },
+      { code: 'MA301', name: 'Engineering Mathematics III' },
+      { code: 'DE301', name: 'Digital Electronics' },
+      { code: 'CO301', name: 'Computer Organization' }
+    ];
+
+    const subSelect = document.getElementById('doubtSubjectSelect');
+    subSelect.innerHTML = semSubjects.map(s => {
+      return `<option value="${s.code}" ${s.code === activeSubject.code ? 'selected' : ''}>${s.name} (${s.code})</option>`;
+    }).join('');
+
+    const teachSelect = document.getElementById('doubtTeacherSelect');
+    teachSelect.innerHTML = DEFAULT_TEACHERS.map(t => {
+      return `<option value="${t.id}" ${t.id === selectedTeacherId ? 'selected' : ''}>${t.name} — ${t.style}</option>`;
+    }).join('');
+  }
+
+  function closeAskDoubtModal() {
+    document.getElementById('doubtModal').style.display = 'none';
+  }
+
+  function handleDoubtSubmit(e) {
+    e.preventDefault();
+    const subjectCode = document.getElementById('doubtSubjectSelect').value;
+    const teacherId   = document.getElementById('doubtTeacherSelect').value;
+    const topic       = document.getElementById('doubtTopic').value;
+    const desc        = document.getElementById('doubtDesc').value;
+    const mode        = document.getElementById('doubtMode').value;
+
+    const teacher = DEFAULT_TEACHERS.find(t => t.id === teacherId);
+
+    // Save to localStorage
+    const savedDoubts = JSON.parse(localStorage.getItem('ra_student_doubts_v1') || '[]');
+    savedDoubts.push({
+      id: 'd_' + Date.now(),
+      studentEmail: session.email || 'student',
+      studentName: currentStudent ? currentStudent.name : 'Student',
+      subjectCode,
+      teacherName: teacher ? teacher.name : 'Faculty',
+      topic,
+      desc,
+      mode,
+      date: new Date().toLocaleDateString('en-IN'),
+      status: 'Slot Confirmed'
+    });
+    localStorage.setItem('ra_student_doubts_v1', JSON.stringify(savedDoubts));
+
+    closeAskDoubtModal();
+    alert(`✅ Success! Your doubt slot with ${teacher ? teacher.name : 'Faculty'} for "${topic}" has been confirmed (${mode}). The faculty mentor has been notified!`);
+  }
+
+  function downloadNoteDoc(title) {
+    // Generates a mock download confirmation
+    alert(`📥 Downloading: "${title}"\nYour official PDF download has started. This document contains full unit syllabus notes, formulas and solved exam questions.`);
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  //  DIRECT LEO CHATBOT INTEGRATION
+  // ══════════════════════════════════════════════════════════════
+  function openLeoChatbot() {
+    const win = document.getElementById('leoChatWindow');
+    if (win) {
+      win.classList.add('leo-open');
+      const input = document.getElementById('leoChatInput');
+      if (input) input.focus();
+    }
+  }
+
+  function askLeoTopic(promptText) {
+    openLeoChatbot();
+    const input = document.getElementById('leoChatInput');
+    const sendBtn = document.getElementById('leoSendBtn');
+    if (input && sendBtn) {
+      input.value = promptText;
+      setTimeout(() => sendBtn.click(), 100);
+    }
+  }
+
+  function askLeoAboutCurrentVideo() {
+    if (!activeVideoLecture) return;
+    closeVideoModal();
+    askLeoTopic(`Can you explain the main concepts and formulas taught in: "${activeVideoLecture.title}" (${activeSubject.name})?`);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,352 @@
+[
+  {
+    "categoryCode": "DC",
+    "code": "30251101",
+    "credits": 3.0,
+    "id": "sub17929322764852",
+    "maxMarks": 100.0,
+    "name": "Introduction to Computer Science and Business Systems",
+    "passingMarks": 40.0,
+    "semester": 1
+  },
+  {
+    "categoryCode": "ESC",
+    "code": "30251102",
+    "credits": 2.0,
+    "id": "sub17929322764983",
+    "maxMarks": 100.0,
+    "name": "Computer Programming",
+    "passingMarks": 40.0,
+    "semester": 1
+  },
+  {
+    "categoryCode": "DC",
+    "code": "30251103",
+    "credits": 3.0,
+    "id": "sub17929322764994",
+    "maxMarks": 100.0,
+    "name": "Digital Logic Design",
+    "passingMarks": 40.0,
+    "semester": 1
+  },
+  {
+    "categoryCode": "DC",
+    "code": "30251104",
+    "credits": 3.0,
+    "id": "sub17929322765065",
+    "maxMarks": 100.0,
+    "name": "Web Technology",
+    "passingMarks": 40.0,
+    "semester": 1
+  },
+  {
+    "categoryCode": "BSC",
+    "code": "30251105",
+    "credits": 3.0,
+    "id": "sub17929322765126",
+    "maxMarks": 100.0,
+    "name": "Matrices and Calculus",
+    "passingMarks": 40.0,
+    "semester": 1
+  },
+  {
+    "categoryCode": "DLC",
+    "code": "30251106",
+    "credits": 1.0,
+    "id": "sub17929322765187",
+    "maxMarks": 100.0,
+    "name": "Computer Programming Lab",
+    "passingMarks": 40.0,
+    "semester": 1
+  },
+  {
+    "categoryCode": "DLC",
+    "code": "30251107",
+    "credits": 1.0,
+    "id": "sub17929322765238",
+    "maxMarks": 100.0,
+    "name": "Web Technology Lab",
+    "passingMarks": 40.0,
+    "semester": 1
+  },
+  {
+    "categoryCode": "SP",
+    "code": "30251108",
+    "credits": 1.0,
+    "id": "sub17929322765299",
+    "maxMarks": 50.0,
+    "name": "Semester Proficiency",
+    "passingMarks": 20.0,
+    "semester": 1
+  },
+  {
+    "categoryCode": "PBL",
+    "code": "30251109",
+    "credits": 1.0,
+    "id": "sub179293227653510",
+    "maxMarks": 100.0,
+    "name": "Micro Project-I",
+    "passingMarks": 40.0,
+    "semester": 1
+  },
+  {
+    "categoryCode": "HSMC",
+    "code": "30251110",
+    "credits": 1.0,
+    "id": "sub179293227655511",
+    "maxMarks": 100.0,
+    "name": "Language Lab",
+    "passingMarks": 40.0,
+    "semester": 1
+  },
+  {
+    "categoryCode": "NEC",
+    "code": "NEC10001",
+    "credits": 1.0,
+    "id": "sub179293227655512",
+    "maxMarks": 50.0,
+    "name": "Novel Engaging Course (Activity Based Learning)",
+    "passingMarks": 20.0,
+    "semester": 1
+  },
+  {
+    "categoryCode": "DC",
+    "code": "30251201",
+    "credits": 3.0,
+    "id": "sub179293227656413",
+    "maxMarks": 100.0,
+    "name": "Data Structures",
+    "passingMarks": 40.0,
+    "semester": 2
+  },
+  {
+    "categoryCode": "DC",
+    "code": "30251202",
+    "credits": 3.0,
+    "id": "sub179293227657214",
+    "maxMarks": 100.0,
+    "name": "Object Oriented Programming",
+    "passingMarks": 40.0,
+    "semester": 2
+  },
+  {
+    "categoryCode": "DC",
+    "code": "30251203",
+    "credits": 3.0,
+    "id": "sub179293227657615",
+    "maxMarks": 100.0,
+    "name": "Discrete Structures",
+    "passingMarks": 40.0,
+    "semester": 2
+  },
+  {
+    "categoryCode": "BSC",
+    "code": "30251204",
+    "credits": 3.0,
+    "id": "sub179293227658216",
+    "maxMarks": 100.0,
+    "name": "Probability and Random Processes",
+    "passingMarks": 40.0,
+    "semester": 2
+  },
+  {
+    "categoryCode": "ESC",
+    "code": "30251205",
+    "credits": 2.0,
+    "id": "sub179293227658617",
+    "maxMarks": 100.0,
+    "name": "Basic Electrical & Electronics Engineering",
+    "passingMarks": 40.0,
+    "semester": 2
+  },
+  {
+    "categoryCode": "DLC",
+    "code": "30251206",
+    "credits": 1.0,
+    "id": "sub179293227659418",
+    "maxMarks": 100.0,
+    "name": "Data Structures Lab",
+    "passingMarks": 40.0,
+    "semester": 2
+  },
+  {
+    "categoryCode": "DLC",
+    "code": "30251207",
+    "credits": 1.0,
+    "id": "sub179293227660019",
+    "maxMarks": 100.0,
+    "name": "Object Oriented Programming Lab",
+    "passingMarks": 40.0,
+    "semester": 2
+  },
+  {
+    "categoryCode": "DLC",
+    "code": "30251208",
+    "credits": 1.0,
+    "id": "sub179293227660720",
+    "maxMarks": 100.0,
+    "name": "Electrical & Electronics Engineering Lab",
+    "passingMarks": 40.0,
+    "semester": 2
+  },
+  {
+    "categoryCode": "SP",
+    "code": "30251209",
+    "credits": 1.0,
+    "id": "sub179293227661321",
+    "maxMarks": 50.0,
+    "name": "Semester Proficiency",
+    "passingMarks": 20.0,
+    "semester": 2
+  },
+  {
+    "categoryCode": "PBL",
+    "code": "30251210",
+    "credits": 1.0,
+    "id": "sub179293227661722",
+    "maxMarks": 100.0,
+    "name": "Micro Project-II",
+    "passingMarks": 40.0,
+    "semester": 2
+  },
+  {
+    "categoryCode": "NEC",
+    "code": "NEC20001",
+    "credits": 1.0,
+    "id": "sub179293227662223",
+    "maxMarks": 50.0,
+    "name": "Novel Engaging Course (Activity Based Learning)",
+    "passingMarks": 20.0,
+    "semester": 2
+  },
+  {
+    "categoryCode": "SIP",
+    "code": "SIP10001",
+    "credits": 2.0,
+    "id": "sub179293227662924",
+    "maxMarks": 60.0,
+    "name": "Skill Internship Program (Soft Skill)",
+    "passingMarks": 24.0,
+    "semester": 2
+  },
+  {
+    "categoryCode": "BSC",
+    "code": "30252101",
+    "credits": 3.0,
+    "id": "sub179293227663425",
+    "maxMarks": 100.0,
+    "name": "Numerical Techniques",
+    "passingMarks": 40.0,
+    "semester": 3
+  },
+  {
+    "categoryCode": "DC",
+    "code": "30252102",
+    "credits": 3.0,
+    "id": "sub179293227663926",
+    "maxMarks": 100.0,
+    "name": "Design and Analysis of Algorithms",
+    "passingMarks": 40.0,
+    "semester": 3
+  },
+  {
+    "categoryCode": "DC",
+    "code": "30252103",
+    "credits": 3.0,
+    "id": "sub179293227664527",
+    "maxMarks": 100.0,
+    "name": "Computer Networks",
+    "passingMarks": 40.0,
+    "semester": 3
+  },
+  {
+    "categoryCode": "DC",
+    "code": "30252104",
+    "credits": 3.0,
+    "id": "sub179293227665228",
+    "maxMarks": 100.0,
+    "name": "Computer Organization and Architecture",
+    "passingMarks": 40.0,
+    "semester": 3
+  },
+  {
+    "categoryCode": "DC",
+    "code": "30252105",
+    "credits": 3.0,
+    "id": "sub179293227665729",
+    "maxMarks": 100.0,
+    "name": "E-Commerce and Digital Business",
+    "passingMarks": 40.0,
+    "semester": 3
+  },
+  {
+    "categoryCode": "DLC",
+    "code": "30252106",
+    "credits": 1.0,
+    "id": "sub179293227666330",
+    "maxMarks": 100.0,
+    "name": "Design and Analysis of Algorithms Lab",
+    "passingMarks": 40.0,
+    "semester": 3
+  },
+  {
+    "categoryCode": "DLC",
+    "code": "30252107",
+    "credits": 1.0,
+    "id": "sub179293227666931",
+    "maxMarks": 100.0,
+    "name": "Design & Thinking Lab",
+    "passingMarks": 40.0,
+    "semester": 3
+  },
+  {
+    "categoryCode": "DLC",
+    "code": "30252108",
+    "credits": 1.0,
+    "id": "sub179293227667632",
+    "maxMarks": 100.0,
+    "name": "Problem Solving through Python Programming",
+    "passingMarks": 40.0,
+    "semester": 3
+  },
+  {
+    "categoryCode": "SP",
+    "code": "30252109",
+    "credits": 1.0,
+    "id": "sub179293227668133",
+    "maxMarks": 50.0,
+    "name": "Semester Proficiency",
+    "passingMarks": 20.0,
+    "semester": 3
+  },
+  {
+    "categoryCode": "PBL",
+    "code": "30252110",
+    "credits": 1.0,
+    "id": "sub179293227668534",
+    "maxMarks": 100.0,
+    "name": "Macro Project-I",
+    "passingMarks": 40.0,
+    "semester": 3
+  },
+  {
+    "categoryCode": "SLP",
+    "code": "30252111",
+    "credits": 1.0,
+    "id": "sub179293227669035",
+    "maxMarks": 40.0,
+    "name": "Self-learning/Presentation (SWAYAM/NPTEL)",
+    "passingMarks": 16.0,
+    "semester": 3
+  },
+  {
+    "categoryCode": "NEC",
+    "code": "NEC30001",
+    "credits": 1.0,
+    "id": "sub179293227669636",
+    "maxMarks": 50.0,
+    "name": "Novel Engaging Course (Activity Based Learning)",
+    "passingMarks": 20.0,
+    "semester": 3
+  }
+]

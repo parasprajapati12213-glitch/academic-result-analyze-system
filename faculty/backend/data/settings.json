@@ -1,0 +1,63 @@
+{
+  "academicYear": "2025-2026",
+  "activeGradingPolicyId": "policy_default_relative",
+  "collegeName": "MADHAV INSTITUTE OF TECHNOLOGY & SCIENCE, GWALIOR",
+  "collegeSub": "(Deemed University) | NAAC Accredited with A++ Grade",
+  "currentSemester": 1,
+  "department": "Centre for Computer Science and Technology",
+  "difficultThreshold": 55.0,
+  "gradeRules": [
+    {
+      "grade": "O",
+      "gradePoint": 10.0,
+      "isPassing": true,
+      "maxPercent": 100.0,
+      "minPercent": 90.0
+    },
+    {
+      "grade": "A+",
+      "gradePoint": 9.0,
+      "isPassing": true,
+      "maxPercent": 89.99,
+      "minPercent": 80.0
+    },
+    {
+      "grade": "A",
+      "gradePoint": 8.0,
+      "isPassing": true,
+      "maxPercent": 79.99,
+      "minPercent": 70.0
+    },
+    {
+      "grade": "B+",
+      "gradePoint": 7.0,
+      "isPassing": true,
+      "maxPercent": 69.99,
+      "minPercent": 60.0
+    },
+    {
+      "grade": "B",
+      "gradePoint": 6.0,
+      "isPassing": true,
+      "maxPercent": 59.99,
+      "minPercent": 50.0
+    },
+    {
+      "grade": "C",
+      "gradePoint": 5.0,
+      "isPassing": true,
+      "maxPercent": 49.99,
+      "minPercent": 40.0
+    },
+    {
+      "grade": "F",
+      "gradePoint": 0.0,
+      "isPassing": false,
+      "maxPercent": 39.99,
+      "minPercent": 0.0
+    }
+  ],
+  "passingPercent": 40.0,
+  "programName": "B. Tech. (Computer Science and Business Systems)",
+  "relativeGradingEnabled": true
+}

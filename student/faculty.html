@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="refresh" content="0; url=../faculty/frontend/index.html" />
+  <title>Faculty Portal – Redirecting...</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="app.js"></script>
+  <script>
+    window.location.replace('../faculty/frontend/index.html');
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background-color: #030712;
+      color: #ffffff;
+      font-family: 'DM Sans', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      margin: 0;
+    }
+
+    .portal-container {
+      max-width: 480px;
+      padding: 42px 32px;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 16px;
+      background: rgba(6, 18, 38, 0.75);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+    }
+
+    .icon {
+      font-size: 44px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    p {
+      font-size: 14px;
+      color: rgba(186, 230, 253, 0.7);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #030712;
+      text-decoration: none;
+      padding: 10px 22px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #00F0FF, #00A3FF);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="portal-container">
+    <div class="icon">🧑‍🏫</div>
+    <h1>Opening Faculty Interface</h1>
+    <p>
+      Connecting you to the MITS Faculty & Examination Interface...
+    </p>
+    <a href="../faculty/frontend/index.html" class="action-btn">Click here to enter Faculty Portal →</a>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <radialGradient id="sealGold" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff8e7"/>
+      <stop offset="70%" stop-color="#ffe8b3"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </radialGradient>
+    <linearGradient id="crestBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="50%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="gearOrange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ea580c"/>
+      <stop offset="100%" stop-color="#c2410c"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Outer Ring with Deep Crimson/Orange Border -->
+  <circle cx="100" cy="100" r="96" fill="#fff" stroke="#c2410c" stroke-width="4" filter="url(#shadow)"/>
+  <circle cx="100" cy="100" r="88" fill="none" stroke="#ea580c" stroke-width="2" stroke-dasharray="2,2"/>
+  <circle cx="100" cy="100" r="76" fill="url(#sealGold)" stroke="#b45309" stroke-width="1.5"/>
+
+  <!-- Curved Text for MITS GWALIOR -->
+  <path id="textPathTop" d="M 30,100 A 70,70 0 1,1 170,100" fill="none"/>
+  <text font-family="'Times New Roman', serif" font-size="11.5" font-weight="bold" fill="#78350f" letter-spacing="1.2">
+    <textPath href="#textPathTop" startOffset="50%" text-anchor="middle">
+      MADHAV INSTITUTE OF TECHNOLOGY &amp; SCIENCE
+    </textPath>
+  </text>
+
+  <path id="textPathBottom" d="M 164,108 A 66,66 0 0,1 36,108" fill="none"/>
+  <text font-family="'Times New Roman', serif" font-size="10.5" font-weight="bold" fill="#78350f" letter-spacing="2">
+    <textPath href="#textPathBottom" startOffset="50%" text-anchor="middle">
+      GWALIOR · ESTD 1957
+    </textPath>
+  </text>
+
+  <!-- Inner Blue Circular Field with Engineering Cog Wheel -->
+  <circle cx="100" cy="100" r="50" fill="url(#crestBlue)" stroke="#fbbf24" stroke-width="2"/>
+
+  <!-- Cog Wheel Teeth -->
+  <g fill="#fbbf24" stroke="#d97706" stroke-width="0.5">
+    <!-- 12 gear teeth rotated around center -->
+    <rect x="96" y="47" width="8" height="7" rx="1"/>
+    <rect x="96" y="47" width="8" height="7" rx="1" transform="rotate(30 100 100)"/>
+    <rect x="96" y="47" width="8" height="7" rx="1" transform="rotate(60 100 100)"/>
+    <rect x="96" y="47" width="8" height="7" rx="1" transform="rotate(90 100 100)"/>
+    <rect x="96" y="47" width="8" height="7" rx="1" transform="rotate(120 100 100)"/>
+    <rect x="96" y="47" width="8" height="7" rx="1" transform="rotate(150 100 100)"/>
+    <rect x="96" y="47" width="8" height="7" rx="1" transform="rotate(180 100 100)"/>
+    <rect x="96" y="47" width="8" height="7" rx="1" transform="rotate(210 100 100)"/>
+    <rect x="96" y="47" width="8" height="7" rx="1" transform="rotate(240 100 100)"/>
+    <rect x="96" y="47" width="8" height="7" rx="1" transform="rotate(270 100 100)"/>
+    <rect x="96" y="47" width="8" height="7" rx="1" transform="rotate(300 100 100)"/>
+    <rect x="96" y="47" width="8" height="7" rx="1" transform="rotate(330 100 100)"/>
+  </g>
+  <circle cx="100" cy="100" r="46" fill="none" stroke="#fbbf24" stroke-width="1.5"/>
+
+  <!-- Radiating Sun Rays in upper half -->
+  <g stroke="#fef08a" stroke-width="1.5" stroke-linecap="round" opacity="0.9">
+    <line x1="100" y1="85" x2="100" y2="68"/>
+    <line x1="93" y1="87" x2="84" y2="72"/>
+    <line x1="107" y1="87" x2="116" y2="72"/>
+    <line x1="88" y1="91" x2="74" y2="80"/>
+    <line x1="112" y1="91" x2="126" y2="80"/>
+  </g>
+
+  <!-- Central Torch / Eternal Flame of Knowledge -->
+  <path d="M100,68 C104,76 108,82 105,88 C102,94 98,94 95,88 C92,82 96,76 100,68 Z" fill="#ef4444"/>
+  <path d="M100,73 C102,78 105,82 103,86 C101,90 99,90 97,86 C95,82 98,78 100,73 Z" fill="#f59e0b"/>
+
+  <!-- Open Academic Book -->
+  <path d="M82,106 C88,103 94,103 100,105 C106,103 112,103 118,106 L118,118 C112,115 106,115 100,117 C94,115 88,115 82,118 Z" fill="#fff" stroke="#1e3a8a" stroke-width="1.2"/>
+  <line x1="100" y1="105" x2="100" y2="117" stroke="#1e3a8a" stroke-width="1.2"/>
+
+  <!-- Ribbon Banner with Motto: WORK IS WORSHIP -->
+  <path d="M 60,132 L 80,128 L 100,130 L 120,128 L 140,132 L 136,142 L 120,138 L 100,140 L 80,138 L 64,142 Z" fill="#b45309" stroke="#78350f" stroke-width="1"/>
+  <text x="100" y="137" font-family="'Times New Roman', serif" font-size="7" font-weight="bold" fill="#fff" text-anchor="middle" letter-spacing="0.5">
+    WORK IS WORSHIP
+  </text>
+</svg>

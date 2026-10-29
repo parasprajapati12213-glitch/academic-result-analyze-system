@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Result Analyzer – Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet" />
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="app.js"></script>
+  <script src="leo_chatbot.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --neon-cyan:         #00F0FF;
+      --electric-blue:     #00A3FF;
+      --sky-glow:          #38BDF8;
+      --cyan-dim:          #0284C7;
+      --cyan-dark:         #0369A1;
+      --navy-abyss:        #030712;
+      --navy-deep:         #050C1A;
+      --glass-bg-card:     rgba(6, 18, 38, 0.58);
+      --glass-bg-login:    rgba(5, 15, 32, 0.70);
+      --glass-border:      rgba(56, 189, 248, 0.22);
+      --glass-border-hov:  rgba(0, 240, 255, 0.65);
+      --text-white:        #ffffff;
+      --text-soft:         rgba(255, 255, 255, 0.86);
+      --text-muted:        rgba(186, 230, 253, 0.60);
+      --input-bg:          rgba(2, 10, 24, 0.55);
+      --input-border:      rgba(56, 189, 248, 0.25);
+      --shadow-card:       0 12px 36px rgba(0, 0, 0, 0.45);
+      --shadow-login:      0 24px 64px rgba(0, 0, 0, 0.65);
+      --shadow-cyan-glow:  0 0 24px rgba(0, 240, 255, 0.30);
+      --radius-card:       16px;
+      --radius-input:      10px;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      background-color: var(--navy-abyss);
+      color: var(--text-white);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ══════════════════════════════════════════════════
+       FULLSCREEN 3D INTERACTIVE BACKGROUND
+    ══════════════════════════════════════════════════ */
+    .cyber-bg-wrapper {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      overflow: hidden;
+      perspective: 1100px;
+      transform-style: preserve-3d;
+      pointer-events: none;
+    }
+
+    /* 3D Moving Layer containing Video + Photo */
+    .cyber-3d-layer {
+      position: absolute;
+      inset: -6%;
+      width: 112%;
+      height: 112%;
+      z-index: 1;
+      will-change: transform;
+      transform-style: preserve-3d;
+      transform: scale(1.05) translate3d(0, 0, 0);
+    }
+
+    /* High-res Photo Fallback & Base */
+    .cyber-photo-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: url('bg.jpg') no-repeat center center / cover;
+      z-index: 1;
+    }
+
+    /* AI Generated Video Background */
+    .cyber-video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      transform: translate(-50%, -50%);
+      object-fit: cover;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    .cyber-video.loaded {
+      opacity: 1;
+    }
+
+    /* 3D Cursor Specular Spotlight Glow */
+    .cyber-cursor-glow {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 3;
+      pointer-events: none;
+      background: radial-gradient(circle 520px at 50% 50%, rgba(0, 240, 255, 0.16) 0%, rgba(0, 163, 255, 0.05) 45%, transparent 70%);
+      mix-blend-mode: screen;
+      will-change: background;
+    }
+
+    /* Floating Data Nodes & Particles Canvas */
+    .cyber-nodes-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    /* Deep Tech Atmospheric Overlay */
+    .cyber-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      background: linear-gradient(
+        135deg,
+        rgba(3, 7, 18, 0.84) 0%,
+        rgba(5, 14, 32, 0.70) 45%,
+        rgba(2, 6, 16, 0.86) 100%
+      );
+    }
+
+    /* Subtle Scanlines effect */
+    .cyber-overlay::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 240, 255, 0.015) 0px,
+        rgba(0, 240, 255, 0.015) 1px,
+        transparent 2px,
+        transparent 4px
+      );
+      pointer-events: none;
+    }
+
+    /* ── PAGE CONTENT WRAPPER ── */
+    .page {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── BRAND STRIP ── */
+    .brand-strip {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 40px;
+      background: rgba(3, 8, 20, 0.65);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      flex-shrink: 0;
+    }
+
+    .brand-strip .logo {
+      height: 48px;
+      width:  48px;
+      object-fit: contain;
+      border-radius: 50%;
+      filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.50));
+    }
+
+    .brand-text { display: flex; flex-direction: column; line-height: 1.25; }
+
+    .brand-name {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--neon-cyan);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      text-shadow: 0 0 12px rgba(0, 240, 255, 0.45);
+    }
+
+    .brand-sub {
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ── MAIN LAYOUT ── */
+    .main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 76px;
+      padding: 40px 64px;
+    }
+
+    /* ══════════════════════════════
+       LEFT COLUMN — Feature Section
+    ══════════════════════════════ */
+    .left-col {
+      flex: 1;
+      max-width: 540px;
+    }
+
+    .hero-heading {
+      font-size: 2.6rem;
+      font-weight: 800;
+      line-height: 1.18;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #ffffff 25%, var(--neon-cyan) 85%, var(--electric-blue) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    .hero-sub {
+      font-size: 0.90rem;
+      color: var(--text-muted);
+      margin-bottom: 34px;
+      font-weight: 400;
+      line-height: 1.6;
+    }
+
+    /* ── 2x2 Feature Cards ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .feat-card {
+      background: linear-gradient(
+        145deg,
+        rgba(8, 24, 48, 0.65) 0%,
+        rgba(4, 14, 30, 0.52) 60%,
+        rgba(0, 240, 255, 0.06) 100%
+      );
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-bottom-color: rgba(56, 189, 248, 0.10);
+      border-right-color: rgba(56, 189, 248, 0.10);
+      border-radius: var(--radius-card);
+      padding: 22px 20px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      /* Layered 3-D Shadows */
+      box-shadow:
+        inset 0  1px 0 rgba(255, 255, 255, 0.18),
+        inset 1px 0  0 rgba(0, 240, 255, 0.14),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+        0  6px 14px rgba(0, 0, 0, 0.40),
+        0 14px 32px rgba(0, 0, 0, 0.30),
+        0 24px 44px rgba(0, 163, 255, 0.12);
+      transform: perspective(700px) translateZ(0);
+      transition:
+        transform    0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
+        box-shadow   0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
+        border-color 0.32s ease,
+        background   0.32s ease;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Top cyan gloss sheen */
+    .feat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 42%;
+      background: linear-gradient(
+        180deg,
+        rgba(0, 240, 255, 0.12) 0%,
+        rgba(0, 240, 255, 0.00) 100%
+      );
+      border-radius: var(--radius-card) var(--radius-card) 0 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Subtle bottom reflection */
+    .feat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.25), transparent);
+      pointer-events: none;
+    }
+
+    .feat-card > * { position: relative; z-index: 1; }
+
+    .feat-card:hover {
+      transform: perspective(700px) translateY(-8px) translateZ(12px);
+      background: linear-gradient(
+        145deg,
+        rgba(10, 30, 60, 0.72) 0%,
+        rgba(5, 18, 38, 0.60) 60%,
+        rgba(0, 240, 255, 0.12) 100%
+      );
+      border-color: rgba(0, 240, 255, 0.60);
+      border-bottom-color: rgba(0, 240, 255, 0.22);
+      border-right-color:  rgba(0, 240, 255, 0.22);
+      box-shadow:
+        inset 0  1px 0 rgba(255, 255, 255, 0.28),
+        inset 1px 0  0 rgba(0, 240, 255, 0.22),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+        0  8px 20px rgba(0, 0, 0, 0.45),
+        0 20px 48px rgba(0, 0, 0, 0.38),
+        0 36px 60px rgba(0, 240, 255, 0.22);
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(0, 240, 255, 0.10);
+      border: 1px solid rgba(0, 240, 255, 0.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      flex-shrink: 0;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.18);
+    }
+
+    .card-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--neon-cyan);
+      fill: none;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 4px rgba(0, 240, 255, 0.45));
+    }
+
+    .card-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-white);
+      margin-bottom: 7px;
+      line-height: 1.35;
+    }
+
+    .card-desc {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      font-weight: 400;
+    }
+
+    /* ══════════════════════════════
+       RIGHT COLUMN — Login Card
+    ══════════════════════════════ */
+    .right-col {
+      flex-shrink: 0;
+      width: 440px;
+    }
+
+    .login-card {
+      background: var(--glass-bg-login);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 46px 40px 38px;
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      box-shadow:
+        var(--shadow-login),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        0 0 40px rgba(0, 163, 255, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Cyber neon top border shimmer */
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--electric-blue) 25%,
+        var(--neon-cyan) 50%,
+        var(--sky-glow) 75%,
+        transparent 100%
+      );
+      box-shadow: 0 0 12px var(--neon-cyan);
+    }
+
+    .login-heading {
+      font-size: 1.95rem;
+      font-weight: 800;
+      color: var(--text-white);
+      text-align: center;
+      margin-bottom: 4px;
+      letter-spacing: -0.3px;
+    }
+
+    .login-sub {
+      font-size: 0.80rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 26px;
+    }
+
+    /* ── Role Tabs ── */
+    .role-tabs {
+      display: flex;
+      background: rgba(2, 10, 24, 0.60);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(56, 189, 248, 0.18);
+    }
+
+    .role-tabs button {
+      flex: 1;
+      padding: 10px 0;
+      border: none;
+      background: transparent;
+      border-radius: 9px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.24s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .role-tabs button.active {
+      background: linear-gradient(135deg, rgba(2, 132, 199, 0.80), rgba(3, 105, 161, 0.90));
+      color: var(--text-white);
+      box-shadow: 0 2px 14px rgba(0, 163, 255, 0.45);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+    }
+
+    .role-tabs button:not(.active):hover {
+      color: var(--neon-cyan);
+      background: rgba(56, 189, 248, 0.08);
+    }
+
+    .tab-icon svg {
+      width: 15px; height: 15px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    /* ── Form Fields ── */
+    .form-group { margin-bottom: 18px; }
+
+    .form-group label {
+      display: block;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-soft);
+      margin-bottom: 7px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+
+    .input-wrap { position: relative; }
+
+    .input-wrap input {
+      width: 100%;
+      padding: 13px 44px 13px 16px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: var(--radius-input);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      color: var(--text-white);
+      outline: none;
+      transition: border-color 0.22s, background 0.22s, box-shadow 0.22s;
+    }
+
+    .input-wrap input::placeholder {
+      color: rgba(186, 230, 253, 0.40);
+      font-weight: 400;
+    }
+
+    .input-wrap input:focus {
+      border-color: var(--neon-cyan);
+      background: rgba(2, 14, 34, 0.75);
+      box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.25), 0 0 16px rgba(0, 240, 255, 0.20);
+    }
+
+    .field-icon {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .field-icon svg {
+      width: 17px; height: 17px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .eye-btn {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 2px;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s;
+    }
+
+    .eye-btn:hover { color: var(--neon-cyan); }
+
+    .eye-btn svg {
+      width: 17px; height: 17px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    /* ── Remember / Forgot row ── */
+    .remember-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    .remember-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.80rem;
+      color: var(--text-soft);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .remember-label input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--electric-blue);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .forgot-link {
+      font-size: 0.80rem;
+      color: var(--sky-glow);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s, text-shadow 0.2s;
+    }
+
+    .forgot-link:hover {
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+    }
+
+    /* ── Primary Login Button ── */
+    .btn-login {
+      width: 100%;
+      padding: 13.5px;
+      background: linear-gradient(135deg, #0284C7 0%, #0369A1 60%, #075985 100%);
+      color: #fff;
+      border: 1px solid rgba(0, 240, 255, 0.40);
+      border-radius: var(--radius-input);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.94rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.18s, box-shadow 0.24s, background 0.24s;
+      box-shadow: 0 4px 20px rgba(2, 132, 199, 0.45);
+    }
+
+    .btn-login:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(135deg, #00A3FF 0%, #0284C7 60%, #0369A1 100%);
+      box-shadow: 0 0 28px rgba(0, 240, 255, 0.55), 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .btn-login:active { transform: translateY(0); }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+      color: var(--text-muted);
+      font-size: 0.74rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(56, 189, 248, 0.16);
+    }
+
+    /* ── Google Button ── */
+    .btn-google {
+      width: 100%;
+      padding: 12.5px;
+      background: rgba(255, 255, 255, 0.95);
+      color: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.50);
+      border-radius: var(--radius-input);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.90rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background 0.22s, transform 0.18s, box-shadow 0.22s;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-google:hover {
+      background: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.45), 0 6px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    .btn-google:active { transform: translateY(0); }
+
+    .google-svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    /* ── Role Badge ── */
+    .role-badge {
+      text-align: center;
+      margin-top: 22px;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .role-badge span {
+      display: inline-block;
+      background: rgba(0, 240, 255, 0.10);
+      border: 1px solid rgba(0, 240, 255, 0.30);
+      color: var(--neon-cyan);
+      font-weight: 700;
+      padding: 3px 14px;
+      border-radius: 20px;
+      font-size: 0.70rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 5px;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.20);
+    }
+
+    /* ── Google Feedback Banner ── */
+    #googleBanner {
+      display: none;
+      margin-top: 14px;
+      padding: 11px 14px;
+      border-radius: 9px;
+      font-size: 0.78rem;
+      line-height: 1.55;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* ══════════════════════
+       RESPONSIVE BREAKPOINTS
+    ══════════════════════ */
+    @media (max-width: 1100px) {
+      .main { padding: 28px 32px; gap: 48px; }
+      .hero-heading { font-size: 2.2rem; }
+      .right-col { width: 400px; }
+    }
+
+    @media (max-width: 820px) {
+      .main {
+        flex-direction: column;
+        padding: 28px 20px 44px;
+        gap: 36px;
+        align-items: center;
+      }
+
+      .left-col {
+        max-width: 100%;
+        width: 100%;
+        text-align: center;
+      }
+
+      .hero-heading { font-size: 2rem; }
+
+      .right-col {
+        width: 100%;
+        max-width: 460px;
+      }
+
+      .brand-strip { padding: 12px 20px; }
+    }
+
+    @media (max-width: 500px) {
+      .hero-heading { font-size: 1.6rem; }
+
+      .cards-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .feat-card { padding: 16px 14px; }
+      .card-title { font-size: 0.82rem; }
+      .card-desc  { font-size: 0.72rem; }
+
+      .login-card { padding: 32px 24px 28px; }
+    }
+
+    @media (max-width: 380px) {
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════
+     DYNAMIC BACKGROUND: 3D VIDEO + PHOTO + NEURAL CANVAS
+══════════════════════════════════════════════════ -->
+<div class="cyber-bg-wrapper">
+  <!-- Interactive 3D tilt layer (video + photo) -->
+  <div class="cyber-3d-layer" id="cyber3dLayer">
+    <video id="cyberVideo" class="cyber-video" autoplay loop muted playsinline poster="bg.jpg">
+      <source src="bg_video.mp4" type="video/mp4" />
+      <source src="bg_video.webm" type="video/webm" />
+    </video>
+    <div class="cyber-photo-bg" id="cyberPhoto"></div>
+  </div>
+
+  <!-- Interactive 3D Cursor Lighting Glow Spotlight -->
+  <div class="cyber-cursor-glow" id="cyberCursorGlow"></div>
+
+  <!-- Interactive Glowing Data Nodes & Particle Grid Canvas -->
+  <canvas id="cyberNodesCanvas" class="cyber-nodes-canvas"></canvas>
+
+  <!-- Deep Tech Holographic Atmosphere Overlay -->
+  <div class="cyber-overlay"></div>
+</div>
+
+<div class="page">
+
+  <!-- ── BRAND STRIP ── -->
+  <div class="brand-strip">
+    <img class="logo" src="mits_logo.jpg" alt="MITS Logo" id="logoImg" />
+    <div class="brand-text">
+      <span class="brand-name">Result Analyzer</span>
+      <span class="brand-sub">Madhav Institute of Tech &amp; Science</span>
+    </div>
+  </div>
+
+  <!-- ── MAIN ── -->
+  <main class="main">
+
+    <!-- ══ LEFT: Academic Feature Section ══ -->
+    <div class="left-col">
+      <h1 class="hero-heading">Academic Result Analyzer</h1>
+      <p class="hero-sub">Holographic data intelligence — track, analyze, and elevate your performance.</p>
+
+      <div class="cards-grid">
+
+        <!-- Card 1: See Your Result -->
+        <div class="feat-card">
+          <div class="card-icon">
+            <!-- document / chart icon -->
+            <svg viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+          </div>
+          <div class="card-title">See Your Result</div>
+          <div class="card-desc">View your academic results in a clear and organized format.</div>
+        </div>
+
+        <!-- Card 2: Chatbot & Video -->
+        <div class="feat-card">
+          <div class="card-icon">
+            <!-- chat / AI node icon -->
+            <svg viewBox="0 0 24 24">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              <line x1="9" y1="10" x2="15" y2="10"/>
+              <line x1="12" y1="7" x2="12" y2="13"/>
+            </svg>
+          </div>
+          <div class="card-title">Solve Doubts with Chatbot and Video Lectures</div>
+          <div class="card-desc">Understand difficult concepts with chatbot assistance and helpful video lectures.</div>
+        </div>
+
+        <!-- Card 3: Track Progress -->
+        <div class="feat-card">
+          <div class="card-icon">
+            <!-- pulse / trendline icon -->
+            <svg viewBox="0 0 24 24">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              <circle cx="9" cy="3" r="1.5" fill="currentColor"/>
+              <circle cx="15" cy="21" r="1.5" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="card-title">Track Your Progress</div>
+          <div class="card-desc">Monitor your academic performance and observe your progress over time.</div>
+        </div>
+
+        <!-- Card 4: Weak Spots -->
+        <div class="feat-card">
+          <div class="card-icon">
+            <!-- target / neural node icon -->
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/>
+              <circle cx="12" cy="12" r="6"/>
+              <circle cx="12" cy="12" r="2" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="card-title">Know Your Weak Spots</div>
+          <div class="card-desc">Identify subjects and topics that need more attention.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ RIGHT: Glassmorphism Login Card ══ -->
+    <div class="right-col">
+      <div class="login-card">
+
+        <h2 class="login-heading">Login</h2>
+        <p class="login-sub">Sign in to access your dashboard</p>
+
+        <!-- Role Tabs -->
+        <div class="role-tabs" role="tablist">
+          <button class="active" id="tab-student" role="tab" aria-selected="true"
+                  onclick="switchRole('student')">
+            <span class="tab-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c0 2 6 3 6 3s6-1 6-3v-5"/>
+              </svg>
+            </span>
+            Student
+          </button>
+          <button id="tab-faculty" role="tab" aria-selected="false"
+                  onclick="switchRole('faculty')">
+            <span class="tab-icon">
+              <svg viewBox="0 0 24 24">
+                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                <path d="M8 21h8M12 17v4"/>
+              </svg>
+            </span>
+            Faculty
+          </button>
+        </div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)" novalidate>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label for="email">Email</label>
+            <div class="input-wrap">
+              <input type="email" id="email" name="email"
+                     placeholder="Enter your email"
+                     autocomplete="email" required />
+              <span class="field-icon">
+                <svg viewBox="0 0 24 24">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+              </span>
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <input type="password" id="password" name="password"
+                     placeholder="Enter your password"
+                     autocomplete="current-password" required />
+              <button type="button" class="eye-btn" onclick="togglePassword()"
+                      aria-label="Toggle password visibility">
+                <span id="eyeIcon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Remember me / Forgot password -->
+          <div class="remember-row">
+            <label class="remember-label">
+              <input type="checkbox" id="rememberMe" />
+              Remember me
+            </label>
+            <a href="#" class="forgot-link">Forgot Password?</a>
+          </div>
+
+          <!-- Login Button -->
+          <button type="submit" class="btn-login" id="loginBtn">Login as Student</button>
+
+          <!-- Divider -->
+          <div class="divider">or</div>
+
+          <!-- Continue with Google -->
+          <button type="button" class="btn-google" onclick="handleGoogle()">
+            <!-- Official Google "G" SVG -->
+            <svg class="google-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Continue with Google
+          </button>
+
+          <!-- Google feedback banner -->
+          <div id="googleBanner"></div>
+
+        </form>
+
+        <!-- Active role indicator -->
+        <div class="role-badge">
+          Signing in as &nbsp;<span id="roleBadge">STUDENT</span>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // ── Video Background Loader ────────────────────────────────────────
+  const cyberVideo = document.getElementById('cyberVideo');
+  if (cyberVideo) {
+    cyberVideo.addEventListener('playing', () => {
+      cyberVideo.classList.add('loaded');
+    });
+  }
+
+  // ── Interactive 3D Cursor & Holographic Data System ───────────────
+  (function init3DInteractiveBackground() {
+    const layer = document.getElementById('cyber3dLayer');
+    const glow = document.getElementById('cyberCursorGlow');
+    const canvas = document.getElementById('cyberNodesCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    let width, height;
+    let particles = [];
+    let shockwaves = [];
+
+    // Cursor tracking with lerp interpolation
+    const mouse = {
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2,
+      targetX: window.innerWidth / 2,
+      targetY: window.innerHeight / 2,
+      normX: 0,
+      normY: 0,
+      isHovering: false,
+      pulseAngle: 0
+    };
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      createParticles();
+    }
+
+    function createParticles() {
+      particles = [];
+      const count = Math.floor((width * height) / 18000); // optimal density
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.45,
+          vy: (Math.random() - 0.5) * 0.45,
+          z: Math.random() * 200 - 100, // virtual 3D depth
+          r: Math.random() * 2.2 + 1,
+          alpha: Math.random() * 0.5 + 0.25,
+          color: Math.random() > 0.3 ? '#00F0FF' : '#38BDF8'
+        });
+      }
+    }
+
+    // Mouse 3D tracking across the screen
+    window.addEventListener('mousemove', function(e) {
+      mouse.targetX = e.clientX;
+      mouse.targetY = e.clientY;
+      mouse.normX = (e.clientX / width - 0.5) * 2; // -1 to 1
+      mouse.normY = (e.clientY / height - 0.5) * 2;
+      mouse.isHovering = true;
+    });
+
+    window.addEventListener('mouseleave', function() {
+      mouse.normX = 0;
+      mouse.normY = 0;
+      mouse.isHovering = false;
+    });
+
+    // Click creates an expanding 3D shockwave in the data grid
+    window.addEventListener('click', function(e) {
+      shockwaves.push({
+        x: e.clientX,
+        y: e.clientY,
+        radius: 10,
+        maxRadius: 280,
+        alpha: 0.85
+      });
+    });
+
+    // 3D Parallax Smooth Values
+    let curRotX = 0, curRotY = 0, curTransX = 0, curTransY = 0;
+
+    function animate() {
+      // Smooth lerp for mouse coordinates
+      mouse.x += (mouse.targetX - mouse.x) * 0.08;
+      mouse.y += (mouse.targetY - mouse.y) * 0.08;
+      mouse.pulseAngle += 0.04;
+
+      // 3D Parallax Calculation for background photo / video layer
+      const targetRotX = -mouse.normY * 7; // up/down tilt in deg
+      const targetRotY = mouse.normX * 9;  // left/right tilt in deg
+      const targetTransX = -mouse.normX * 18; // parallax pan X
+      const targetTransY = -mouse.normY * 18; // parallax pan Y
+
+      curRotX += (targetRotX - curRotX) * 0.06;
+      curRotY += (targetRotY - curRotY) * 0.06;
+      curTransX += (targetTransX - curTransX) * 0.06;
+      curTransY += (targetTransY - curTransY) * 0.06;
+
+      if (layer) {
+        layer.style.transform = 'scale(1.06) perspective(1000px) rotateX(' + curRotX.toFixed(2) + 'deg) rotateY(' + curRotY.toFixed(2) + 'deg) translate3d(' + curTransX.toFixed(1) + 'px, ' + curTransY.toFixed(1) + 'px, 0)';
+      }
+
+      // Dynamic cursor specular spotlight positioning
+      if (glow) {
+        glow.style.background = 'radial-gradient(circle 520px at ' + mouse.x.toFixed(1) + 'px ' + mouse.y.toFixed(1) + 'px, rgba(0, 240, 255, 0.18) 0%, rgba(0, 163, 255, 0.06) 45%, transparent 70%)';
+      }
+
+      // Clear Canvas
+      ctx.clearRect(0, 0, width, height);
+
+      // Render 3D Expanding Shockwaves
+      for (let s = shockwaves.length - 1; s >= 0; s--) {
+        const sw = shockwaves[s];
+        sw.radius += 5.5;
+        sw.alpha *= 0.94;
+
+        ctx.beginPath();
+        ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(0, 240, 255, ' + sw.alpha + ')';
+        ctx.lineWidth = 2.5;
+        ctx.shadowBlur = 16;
+        ctx.shadowColor = '#00F0FF';
+        ctx.stroke();
+
+        if (sw.alpha < 0.01 || sw.radius > sw.maxRadius) {
+          shockwaves.splice(s, 1);
+        }
+      }
+
+      // Render interactive particles
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Wrap around boundaries
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        // 3D Parallax shift per particle based on its virtual depth z
+        const depthFactor = (p.z + 100) / 200; // 0 to 1
+        const renderX = p.x + curTransX * depthFactor * 1.5;
+        const renderY = p.y + curTransY * depthFactor * 1.5;
+
+        // Mouse interaction: 3D magnetic attraction / deflection
+        if (mouse.isHovering) {
+          const dx = mouse.x - renderX;
+          const dy = mouse.y - renderY;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist < 170) {
+            // Draw glowing cyan energy connection to cursor
+            const lineAlpha = (1 - dist / 170) * 0.45;
+            ctx.beginPath();
+            ctx.moveTo(renderX, renderY);
+            ctx.lineTo(mouse.x, mouse.y);
+            ctx.strokeStyle = 'rgba(0, 240, 255, ' + lineAlpha + ')';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Gentle 3D repulsion away from mouse pointer
+            const force = (170 - dist) / 170 * 0.6;
+            p.x -= (dx / dist) * force;
+            p.y -= (dy / dist) * force;
+          }
+        }
+
+        // Draw node
+        ctx.beginPath();
+        ctx.arc(renderX, renderY, p.r * (0.8 + depthFactor * 0.4), 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.shadowBlur = 10 * depthFactor;
+        ctx.shadowColor = p.color;
+        ctx.fill();
+
+        // Connect nearby nodes
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const depthFactor2 = (p2.z + 100) / 200;
+          const renderX2 = p2.x + curTransX * depthFactor2 * 1.5;
+          const renderY2 = p2.y + curTransY * depthFactor2 * 1.5;
+
+          const dist = Math.hypot(renderX - renderX2, renderY - renderY2);
+          if (dist < 115) {
+            ctx.beginPath();
+            ctx.moveTo(renderX, renderY);
+            ctx.lineTo(renderX2, renderY2);
+            ctx.strokeStyle = 'rgba(0, 210, 255, ' + (0.16 * (1 - dist / 115)) + ')';
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw Cursor 3D Holographic Node & Quantum Ring
+      if (mouse.isHovering) {
+        ctx.save();
+        ctx.translate(mouse.x, mouse.y);
+
+        // Outer rotating dashed quantum ring
+        ctx.rotate(mouse.pulseAngle);
+        ctx.beginPath();
+        ctx.arc(0, 0, 18, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(0, 240, 255, 0.45)';
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([4, 4]);
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = '#00F0FF';
+        ctx.stroke();
+
+        // Inner glowing core node
+        ctx.beginPath();
+        ctx.arc(0, 0, 3, 0, Math.PI * 2);
+        ctx.fillStyle = '#00F0FF';
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#00F0FF';
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    animate();
+  })();
+
+  // ── Role switching ─────────────────────────────────────────────────
+  let currentRole = 'student';
+
+  function switchRole(role) {
+    currentRole = role;
+    const tabS  = document.getElementById('tab-student');
+    const tabF  = document.getElementById('tab-faculty');
+    const btn   = document.getElementById('loginBtn');
+    const badge = document.getElementById('roleBadge');
+
+    if (role === 'student') {
+      tabS.classList.add('active');    tabS.setAttribute('aria-selected', 'true');
+      tabF.classList.remove('active'); tabF.setAttribute('aria-selected', 'false');
+      btn.textContent   = 'Login as Student';
+      badge.textContent = 'STUDENT';
+    } else {
+      tabF.classList.add('active');    tabF.setAttribute('aria-selected', 'true');
+      tabS.classList.remove('active'); tabS.setAttribute('aria-selected', 'false');
+      btn.textContent   = 'Login as Faculty';
+      badge.textContent = 'FACULTY';
+    }
+  }
+
+  // ── Toggle password visibility ─────────────────────────────────────
+  const eyeOpenSVG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+  const eyeClosedSVG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+
+  function togglePassword() {
+    const pwd      = document.getElementById('password');
+    const icon     = document.getElementById('eyeIcon');
+    const isHidden = pwd.type === 'password';
+    pwd.type       = isHidden ? 'text' : 'password';
+    icon.innerHTML = isHidden ? eyeClosedSVG : eyeOpenSVG;
+  }
+
+  // ── Form submission ────────────────────────────────────────────────
+  function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const pass  = document.getElementById('password').value;
+    if (!email || !pass) {
+      showBanner('error', 'Please fill in both Email and Password.');
+      return;
+    }
+    // Save session and navigate to dashboard or faculty interface
+    if (currentRole === 'faculty') {
+      localStorage.setItem('ra_session', JSON.stringify({
+        email: email,
+        role: 'faculty',
+        name: email.split('@')[0],
+        loginTime: new Date().toISOString()
+      }));
+      sessionStorage.setItem('mits_auth_token', 'mits_faculty_session_token');
+      sessionStorage.setItem('mits_auth_user', JSON.stringify({
+        username: email,
+        name: email.split('@')[0],
+        role: 'Faculty / Teacher'
+      }));
+      window.location.href = '../faculty/frontend/index.html';
+    } else {
+      const matched = (typeof RA !== 'undefined' && RA.getStudentByEmail)
+        ? RA.getStudentByEmail(email)
+        : null;
+      localStorage.setItem('ra_session', JSON.stringify({
+        email: email,
+        role: 'student',
+        studentId: matched ? matched.id : null,
+        name: matched ? matched.name : email.split('@')[0],
+        rollNo: matched ? matched.rollNo : null,
+        branch: matched ? (matched.branch || matched.className) : null,
+        department: matched ? matched.department : null,
+        batch: matched ? (matched.batch || matched.academicYear) : null,
+        currentSem: matched ? (matched.currentSem || matched.semester) : null,
+        isLinked: !!matched,
+        loginTime: new Date().toISOString()
+      }));
+      window.location.href = 'dashboard.html';
+    }
+  }
+
+  // ── Google Identity Services (GIS) ────────────────────────────────
+  // NOTE: Replace the value below with your OAuth Client ID from:
+  //       https://console.cloud.google.com → APIs & Services → Credentials
+  const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+  let googleTokenClient  = null;
+
+  function initGoogleClient() {
+    if (!window.google) return;
+    googleTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id : GOOGLE_CLIENT_ID,
+      scope     : 'openid email profile',
+      prompt    : 'select_account', // shows ALL accounts on the device
+      callback  : onGoogleToken,
+    });
+  }
+
+  window.onGoogleLibraryLoad = initGoogleClient;
+
+  function onGoogleToken(tokenResponse) {
+    if (tokenResponse.error) {
+      showBanner('error', 'Google sign-in was cancelled or failed. Please try again.');
+      return;
+    }
+    fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+    })
+    .then(r => r.json())
+    .then(profile => {
+      const gEmail = (profile.email || '').toLowerCase();
+      if (currentRole === 'faculty') {
+        localStorage.setItem('ra_session', JSON.stringify({
+          email: gEmail,
+          role: 'faculty',
+          name: profile.name || gEmail.split('@')[0],
+          picture: profile.picture || '',
+          loginTime: new Date().toISOString()
+        }));
+        sessionStorage.setItem('mits_auth_token', 'mits_faculty_session_token');
+        sessionStorage.setItem('mits_auth_user', JSON.stringify({
+          username: gEmail,
+          name: profile.name || gEmail.split('@')[0],
+          role: 'Faculty / Teacher'
+        }));
+        showBanner('success', profile);
+        setTimeout(() => { window.location.href = '../faculty/frontend/index.html'; }, 900);
+      } else {
+        const matched = (typeof RA !== 'undefined' && RA.getStudentByEmail)
+          ? RA.getStudentByEmail(gEmail)
+          : null;
+        localStorage.setItem('ra_session', JSON.stringify({
+          email: gEmail,
+          role: 'student',
+          studentId: matched ? matched.id : null,
+          name: matched ? matched.name : (profile.name || gEmail.split('@')[0]),
+          rollNo: matched ? matched.rollNo : null,
+          branch: matched ? matched.branch : null,
+          department: matched ? matched.department : null,
+          batch: matched ? matched.batch : null,
+          currentSem: matched ? matched.currentSem : null,
+          isLinked: !!matched,
+          picture: profile.picture || '',
+          loginTime: new Date().toISOString()
+        }));
+        showBanner('success', profile);
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 900);
+      }
+    })
+    .catch(() => showBanner('error', 'Could not fetch profile. Please try again.'));
+  }
+
+    function openGoogleAccountChooser() {
+    const width = 520, height = 640;
+    const left = Math.max(0, Math.floor((window.screen.width - width) / 2));
+    const top = Math.max(0, Math.floor((window.screen.height - height) / 2));
+    // Official Google Account Chooser: renders all Google accounts active on this device
+    const googleUrl = 'https://accounts.google.com/AccountChooser?service=lso&prompt=select_account&flowName=GlifWebSignIn';
+    
+    showBanner('info', 'Connecting to Google Accounts... Select your Google account in the window.');
+
+    const popup = window.open(
+      googleUrl,
+      'GoogleAccountChooser',
+      'width=' + width + ',height=' + height + ',top=' + top + ',left=' + left + ',status=no,menubar=no,toolbar=no,scrollbars=yes,resizable=yes'
+    );
+
+    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+      window.open(googleUrl, '_blank');
+    } else {
+      popup.focus();
+    }
+  }
+
+  function handleGoogle() {
+    // 1. If Google Identity Services client is configured, run OAuth 2.0 flow
+    if (GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.startsWith('YOUR_') && window.google) {
+      if (!googleTokenClient) initGoogleClient();
+      if (googleTokenClient) {
+        try {
+          googleTokenClient.requestToken();
+          return;
+        } catch (err) {
+          console.warn('GIS requestToken fallback:', err);
+        }
+      }
+    }
+
+    // 2. Direct Google Product: Launch Google Account Chooser immediately
+    openGoogleAccountChooser();
+  }
+
+  // ── Banner helper ──────────────────────────────────────────────────
+  function showBanner(type, data) {
+    const b = document.getElementById('googleBanner');
+    b.style.display = 'block';
+    const base = 'display:block;margin-top:14px;padding:11px 14px;border-radius:9px;font-size:0.78rem;line-height:1.55;font-family:DM Sans,sans-serif;';
+    if (type === 'info') {
+      b.style.cssText = base + 'background:rgba(0,240,255,0.12);border:1px solid rgba(0,240,255,0.35);color:#38BDF8;display:flex;align-items:center;gap:10px;';
+      b.innerHTML = '<span>' + data + '</span>';
+    } else if (type === 'warn') {
+      b.style.cssText = base + 'background:rgba(0,240,255,0.08);border:1px solid rgba(0,240,255,0.30);color:#38BDF8;';
+      b.innerHTML = `<strong>Setup required:</strong> Replace <code>YOUR_GOOGLE_CLIENT_ID</code> in login.html with your real OAuth Client ID from <a href="https://console.cloud.google.com" target="_blank" style="color:#00F0FF;font-weight:700;">Google Cloud Console</a>.`;
+    } else if (type === 'success') {
+      b.style.cssText = base + 'background:rgba(52,168,83,0.12);border:1px solid rgba(52,168,83,0.32);color:#a8f0b8;display:flex;align-items:center;gap:10px;';
+      b.innerHTML = `<img src="${data.picture}" style="width:28px;height:28px;border-radius:50%;flex-shrink:0;" alt="avatar"/><span><strong>Signed in as ${data.name}</strong><br>${data.email}</span>`;
+    } else {
+      b.style.cssText = base + 'background:rgba(234,67,53,0.12);border:1px solid rgba(234,67,53,0.32);color:#f9a8a8;';
+      b.innerHTML = data;
+    }
+  }
+
+  // ── Remove white background from MITS logo via Canvas ─────────────
+  window.addEventListener('load', () => {
+    const img = document.getElementById('logoImg');
+
+    const removeWhiteBg = (imgEl) => {
+      const canvas  = document.createElement('canvas');
+      canvas.width  = imgEl.naturalWidth  || 200;
+      canvas.height = imgEl.naturalHeight || 200;
+      const ctx     = canvas.getContext('2d');
+      ctx.drawImage(imgEl, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data      = imageData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i] > 220 && data[i+1] > 220 && data[i+2] > 220) data[i+3] = 0;
+      }
+      ctx.putImageData(imageData, 0, 0);
+      imgEl.src = canvas.toDataURL('image/png');
+    };
+
+    if (img.complete && img.naturalWidth) removeWhiteBg(img);
+    else {
+      img.addEventListener('load',  () => removeWhiteBg(img));
+      img.addEventListener('error', () => { /* fallback */ });
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Result Analyzer – Student Rankings & Paper Difficulty</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+  <script src="leo_chatbot.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --cyan:#00F0FF;--blue:#00A3FF;--sky:#38BDF8;
+      --navy:#030712;--navy2:#050C1A;--navy3:#071428;
+      --glass:rgba(6,18,38,0.74);--border:rgba(56,189,248,0.20);
+      --soft:rgba(255,255,255,0.88);--muted:rgba(186,230,253,0.60);
+      --r:14px;
+    }
+    html,body{min-height:100%;font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#030712,#050C1A 50%,#071428);color:#fff;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,240,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,0.03) 1px,transparent 1px);background-size:52px 52px;pointer-events:none;z-index:0}
+    #appNav{position:relative;z-index:200}
+    .page{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:26px 20px 70px}
+
+    /* Common Buttons */
+    .btn{display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:8px 16px;border-radius:9px;border:none;cursor:pointer;transition:all .2s;text-decoration:none}
+    .btn-primary{background:linear-gradient(135deg,var(--cyan),var(--blue));color:#030712}
+    .btn-primary:hover{opacity:.88;transform:translateY(-1px)}
+    .btn-secondary{background:rgba(56,189,248,0.10);border:1px solid rgba(56,189,248,0.28);color:var(--sky)}
+    .btn-secondary:hover{background:rgba(56,189,248,0.20)}
+
+    /* Hero Banner */
+    .hero-banner{background:linear-gradient(145deg,rgba(6,18,38,0.88),rgba(4,12,28,0.72));border:1px solid rgba(0,240,255,0.22);border-radius:18px;padding:24px 28px;margin-bottom:24px;backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;box-shadow:0 12px 36px rgba(0,0,0,0.45)}
+    .hero-left{display:flex;align-items:center;gap:18px}
+    .hero-avatar{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#030712;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;flex-shrink:0;box-shadow:0 0 24px rgba(245,158,11,0.35)}
+    .hero-title h2{font-size:22px;font-weight:800;color:#fff;margin-bottom:4px}
+    .hero-badges{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px}
+    .stu-tag{font-size:12px;font-weight:600;padding:3px 10px;border-radius:8px;background:rgba(56,189,248,0.10);border:1px solid rgba(56,189,248,0.25);color:var(--sky)}
+    .stu-tag-gold{background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.35);color:#fbbf24}
+    .stu-tag-verified{background:rgba(74,222,128,0.10);border-color:rgba(74,222,128,0.30);color:#4ade80}
+
+    /* Rank Metric Toggle */
+    .metric-toggle{display:inline-flex;background:rgba(2,10,24,0.75);border:1px solid rgba(56,189,248,0.25);border-radius:12px;padding:4px}
+    .metric-toggle-btn{padding:8px 18px;border-radius:8px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+    .metric-toggle-btn.active{background:linear-gradient(135deg,var(--cyan),var(--blue));color:#030712;font-weight:700;box-shadow:0 2px 10px rgba(0,240,255,0.3)}
+
+    /* Hierarchy Ranking Grid */
+    .rank-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-bottom:24px}
+    .rank-card{background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:20px 22px;backdrop-filter:blur(14px);position:relative;overflow:hidden;transition:transform .2s,border-color .25s}
+    .rank-card:hover{transform:translateY(-3px);border-color:rgba(0,240,255,0.45)}
+    .rank-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+    .rank-card.card-class::before{background:linear-gradient(90deg,#00F0FF,#38BDF8)}
+    .rank-card.card-branch::before{background:linear-gradient(90deg,#a78bfa,#c084fc)}
+    .rank-card.card-dept::before{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+    .rank-card.card-college::before{background:linear-gradient(90deg,#ec4899,#f43f5e)}
+    .rank-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .rank-icon{font-size:24px}
+    .rank-badge{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:8px}
+    .rank-val{font-size:36px;font-weight:800;line-height:1;margin-bottom:6px}
+    .rank-scope{font-size:12px;color:var(--muted);margin-bottom:12px}
+    .rank-progress{height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-bottom:8px}
+    .rank-bar{height:100%;border-radius:3px;transition:width 0.8s ease}
+    .rank-subtext{font-size:11.5px;color:rgba(255,255,255,0.65);display:flex;justify-content:space-between}
+
+    /* Topper Spotlight Card */
+    .topper-banner{background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(6,18,38,0.85));border:1px solid rgba(245,158,11,0.35);border-radius:16px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px}
+    .topper-info{display:flex;align-items:center;gap:16px}
+    .topper-icon{font-size:36px;background:rgba(245,158,11,0.15);width:60px;height:60px;border-radius:14px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(245,158,11,0.3)}
+
+    /* Sem Tabs */
+    .sem-tab-bar{display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+    .sem-tab-btn{padding:8px 18px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid rgba(56,189,248,0.20);background:rgba(5,12,26,0.70);color:var(--muted);cursor:pointer;transition:all .2s}
+    .sem-tab-btn:hover{color:var(--cyan);border-color:rgba(0,240,255,0.35);background:rgba(0,240,255,0.06)}
+    .sem-tab-btn.active{color:var(--cyan);border-color:rgba(0,240,255,0.45);background:rgba(0,240,255,0.14);font-weight:700}
+
+    /* Table & Cards */
+    .card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;backdrop-filter:blur(14px);margin-bottom:24px}
+    .card-head{background:linear-gradient(90deg,#1B365D,#14274f);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+    .card-head h3{font-size:15px;font-weight:700;color:#fff}
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:13.5px}
+    thead th{background:#1B365D;padding:11px 16px;text-align:left;font-weight:700;font-size:12px;color:#fff;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap}
+    tbody tr{border-bottom:1px solid rgba(56,189,248,0.10);transition:background .18s}
+    tbody tr:hover{background:rgba(0,240,255,0.05)}
+    tbody td{padding:12px 16px;color:var(--soft);vertical-align:middle}
+
+    /* Difficulty Badges */
+    .diff-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:700;border:1px solid}
+    .diff-tough{background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.35);color:#f87171}
+    .diff-moderate{background:rgba(56,189,248,0.12);border-color:rgba(56,189,248,0.35);color:#38BDF8}
+    .diff-easy{background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.35);color:#4ade80}
+
+    .grade-badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:800;border:1px solid}
+
+    /* Warning Card */
+    .warning-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.30);border-radius:16px;padding:32px 24px;text-align:center;margin:40px auto;max-width:540px}
+    .warning-card h3{color:#f87171;font-size:18px;margin-bottom:8px}
+    .warning-card p{color:var(--muted);font-size:13.5px;margin-bottom:20px;line-height:1.6}
+  </style>
+</head>
+<body>
+<div id="appNav"></div>
+
+<main class="page">
+
+  <!-- ══════════════════════════════════════════════════════════════
+       STUDENT RANKING VIEW
+  ══════════════════════════════════════════════════════════════ -->
+  <div id="studentRankingSection" style="display:none">
+
+    <!-- Hero Card -->
+    <div class="hero-banner">
+      <div class="hero-left">
+        <div class="hero-avatar" id="stuAvatar">🏆</div>
+        <div class="hero-title">
+          <h2 id="stuName">—</h2>
+          <div style="font-size:13px;color:var(--muted)" id="stuRollAndBranch">—</div>
+          <div class="hero-badges">
+            <span class="stu-tag stu-tag-gold" id="stuRankSummaryTag">🏆 Class Rank #—</span>
+            <span class="stu-tag stu-tag-verified">✓ Relative Calibrated</span>
+            <span class="stu-tag" id="stuDeptTag">Dept: —</span>
+            <span class="stu-tag" id="stuSemTag">Semester —</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <!-- Metric Toggle: SGPA vs CGPA -->
+        <div class="metric-toggle">
+          <button class="metric-toggle-btn active" id="btnToggleSGPA" onclick="switchMetric('sgpa')">🏆 Semester SGPA</button>
+          <button class="metric-toggle-btn" id="btnToggleCGPA" onclick="switchMetric('cgpa')">🎓 Cumulative CGPA</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Semester Selector Tabs -->
+    <div class="sem-tab-bar" id="semTabs"></div>
+
+    <!-- Topper Spotlight & Gap Analysis Banner -->
+    <div class="topper-banner">
+      <div class="topper-info">
+        <div class="topper-icon">👑</div>
+        <div>
+          <div style="font-size:12px;color:#fbbf24;font-weight:700;text-transform:uppercase;letter-spacing:0.5px" id="topperTitle">Class Topper Spotlight</div>
+          <div style="font-size:18px;font-weight:800;color:#fff" id="topperName">—</div>
+          <div style="font-size:12.5px;color:var(--muted)" id="topperDetails">—</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+        <div style="text-align:right">
+          <div style="font-size:11.5px;color:var(--muted)">Topper Score</div>
+          <div style="font-size:24px;font-weight:800;color:#fbbf24" id="topperScore">—</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11.5px;color:var(--muted)">Your Score</div>
+          <div style="font-size:24px;font-weight:800;color:var(--cyan)" id="myScore">—</div>
+        </div>
+        <div style="text-align:right;background:rgba(2,10,24,0.6);padding:8px 14px;border-radius:10px;border:1px solid rgba(245,158,11,0.25)">
+          <div style="font-size:11px;color:var(--muted)">Gap to #1</div>
+          <div style="font-size:16px;font-weight:800" id="topperGap">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4-Level Hierarchy Ranking Cards (Class, Branch, Department, College) -->
+    <div class="rank-grid">
+      <!-- 1. Class / Section Rank -->
+      <div class="rank-card card-class">
+        <div class="rank-header">
+          <span class="rank-icon">👥</span>
+          <span class="rank-badge" style="background:rgba(0,240,255,0.12);color:var(--cyan);border:1px solid rgba(0,240,255,0.3)" id="classPctBadge">Top —%</span>
+        </div>
+        <div class="rank-val" style="color:var(--cyan)" id="classRankVal">#—</div>
+        <div class="rank-scope" id="classScopeLabel">Class / Section Rank</div>
+        <div class="rank-progress">
+          <div class="rank-bar" style="background:linear-gradient(90deg,var(--cyan),var(--blue))" id="classBar" style="width:0%"></div>
+        </div>
+        <div class="rank-subtext">
+          <span id="classRankSub">Rank in Batch & Section</span>
+          <span id="classTotalSub">— Students</span>
+        </div>
+      </div>
+
+      <!-- 2. Branch Rank -->
+      <div class="rank-card card-branch">
+        <div class="rank-header">
+          <span class="rank-icon">💻</span>
+          <span class="rank-badge" style="background:rgba(167,139,250,0.12);color:#a78bfa;border:1px solid rgba(167,139,250,0.3)" id="branchPctBadge">Top —%</span>
+        </div>
+        <div class="rank-val" style="color:#a78bfa" id="branchRankVal">#—</div>
+        <div class="rank-scope" id="branchScopeLabel">Branch Rank</div>
+        <div class="rank-progress">
+          <div class="rank-bar" style="background:linear-gradient(90deg,#a78bfa,#c084fc)" id="branchBar" style="width:0%"></div>
+        </div>
+        <div class="rank-subtext">
+          <span id="branchRankSub">Across Branch</span>
+          <span id="branchTotalSub">— Students</span>
+        </div>
+      </div>
+
+      <!-- 3. Department Rank (Multi-branch) -->
+      <div class="rank-card card-dept">
+        <div class="rank-header">
+          <span class="rank-icon">🏛️</span>
+          <span class="rank-badge" style="background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.3)" id="deptPctBadge">Top —%</span>
+        </div>
+        <div class="rank-val" style="color:#fbbf24" id="deptRankVal">#—</div>
+        <div class="rank-scope" id="deptScopeLabel">Department Rank</div>
+        <div class="rank-progress">
+          <div class="rank-bar" style="background:linear-gradient(90deg,#f59e0b,#fbbf24)" id="deptBar" style="width:0%"></div>
+        </div>
+        <div class="rank-subtext">
+          <span id="deptRankSub">All Department Branches</span>
+          <span id="deptTotalSub">— Students</span>
+        </div>
+      </div>
+
+      <!-- 4. College Rank -->
+      <div class="rank-card card-college">
+        <div class="rank-header">
+          <span class="rank-icon">🎓</span>
+          <span class="rank-badge" style="background:rgba(236,72,153,0.12);color:#ec4899;border:1px solid rgba(236,72,153,0.3)" id="colPctBadge">Top —%</span>
+        </div>
+        <div class="rank-val" style="color:#ec4899" id="colRankVal">#—</div>
+        <div class="rank-scope">MITS College-Wide Rank</div>
+        <div class="rank-progress">
+          <div class="rank-bar" style="background:linear-gradient(90deg,#ec4899,#f43f5e)" id="colBar" style="width:0%"></div>
+        </div>
+        <div class="rank-subtext">
+          <span>Overall Institution</span>
+          <span id="colTotalSub">— Students</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subject-Wise Ranking & Paper Difficulty Table Card -->
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h3>📚 Subject-Wise Rankings & Paper Difficulty Analysis</h3>
+          <p style="font-size:12px;color:var(--muted);margin-top:2px">Calibrated with Class Mean (μ), Standard Deviation (σ), and Subject-level Toppers</p>
+        </div>
+        <span class="stu-tag stu-tag-verified">Relative Normalization</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Course Code</th>
+              <th>Subject Name</th>
+              <th style="text-align:center">Credits</th>
+              <th style="text-align:center">Your Score (/100)</th>
+              <th style="text-align:center">Subject Rank</th>
+              <th style="text-align:center">Subject Topper</th>
+              <th style="text-align:center">Class Mean (μ)</th>
+              <th style="text-align:center">Std Dev (σ)</th>
+              <th style="text-align:center">Paper Difficulty</th>
+              <th style="text-align:center">Relative Grade</th>
+            </tr>
+          </thead>
+          <tbody id="subjectRankingBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3D Interactive Charts Grid (Large Visualizations with Pop-up Part Highlights & Detailed Insights) -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:24px;margin-bottom:28px">
+      <!-- 1. 3D Line Graph: Subject Percentile Trajectory -->
+      <div class="card chart-card-3d">
+        <div class="chart-3d-inner">
+          <div class="card-head">
+            <h3>📈 3D Subject Percentile Trajectory (Line Graph)</h3>
+            <span class="stu-tag stu-tag-verified">Top % Curve</span>
+          </div>
+          <div class="chart-inspector" id="percentileInspector">
+            <span>💡</span> <span>Hover over any subject node to pop up rank percentile &amp; class standing</span>
+          </div>
+          <div class="card-body" style="padding:10px 18px 18px;height:320px;position:relative"><canvas id="percentileChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- 2. 3D Pie Graph: Paper Difficulty Share -->
+      <div class="card chart-card-3d">
+        <div class="chart-3d-inner">
+          <div class="card-head">
+            <h3>🥧 3D Paper Difficulty Distribution (Pie Graph)</h3>
+            <span class="stu-tag stu-tag-gold">Interactive 3D Pop-up Slices</span>
+          </div>
+          <div class="chart-inspector" id="difficultyPieInspector">
+            <span>💡</span> <span>Hover over any pie slice to pop up difficulty share &amp; course list</span>
+          </div>
+          <div class="card-body" style="padding:10px 18px 18px;height:320px;position:relative;display:flex;justify-content:center"><canvas id="difficultyPieChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- 3. 3D Histogram: Paper Difficulty Toughness Rating -->
+      <div class="card chart-card-3d">
+        <div class="chart-3d-inner">
+          <div class="card-head">
+            <h3>📊 3D Paper Difficulty Index (Histogram)</h3>
+            <span style="font-size:11.5px;color:var(--muted)">1 to 10 Toughness Pillars</span>
+          </div>
+          <div class="chart-inspector" id="difficultyHistInspector">
+            <span>💡</span> <span>Hover over any difficulty pillar to pop up class mean &amp; toughness index</span>
+          </div>
+          <div class="card-body" style="padding:10px 18px 18px;height:320px;position:relative"><canvas id="difficultyChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- 4. 3D Score vs Topper vs Class Average Benchmark -->
+      <div class="card chart-card-3d">
+        <div class="chart-3d-inner">
+          <div class="card-head">
+            <h3>🎯 3D Score vs Topper vs Class Mean Benchmark</h3>
+            <span style="font-size:11.5px;color:var(--muted)">Triple Pillar Comparison</span>
+          </div>
+          <div class="chart-inspector" id="rankingBenchmarkInspector">
+            <span>💡</span> <span>Hover over any subject bar to pop up topper score &amp; benchmark gap</span>
+          </div>
+          <div class="card-body" style="padding:10px 18px 18px;height:320px;position:relative"><canvas id="subjectBenchmarkChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- 5. 3D Multi-Tier Percentile Standing -->
+      <div class="card chart-card-3d" style="grid-column: 1 / -1">
+        <div class="chart-3d-inner">
+          <div class="card-head">
+            <h3>🏛️ 3D Multi-Tier Percentile Standing</h3>
+            <span style="font-size:11.5px;color:var(--muted)">Class vs Branch vs Dept vs College</span>
+          </div>
+          <div class="chart-inspector" id="hierarchyInspector">
+            <span>💡</span> <span>Hover over any tier bar to pop up student count &amp; percentile rank</span>
+          </div>
+          <div class="card-body" style="padding:10px 18px 18px;height:320px;position:relative"><canvas id="hierarchyChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       UNLINKED STUDENT NOTICE
+  ══════════════════════════════════════════════════════════════ -->
+  <div id="unlinkedSection" style="display:none">
+    <div class="warning-card">
+      <div style="font-size:48px;margin-bottom:12px">⚠️</div>
+      <h3>Academic Record Not Linked</h3>
+      <p>
+        You are currently logged in with email:<br/>
+        <strong style="color:var(--cyan);font-family:monospace" id="unlinkedEmail">user@email.com</strong>
+      </p>
+      <p style="text-align:left;background:rgba(2,10,24,0.6);padding:14px;border-radius:10px;border:1px solid rgba(239,68,68,0.25)">
+        • Your faculty has not yet registered your student record with this email address.<br/>
+        • Once added in the Faculty Portal, your class, branch, department, and college ranks will automatically be computed and shown here.
+      </p>
+      <button class="btn btn-primary" onclick="RA.logout()">Switch Account / Logout</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       FACULTY NOTICE VIEW
+  ══════════════════════════════════════════════════════════════ -->
+  <div id="facultyRankingNotice" style="display:none;padding:30px 10px;text-align:center">
+    <div class="card" style="max-width:620px;margin:30px auto;padding:36px 28px;border:1px solid rgba(0,240,255,0.3);background:var(--glass-bg-card);box-shadow:0 14px 40px rgba(0,0,0,0.5)">
+      <div style="font-size:46px;margin-bottom:12px">🧑‍🏫</div>
+      <h2 style="font-size:22px;font-weight:800;color:#fff;margin-bottom:8px">Faculty Account Active</h2>
+      <p style="color:var(--muted);font-size:13.5px;line-height:1.6;margin-bottom:22px">
+        You are logged in with Faculty credentials. The rankings page computes personalized class, branch, department, and college ranks for student accounts.
+      </p>
+      <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap">
+        <a href="../faculty/frontend/index.html" class="btn btn-primary" style="padding:11px 24px;font-size:14px">🧑‍🏫 Open Faculty Portal</a>
+        <a href="results.html" class="btn btn-secondary" style="padding:11px 20px;font-size:14px">📊 Browse All Student Results</a>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  initPage('ranking');
+
+  let currentStudent = null;
+  let activeSemester = 1;
+  let activeMetric = 'sgpa'; // 'sgpa' | 'cgpa'
+
+  let hierarchyChartInst = null;
+  let subjectBenchmarkChartInst = null;
+  let difficultyChartInst = null;
+  let percentileChartInst = null;
+  let difficultyPieChartInst = null;
+
+  const session = RA.getSession();
+  const isStudent = session.role === 'student';
+
+  if (isStudent) {
+    const userEmail = (session.email || '').trim().toLowerCase();
+    const student = RA.getStudentByEmail ? RA.getStudentByEmail(userEmail) : null;
+
+    if (student) {
+      currentStudent = student;
+      document.getElementById('studentRankingSection').style.display = 'block';
+      initStudentRankings(student);
+    } else {
+      document.getElementById('unlinkedSection').style.display = 'block';
+      document.getElementById('unlinkedEmail').textContent = userEmail || 'unknown';
+    }
+  } else {
+    document.getElementById('facultyRankingNotice').style.display = 'block';
+  }
+
+  function initStudentRankings(stu) {
+    document.getElementById('stuAvatar').textContent = stu.name.charAt(0).toUpperCase();
+    document.getElementById('stuName').textContent   = stu.name;
+    document.getElementById('stuRollAndBranch').textContent =
+      stu.rollNo + ' · ' + (stu.branch || 'CSE') + ' · Batch ' + (stu.batch || '2021');
+
+    const dept = stu.department || (RA.getDepartmentForBranch ? RA.getDepartmentForBranch(stu.branch) : 'CSE');
+    document.getElementById('stuDeptTag').textContent = 'Dept: ' + dept;
+
+    const allMarks = RA.getMarksForStudent(stu.id).sort((a,b) => a.semester - b.semester);
+    const semTabsEl = document.getElementById('semTabs');
+
+    if (!allMarks.length) {
+      semTabsEl.innerHTML = '<div style="color:var(--muted);font-size:13px">No marks recorded yet.</div>';
+      return;
+    }
+
+    semTabsEl.innerHTML = allMarks.map(m => {
+      return `<button class="sem-tab-btn ${m.semester === activeSemester ? 'active' : ''}" onclick="switchSem(${m.semester})">
+        Semester ${m.semester}
+      </button>`;
+    }).join('');
+
+    activeSemester = allMarks[allMarks.length - 1].semester;
+    switchSem(activeSemester);
+  }
+
+  function switchSem(sem) {
+    activeSemester = sem;
+    document.querySelectorAll('.sem-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.textContent.trim() === 'Semester ' + sem);
+    });
+    document.getElementById('stuSemTag').textContent = 'Semester ' + sem;
+    renderAllRankings();
+  }
+
+  function switchMetric(metric) {
+    activeMetric = metric;
+    document.getElementById('btnToggleSGPA').classList.toggle('active', metric === 'sgpa');
+    document.getElementById('btnToggleCGPA').classList.toggle('active', metric === 'cgpa');
+    renderAllRankings();
+  }
+
+  function renderAllRankings() {
+    if (!currentStudent) return;
+    const hier = RA.getStudentHierarchyRanks ? RA.getStudentHierarchyRanks(currentStudent.id, activeSemester) : null;
+    if (!hier) return;
+
+    const metricData = activeMetric === 'sgpa' ? hier.sgpa : hier.cgpa;
+    const metricLabel = activeMetric === 'sgpa' ? 'SGPA' : 'CGPA';
+
+    // 1. Update Topper Spotlight & Gap
+    const topper = metricData.topper;
+    if (topper) {
+      document.getElementById('topperTitle').textContent = `Top Performer (${metricLabel})`;
+      document.getElementById('topperName').textContent = topper.name;
+      document.getElementById('topperDetails').textContent = (topper.rollNo || '') + ' · ' + (topper.branch || hier.studentBranch);
+      const topScore = activeMetric === 'sgpa' ? (topper.sgpa || 0) : (topper.cgpa || 0);
+      document.getElementById('topperScore').textContent = topScore > 0 ? topScore.toFixed(2) : '—';
+      document.getElementById('myScore').textContent = metricData.myScore > 0 ? metricData.myScore.toFixed(2) : '—';
+
+      const gap = topScore - metricData.myScore;
+      const gapEl = document.getElementById('topperGap');
+      if (gap <= 0.01) {
+        gapEl.textContent = '🌟 You are #1!';
+        gapEl.style.color = '#fbbf24';
+      } else {
+        gapEl.textContent = '-' + gap.toFixed(2) + ' pts';
+        gapEl.style.color = '#38BDF8';
+      }
+    }
+
+    // 2. Update Hierarchy Cards
+    // Class
+    document.getElementById('classRankVal').textContent = '#' + metricData.classRank;
+    document.getElementById('classScopeLabel').textContent = `Class Rank (${hier.studentBranch} Sec)`;
+    document.getElementById('classPctBadge').textContent = `Top ${metricData.classPct}%`;
+    document.getElementById('classBar').style.width = metricData.classPct + '%';
+    document.getElementById('classTotalSub').textContent = `${metricData.classTotal} Students`;
+    document.getElementById('stuRankSummaryTag').textContent = `🏆 Class Rank #${metricData.classRank} (${metricLabel})`;
+
+    // Branch
+    document.getElementById('branchRankVal').textContent = '#' + metricData.branchRank;
+    document.getElementById('branchScopeLabel').textContent = `Branch Rank (${hier.studentBranch})`;
+    document.getElementById('branchPctBadge').textContent = `Top ${metricData.branchPct}%`;
+    document.getElementById('branchBar').style.width = metricData.branchPct + '%';
+    document.getElementById('branchTotalSub').textContent = `${metricData.branchTotal} Students`;
+
+    // Department
+    document.getElementById('deptRankVal').textContent = '#' + metricData.deptRank;
+    document.getElementById('deptScopeLabel').textContent = `Dept Rank (${hier.studentDept})`;
+    document.getElementById('deptPctBadge').textContent = `Top ${metricData.deptPct}%`;
+    document.getElementById('deptBar').style.width = metricData.deptPct + '%';
+    document.getElementById('deptTotalSub').textContent = `${metricData.deptTotal} Students`;
+
+    // College
+    document.getElementById('colRankVal').textContent = '#' + metricData.collegeRank;
+    document.getElementById('colPctBadge').textContent = `Top ${metricData.collegePct}%`;
+    document.getElementById('colBar').style.width = metricData.collegePct + '%';
+    document.getElementById('colTotalSub').textContent = `${metricData.collegeTotal} Students`;
+
+    // 3. Subject-wise Rankings & Difficulty
+    const subjects = RA.getSubjectWiseRanking ? RA.getSubjectWiseRanking(currentStudent.id, activeSemester) : [];
+    const tbody = document.getElementById('subjectRankingBody');
+
+    if (!subjects.length) {
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">No subject records for Semester ' + activeSemester + '</td></tr>';
+    } else {
+      tbody.innerHTML = subjects.map(s => {
+        let diffClass = 'diff-moderate';
+        if (s.diffLabel.includes('Tough')) diffClass = 'diff-tough';
+        if (s.diffLabel.includes('Easy')) diffClass = 'diff-easy';
+
+        const gColor = RA.gradeColor(s.grade.grade);
+
+        return `<tr>
+          <td><strong style="color:var(--sky)">${RA.escHTML(s.code)}</strong></td>
+          <td><strong>${RA.escHTML(s.name)}</strong></td>
+          <td style="text-align:center;color:var(--muted)">${s.credits}</td>
+          <td style="text-align:center"><strong style="font-size:15px;color:var(--cyan)">${s.myScore}</strong></td>
+          <td style="text-align:center">
+            <span class="stu-tag" style="background:rgba(0,240,255,0.1);color:var(--cyan);font-weight:700">
+              #${s.myRank} of ${s.totalCount}
+            </span>
+          </td>
+          <td style="text-align:center"><span style="color:#fbbf24;font-weight:600">${s.topper.score}</span> <span style="font-size:11px;color:var(--muted)">(${RA.escHTML(s.topper.studentName)})</span></td>
+          <td style="text-align:center;color:var(--soft)">${s.mean}</td>
+          <td style="text-align:center;color:var(--muted)">±${s.sd}</td>
+          <td style="text-align:center">
+            <span class="diff-badge ${diffClass}">${RA.escHTML(s.diffLabel)}</span>
+          </td>
+          <td style="text-align:center">
+            <span class="grade-badge" style="color:${gColor};border-color:${gColor}45;background:${gColor}15">
+              ${s.grade.grade}
+            </span>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    // 4. Render All 3D Charts
+    renderHierarchyChart(metricData);
+    renderSubjectBenchmarkChart(subjects);
+    renderDifficultyChart(subjects);
+    renderPercentileChart(subjects);
+    renderDifficultyPieChart(subjects);
+    if (window.init3DGraphCards) window.init3DGraphCards();
+  }
+
+  // ── 1. 3D Multi-Tier Percentile Standing Bar ───────────────
+  function renderHierarchyChart(metricData) {
+    if (hierarchyChartInst) hierarchyChartInst.destroy();
+    const canvas = document.getElementById('hierarchyChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const tierLabels = ['Class / Section', 'Branch', 'Department', 'College'];
+    const tierRanks = [metricData.classRank, metricData.branchRank, metricData.deptRank, metricData.collegeRank];
+    const tierTotals = [metricData.classTotal, metricData.branchTotal, metricData.deptTotal, metricData.collegeTotal];
+    const inspector = document.getElementById('hierarchyInspector');
+
+    hierarchyChartInst = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: tierLabels,
+        datasets: [{
+          label: 'Percentile Standing (Top %)',
+          data: [metricData.classPct, metricData.branchPct, metricData.deptPct, metricData.collegePct],
+          backgroundColor: [
+            'rgba(0, 240, 255, 0.85)',
+            'rgba(167, 139, 250, 0.85)',
+            'rgba(251, 191, 36, 0.85)',
+            'rgba(236, 72, 153, 0.85)'
+          ],
+          borderColor: ['#00F0FF', '#a78bfa', '#fbbf24', '#ec4899'],
+          borderWidth: 1.5,
+          borderRadius: 8,
+          hoverBorderWidth: 3.5,
+          hoverBorderColor: '#ffffff'
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        onHover: (event, activeElements) => {
+          if (!inspector) return;
+          if (activeElements.length > 0) {
+            const idx = activeElements[0].index;
+            const tier = tierLabels[idx];
+            const rank = tierRanks[idx];
+            const total = tierTotals[idx];
+            const pctVal = [metricData.classPct, metricData.branchPct, metricData.deptPct, metricData.collegePct][idx];
+            inspector.classList.add('active');
+            inspector.innerHTML = `<strong>🏛️ Pop-up Tier: ${tier}:</strong> Your Rank: <strong>#${rank} of ${total}</strong> · Standing: <strong>Top ${pctVal}%</strong> of peer group`;
+          } else {
+            inspector.classList.remove('active');
+            inspector.innerHTML = `<span>💡</span> <span>Hover over any tier bar to pop up student count &amp; percentile rank</span>`;
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            padding: 14,
+            backgroundColor: 'rgba(3, 7, 18, 0.95)',
+            borderColor: '#00F0FF',
+            borderWidth: 2,
+            cornerRadius: 10,
+            callbacks: {
+              title: (items) => `Institutional Scope: ${items[0].label}`,
+              label: (ctx) => ` Percentile: Top ${ctx.raw}% of peer group`,
+              afterBody: (items) => {
+                const idx = items[0].dataIndex;
+                return `Rank: #${tierRanks[idx]} out of ${tierTotals[idx]} enrolled students`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { min: 0, max: 100, ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 12, weight: 600 }, callback: v => v + '%' }, grid: { color: 'rgba(56,189,248,0.08)' } },
+          y: { ticks: { color: 'rgba(186,230,253,0.85)', font: { family: 'DM Sans', size: 12, weight: 600 } }, grid: { display: false } }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+
+  // ── 2. 3D Subject Benchmark Bar ────────────────────────────
+  function renderSubjectBenchmarkChart(subjects) {
+    if (subjectBenchmarkChartInst) subjectBenchmarkChartInst.destroy();
+    const canvas = document.getElementById('subjectBenchmarkChart');
+    if (!canvas || !subjects.length) return;
+    const ctx = canvas.getContext('2d');
+
+    const myGrad = ctx.createLinearGradient(0, 0, 0, 320);
+    myGrad.addColorStop(0, '#00F0FF');
+    myGrad.addColorStop(1, 'rgba(0, 163, 255, 0.45)');
+
+    const topGrad = ctx.createLinearGradient(0, 0, 0, 320);
+    topGrad.addColorStop(0, '#fde047');
+    topGrad.addColorStop(1, 'rgba(251, 191, 36, 0.45)');
+
+    const meanGrad = ctx.createLinearGradient(0, 0, 0, 320);
+    meanGrad.addColorStop(0, '#94a3b8');
+    meanGrad.addColorStop(1, 'rgba(71, 85, 105, 0.45)');
+
+    const inspector = document.getElementById('rankingBenchmarkInspector');
+
+    subjectBenchmarkChartInst = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: subjects.map(s => s.code),
+        datasets: [
+          {
+            label: 'My Score',
+            data: subjects.map(s => s.myScore),
+            backgroundColor: myGrad,
+            borderColor: '#00F0FF',
+            borderWidth: 1.5,
+            borderRadius: 5,
+            hoverBorderWidth: 3.5,
+            hoverBorderColor: '#ffffff'
+          },
+          {
+            label: 'Subject Topper',
+            data: subjects.map(s => s.topper.score),
+            backgroundColor: topGrad,
+            borderColor: '#fbbf24',
+            borderWidth: 1.5,
+            borderRadius: 5,
+            hoverBorderWidth: 3.5,
+            hoverBorderColor: '#ffffff'
+          },
+          {
+            label: 'Class Mean (μ)',
+            data: subjects.map(s => s.mean),
+            backgroundColor: meanGrad,
+            borderColor: '#94a3b8',
+            borderWidth: 1.5,
+            borderRadius: 5,
+            hoverBorderWidth: 3.5,
+            hoverBorderColor: '#ffffff'
+          }
+        ]
+      },
+      options: {
+        onHover: (event, activeElements) => {
+          if (!inspector) return;
+          if (activeElements.length > 0) {
+            const idx = activeElements[0].index;
+            const s = subjects[idx];
+            const topperGap = (s.topper.score - s.myScore).toFixed(1);
+            const meanGap = (s.myScore - s.mean).toFixed(1);
+            const gapStr = topperGap <= 0 ? '🌟 You are Topper!' : `-${topperGap} to Topper`;
+            inspector.classList.add('active');
+            inspector.innerHTML = `<strong>🎯 Pop-up Benchmark: ${s.code} (${s.name}):</strong> You: <strong>${s.myScore}</strong> · Topper: <strong>${s.topper.score}</strong> (${s.topper.studentName}) · Class Mean: <strong>${s.mean}</strong> (${gapStr} · ${meanGap >= 0 ? '+' : ''}${meanGap} vs Mean)`;
+          } else {
+            inspector.classList.remove('active');
+            inspector.innerHTML = `<span>💡</span> <span>Hover over any subject bar to pop up topper score &amp; benchmark gap</span>`;
+          }
+        },
+        plugins: {
+          legend: { labels: { color: 'rgba(186,230,253,0.85)', font: { family: 'DM Sans', size: 11, weight: 600 } } },
+          tooltip: {
+            padding: 14,
+            backgroundColor: 'rgba(3, 7, 18, 0.95)',
+            borderColor: '#00F0FF',
+            borderWidth: 2,
+            cornerRadius: 10,
+            callbacks: {
+              title: (items) => {
+                const s = subjects[items[0].dataIndex];
+                return `${s.code} – ${s.name}`;
+              },
+              afterBody: (items) => {
+                const s = subjects[items[0].dataIndex];
+                return `──────────────────\nYour Score: ${s.myScore}/100\nTopper: ${s.topper.score}/100 (${s.topper.studentName})\nClass Mean: ${s.mean}/100\nRank in Subject: #${s.myRank} of ${s.totalCount}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 11, weight: 600 } }, grid: { color: 'rgba(56,189,248,0.08)' } },
+          y: { ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 11 } }, grid: { color: 'rgba(56,189,248,0.08)' }, min: 0, max: 100 }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+
+  // ── 3. 3D Difficulty Histogram Rating ──────────────────────
+  function renderDifficultyChart(subjects) {
+    if (difficultyChartInst) difficultyChartInst.destroy();
+    const canvas = document.getElementById('difficultyChart');
+    if (!canvas || !subjects.length) return;
+    const ctx = canvas.getContext('2d');
+
+    const inspector = document.getElementById('difficultyHistInspector');
+
+    difficultyChartInst = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: subjects.map(s => s.code),
+        datasets: [{
+          label: 'Difficulty Index (1 to 10)',
+          data: subjects.map(s => s.diffScore),
+          backgroundColor: subjects.map(s => s.diffColor + 'cc'),
+          borderColor: subjects.map(s => s.diffColor),
+          borderWidth: 1.5,
+          borderRadius: 6,
+          hoverBorderWidth: 3.5,
+          hoverBorderColor: '#ffffff'
+        }]
+      },
+      options: {
+        onHover: (event, activeElements) => {
+          if (!inspector) return;
+          if (activeElements.length > 0) {
+            const idx = activeElements[0].index;
+            const s = subjects[idx];
+            inspector.classList.add('active');
+            inspector.innerHTML = `<strong>📊 Pop-up Pillar: ${s.code} (${s.name}):</strong> Toughness Rating: <strong>${s.diffScore} / 10</strong> · Classification: <strong>${s.diffLabel}</strong> · Class Mean: <strong>${s.mean} / 100</strong> (σ: ±${s.sd})`;
+          } else {
+            inspector.classList.remove('active');
+            inspector.innerHTML = `<span>💡</span> <span>Hover over any difficulty pillar to pop up class mean &amp; toughness index</span>`;
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            padding: 14,
+            backgroundColor: 'rgba(3, 7, 18, 0.95)',
+            borderColor: '#00F0FF',
+            borderWidth: 2,
+            cornerRadius: 10,
+            callbacks: {
+              title: (items) => {
+                const s = subjects[items[0].dataIndex];
+                return `${s.code} – ${s.name}`;
+              },
+              afterBody: (items) => {
+                const s = subjects[items[0].dataIndex];
+                return `Level: ${s.diffLabel}\nDifficulty Rating: ${s.diffScore}/10\nClass Mean (μ): ${s.mean}/100\nVariance (σ): ±${s.sd}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 11, weight: 600 } }, grid: { color: 'rgba(56,189,248,0.08)' } },
+          y: { min: 0, max: 10, ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 11 } }, grid: { color: 'rgba(56,189,248,0.08)' } }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+
+  // ── 4. 3D Line Graph: Subject Percentile Trajectory ────────
+  function renderPercentileChart(subjects) {
+    if (percentileChartInst) percentileChartInst.destroy();
+    const canvas = document.getElementById('percentileChart');
+    if (!canvas || !subjects.length) return;
+    const ctx = canvas.getContext('2d');
+
+    const strokeGrad = ctx.createLinearGradient(0, 0, 500, 0);
+    strokeGrad.addColorStop(0, '#00F0FF');
+    strokeGrad.addColorStop(0.5, '#38BDF8');
+    strokeGrad.addColorStop(1, '#a78bfa');
+
+    const fillGrad = ctx.createLinearGradient(0, 0, 0, 320);
+    fillGrad.addColorStop(0, 'rgba(0, 240, 255, 0.38)');
+    fillGrad.addColorStop(0.6, 'rgba(56, 189, 248, 0.12)');
+    fillGrad.addColorStop(1, 'rgba(3, 7, 18, 0)');
+
+    const inspector = document.getElementById('percentileInspector');
+
+    percentileChartInst = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: subjects.map(s => s.code),
+        datasets: [{
+          label: 'Percentile in Subject',
+          data: subjects.map(s => s.percentile),
+          borderColor: strokeGrad,
+          backgroundColor: fillGrad,
+          pointBackgroundColor: '#00F0FF',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2.5,
+          pointRadius: 8,
+          pointHoverRadius: 14,
+          pointHoverBackgroundColor: '#ffffff',
+          pointHoverBorderColor: '#00F0FF',
+          pointHoverBorderWidth: 4,
+          borderWidth: 3.5,
+          fill: true,
+          tension: 0.38
+        }]
+      },
+      options: {
+        onHover: (event, activeElements) => {
+          if (!inspector) return;
+          if (activeElements.length > 0) {
+            const idx = activeElements[0].index;
+            const s = subjects[idx];
+            inspector.classList.add('active');
+            inspector.innerHTML = `<strong>📈 Pop-up Node: ${s.code} (${s.name}):</strong> Your Score: <strong>${s.myScore}/100</strong> · Subject Rank: <strong>#${s.myRank} of ${s.totalCount}</strong> · Standing: <strong>Top ${s.percentile}%</strong> of Class`;
+          } else {
+            inspector.classList.remove('active');
+            inspector.innerHTML = `<span>💡</span> <span>Hover over any subject node to pop up rank percentile &amp; class standing</span>`;
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            padding: 14,
+            backgroundColor: 'rgba(3, 7, 18, 0.95)',
+            borderColor: '#00F0FF',
+            borderWidth: 2,
+            cornerRadius: 10,
+            callbacks: {
+              title: (items) => {
+                const s = subjects[items[0].dataIndex];
+                return `${s.code} – ${s.name}`;
+              },
+              label: (ctx) => ` Relative Percentile: Top ${ctx.raw}% of class`,
+              afterBody: (items) => {
+                const s = subjects[items[0].dataIndex];
+                return `Score: ${s.myScore}/100\nRank in Subject: #${s.myRank} of ${s.totalCount}\nRelative Grade: ${s.grade.grade}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 11, weight: 600 } }, grid: { color: 'rgba(56,189,248,0.08)' } },
+          y: { min: 0, max: 100, ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 11 }, callback: v => v + '%' }, grid: { color: 'rgba(56,189,248,0.08)' } }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+
+  // ── 5. 3D Pie Graph: Paper Difficulty Share ────────────────
+  function renderDifficultyPieChart(subjects) {
+    if (difficultyPieChartInst) difficultyPieChartInst.destroy();
+    const canvas = document.getElementById('difficultyPieChart');
+    if (!canvas || !subjects.length) return;
+    const ctx = canvas.getContext('2d');
+
+    const diffCategories = {
+      'Tough (Hard Paper)': { count: 0, courses: [] },
+      'Moderate': { count: 0, courses: [] },
+      'Easy / High Scoring': { count: 0, courses: [] }
+    };
+
+    subjects.forEach(s => {
+      let key = 'Moderate';
+      if (s.diffLabel.includes('Tough')) key = 'Tough (Hard Paper)';
+      else if (s.diffLabel.includes('Easy')) key = 'Easy / High Scoring';
+      diffCategories[key].count++;
+      diffCategories[key].courses.push(s.code);
+    });
+
+    const labels = Object.keys(diffCategories);
+    const data = labels.map(k => diffCategories[k].count);
+    const totalCourses = subjects.length || 1;
+    const inspector = document.getElementById('difficultyPieInspector');
+
+    difficultyPieChartInst = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: ['#f87171', '#38BDF8', '#4ade80'],
+          borderColor: '#030712',
+          borderWidth: 3,
+          hoverOffset: 34,
+          hoverBorderWidth: 4,
+          hoverBorderColor: '#ffffff'
+        }]
+      },
+      options: {
+        onHover: (event, activeElements) => {
+          if (!inspector) return;
+          if (activeElements.length > 0) {
+            const idx = activeElements[0].index;
+            const diffName = labels[idx];
+            const count = data[idx];
+            const pctVal = ((count / totalCourses) * 100).toFixed(1);
+            const coursesList = diffCategories[diffName].courses.join(', ');
+            inspector.classList.add('active');
+            inspector.innerHTML = `<strong>🥧 Pop-up Slice: ${diffName}:</strong> <strong>${count} Course(s)</strong> (${pctVal}% of semester) — Courses: <strong>${coursesList}</strong>`;
+          } else {
+            inspector.classList.remove('active');
+            inspector.innerHTML = `<span>💡</span> <span>Hover over any pie slice to pop up difficulty share &amp; course list</span>`;
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: 'rgba(186,230,253,0.85)', font: { family: 'DM Sans', size: 11, weight: 600 }, boxWidth: 12, padding: 14 }
+          },
+          tooltip: {
+            padding: 14,
+            backgroundColor: 'rgba(3, 7, 18, 0.95)',
+            borderColor: '#00F0FF',
+            borderWidth: 2,
+            cornerRadius: 10,
+            callbacks: {
+              title: (items) => `Paper Difficulty: ${items[0].label}`,
+              label: (ctx) => {
+                const count = ctx.raw;
+                const pctVal = ((count / totalCourses) * 100).toFixed(1);
+                return ` ${count} Subject(s) (${pctVal}% of total courses)`;
+              },
+              afterLabel: (ctx) => {
+                const k = ctx.label;
+                const list = diffCategories[k] ? diffCategories[k].courses.join(', ') : '';
+                return `Courses: ${list}`;
+              }
+            }
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+</script>
+</body>
+</html>

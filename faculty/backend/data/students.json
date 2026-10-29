@@ -1,0 +1,842 @@
+﻿[
+    {
+        "id":  "s_mits_BTCB25O1092",
+        "semester":  1,
+        "rollNo":  "BTCB25O1092",
+        "name":  "Pranjali Mehra",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "pranjali.mehra@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTIO25O1042",
+        "semester":  1,
+        "rollNo":  "BTIO25O1042",
+        "name":  "Bhumika Varfa",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "bhumika.varfa@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1081",
+        "semester":  1,
+        "rollNo":  "BTCB25O1081",
+        "name":  "Mritunjay Dubey",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "mritunjay.dubey@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1116",
+        "semester":  1,
+        "rollNo":  "BTCB25O1116",
+        "name":  "Satwik Singhal",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "satwik.singhal@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1091",
+        "semester":  1,
+        "rollNo":  "BTCB25O1091",
+        "name":  "Pragati Jain",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "pragati.jain@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1154",
+        "semester":  1,
+        "rollNo":  "BTCB25O1154",
+        "name":  "Nikita Tripathi",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "nikita.tripathi@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1101",
+        "semester":  1,
+        "rollNo":  "BTCB25O1101",
+        "name":  "Rajmani Sisodiya",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "rajmani.sisodiya@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1139",
+        "semester":  1,
+        "rollNo":  "BTCB25O1139",
+        "name":  "Vaishali Varma",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "vaishali.varma@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1108",
+        "semester":  1,
+        "rollNo":  "BTCB25O1108",
+        "name":  "Ronak Gupta",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "ronak.gupta@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1133",
+        "semester":  1,
+        "rollNo":  "BTCB25O1133",
+        "name":  "Tanishka Singh Sengar",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "tanishka.singh.sengar@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1122",
+        "semester":  1,
+        "rollNo":  "BTCB25O1122",
+        "name":  "Shreyansh Verma",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "shreyansh.verma@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1134",
+        "semester":  1,
+        "rollNo":  "BTCB25O1134",
+        "name":  "Tanu Samadhiya",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "tanu.samadhiya@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1082",
+        "semester":  1,
+        "rollNo":  "BTCB25O1082",
+        "name":  "Mritunjay Mishra",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "mritunjay.mishra@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1113",
+        "semester":  1,
+        "rollNo":  "BTCB25O1113",
+        "name":  "Sarthak Vashishtha",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "sarthak.vashishtha@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1093",
+        "semester":  1,
+        "rollNo":  "BTCB25O1093",
+        "name":  "Pranshu Gupta",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "pranshu.gupta@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1155",
+        "semester":  1,
+        "rollNo":  "BTCB25O1155",
+        "name":  "Aditya Ahamana",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "aditya.ahamana@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1105",
+        "semester":  1,
+        "rollNo":  "BTCB25O1105",
+        "name":  "Risikesh Singh Bhadouria",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "risikesh.singh.bhadouria@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1099",
+        "semester":  1,
+        "rollNo":  "BTCB25O1099",
+        "name":  "Raj Sahu",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "raj.sahu@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1143",
+        "semester":  1,
+        "rollNo":  "BTCB25O1143",
+        "name":  "Vinamra Tamrakar",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "vinamra.tamrakar@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1106",
+        "semester":  1,
+        "rollNo":  "BTCB25O1106",
+        "name":  "Ritik Baghel",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "ritik.baghel@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1144",
+        "semester":  1,
+        "rollNo":  "BTCB25O1144",
+        "name":  "Vinay Gaur",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "vinay.gaur@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1086",
+        "semester":  1,
+        "rollNo":  "BTCB25O1086",
+        "name":  "Niharika",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "niharika@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1104",
+        "semester":  1,
+        "rollNo":  "BTCB25O1104",
+        "name":  "Rishika Chourasiya",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "rishika.chourasiya@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1121",
+        "semester":  1,
+        "rollNo":  "BTCB25O1121",
+        "name":  "Shivansh Pathak",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "shivansh.pathak@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1138",
+        "semester":  1,
+        "rollNo":  "BTCB25O1138",
+        "name":  "Utsav Gupta",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "utsav.gupta@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1146",
+        "semester":  1,
+        "rollNo":  "BTCB25O1146",
+        "name":  "Virendra Sharma",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "virendra.sharma@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1126",
+        "semester":  1,
+        "rollNo":  "BTCB25O1126",
+        "name":  "Srashti Gupta",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "srashti.gupta@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1132",
+        "semester":  1,
+        "rollNo":  "BTCB25O1132",
+        "name":  "Swastika Chaubey",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "swastika.chaubey@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1085",
+        "semester":  1,
+        "rollNo":  "BTCB25O1085",
+        "name":  "Neelam Patel",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "neelam.patel@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1118",
+        "semester":  1,
+        "rollNo":  "BTCB25O1118",
+        "name":  "Shital sangulle",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "shital.sangulle@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1124",
+        "semester":  1,
+        "rollNo":  "BTCB25O1124",
+        "name":  "Siddhant Gupta",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "siddhant.gupta@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1130",
+        "semester":  1,
+        "rollNo":  "BTCB25O1130",
+        "name":  "Sumit Suryawanshi",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "sumit.suryawanshi@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1111",
+        "semester":  1,
+        "rollNo":  "BTCB25O1111",
+        "name":  "Sanchit Mandrai",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "sanchit.mandrai@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1112",
+        "semester":  1,
+        "rollNo":  "BTCB25O1112",
+        "name":  "Sandeep Ahirwar",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "sandeep.ahirwar@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1089",
+        "semester":  1,
+        "rollNo":  "BTCB25O1089",
+        "name":  "Paras Prajapati",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "paras.prajapati@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1094",
+        "semester":  1,
+        "rollNo":  "BTCB25O1094",
+        "name":  "Prateek Singh Chauhan",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "prateek.singh.chauhan@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1095",
+        "semester":  1,
+        "rollNo":  "BTCB25O1095",
+        "name":  "Prerna Bhadouria",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "prerna.bhadouria@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1127",
+        "semester":  1,
+        "rollNo":  "BTCB25O1127",
+        "name":  "Sujal Agrawal",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "sujal.agrawal@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1148",
+        "semester":  1,
+        "rollNo":  "BTCB25O1148",
+        "name":  "Vishwabodh Singh",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "vishwabodh.singh@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1151",
+        "semester":  1,
+        "rollNo":  "BTCB25O1151",
+        "name":  "Yashvardhan Singh Chauhan",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "yashvardhan.singh.chauhan@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1137",
+        "semester":  1,
+        "rollNo":  "BTCB25O1137",
+        "name":  "Tushar Birla",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "tushar.birla@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1150",
+        "semester":  1,
+        "rollNo":  "BTCB25O1150",
+        "name":  "Yash Gupta",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "yash.gupta@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1087",
+        "semester":  1,
+        "rollNo":  "BTCB25O1087",
+        "name":  "Nishchal Pratap Rajawat",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "nishchal.pratap.rajawat@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1158",
+        "semester":  1,
+        "rollNo":  "BTCB25O1158",
+        "name":  "Sahib Khan",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "sahib.khan@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1100",
+        "semester":  1,
+        "rollNo":  "BTCB25O1100",
+        "name":  "Rajkumar Patidar",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "rajkumar.patidar@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1147",
+        "semester":  1,
+        "rollNo":  "BTCB25O1147",
+        "name":  "Vishesh Gurjar",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "vishesh.gurjar@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1156",
+        "semester":  1,
+        "rollNo":  "BTCB25O1156",
+        "name":  "Dev Srajan Purohit",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "dev.srajan.purohit@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1157",
+        "semester":  1,
+        "rollNo":  "BTCB25O1157",
+        "name":  "Pramod Kushwah",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "pramod.kushwah@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1119",
+        "semester":  1,
+        "rollNo":  "BTCB25O1119",
+        "name":  "Shiv Bhavsar",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "shiv.bhavsar@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1120",
+        "semester":  1,
+        "rollNo":  "BTCB25O1120",
+        "name":  "Shivam Prasad Sahu",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "shivam.prasad.sahu@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1096",
+        "semester":  1,
+        "rollNo":  "BTCB25O1096",
+        "name":  "Prithvi Patel",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "prithvi.patel@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1135",
+        "semester":  1,
+        "rollNo":  "BTCB25O1135",
+        "name":  "Tanuja Rawat",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "tanuja.rawat@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1107",
+        "semester":  1,
+        "rollNo":  "BTCB25O1107",
+        "name":  "Rohit Kumar",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "rohit.kumar@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1110",
+        "semester":  1,
+        "rollNo":  "BTCB25O1110",
+        "name":  "Sahil Ghorse",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "sahil.ghorse@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1140",
+        "semester":  1,
+        "rollNo":  "BTCB25O1140",
+        "name":  "Vaishnavi Sharma",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "vaishnavi.sharma@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1152",
+        "semester":  1,
+        "rollNo":  "BTCB25O1152",
+        "name":  "Yuvraj Jain",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "yuvraj.jain@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1083",
+        "semester":  1,
+        "rollNo":  "BTCB25O1083",
+        "name":  "Naman Kumar Tripathi",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "naman.kumar.tripathi@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1136",
+        "semester":  1,
+        "rollNo":  "BTCB25O1136",
+        "name":  "Tarun Dahiya",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "tarun.dahiya@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1084",
+        "semester":  1,
+        "rollNo":  "BTCB25O1084",
+        "name":  "Naman Rahangdale",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "naman.rahangdale@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1117",
+        "semester":  1,
+        "rollNo":  "BTCB25O1117",
+        "name":  "Satyam Sharma",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "satyam.sharma@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1115",
+        "semester":  1,
+        "rollNo":  "BTCB25O1115",
+        "name":  "Satakshi Sharma",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "satakshi.sharma@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1145",
+        "semester":  1,
+        "rollNo":  "BTCB25O1145",
+        "name":  "Vipul Jain",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "vipul.jain@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1088",
+        "semester":  1,
+        "rollNo":  "BTCB25O1088",
+        "name":  "Nitin Meena",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "nitin.meena@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1090",
+        "semester":  1,
+        "rollNo":  "BTCB25O1090",
+        "name":  "Piyush Baghel",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "piyush.baghel@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1097",
+        "semester":  1,
+        "rollNo":  "BTCB25O1097",
+        "name":  "Priyansh Patel",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "priyansh.patel@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1103",
+        "semester":  1,
+        "rollNo":  "BTCB25O1103",
+        "name":  "Raman Sahu",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "raman.sahu@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1114",
+        "semester":  1,
+        "rollNo":  "BTCB25O1114",
+        "name":  "Sarvesh Patel",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "sarvesh.patel@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1128",
+        "semester":  1,
+        "rollNo":  "BTCB25O1128",
+        "name":  "Sumit Kumar Patel",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "sumit.kumar.patel@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1142",
+        "semester":  1,
+        "rollNo":  "BTCB25O1142",
+        "name":  "Vansh Patidar",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "vansh.patidar@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1149",
+        "semester":  1,
+        "rollNo":  "BTCB25O1149",
+        "name":  "Vivek Patidar",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "vivek.patidar@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1098",
+        "semester":  1,
+        "rollNo":  "BTCB25O1098",
+        "name":  "Raghvendra Rajput",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "raghvendra.rajput@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1102",
+        "semester":  1,
+        "rollNo":  "BTCB25O1102",
+        "name":  "Ramkrishan Singh Tomar",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "ramkrishan.singh.tomar@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1123",
+        "semester":  1,
+        "rollNo":  "BTCB25O1123",
+        "name":  "Shyam Kushwah",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "shyam.kushwah@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1131",
+        "semester":  1,
+        "rollNo":  "BTCB25O1131",
+        "name":  "Sumit Yadav",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "sumit.yadav@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1125",
+        "semester":  1,
+        "rollNo":  "BTCB25O1125",
+        "name":  "Sparsh Tamrakar",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "sparsh.tamrakar@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1153",
+        "semester":  1,
+        "rollNo":  "BTCB25O1153",
+        "name":  "Yuvraj Singh Rajpoot",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "yuvraj.singh.rajpoot@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTEE25O1039",
+        "semester":  1,
+        "rollNo":  "BTEE25O1039",
+        "name":  "Mayank Jaiswal",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "mayank.jaiswal@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1159",
+        "semester":  1,
+        "rollNo":  "BTCB25O1159",
+        "name":  "Abhijeet Bhadouriya",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-B",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "abhijeet.bhadouriya@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1001",
+        "semester":  1,
+        "rollNo":  "BTCB25O1001",
+        "name":  "Aarav Sharma",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-A",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "aarav.sharma@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_BTCB25O1002",
+        "semester":  1,
+        "rollNo":  "BTCB25O1002",
+        "name":  "Priya Patel",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-A",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "priya.patel@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_0901CSBS251003",
+        "semester":  1,
+        "rollNo":  "0901CSBS251003",
+        "name":  "Rohan Verma",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-A",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "rohan.verma@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_0901CSBS251004",
+        "semester":  1,
+        "rollNo":  "0901CSBS251004",
+        "name":  "Ananya Iyer",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-A",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "ananya.iyer@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_0901CSBS251005",
+        "semester":  1,
+        "rollNo":  "0901CSBS251005",
+        "name":  "Vikram Singh",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-A",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "vikram.singh@mitsgwalior.in"
+    },
+    {
+        "id":  "s_mits_0901CSBS251006",
+        "semester":  1,
+        "rollNo":  "0901CSBS251006",
+        "name":  "Sneha Kulkarni",
+        "academicYear":  "2025-2026",
+        "className":  "CSBS-A",
+        "department":  "Centre for Computer Science and Technology",
+        "email":  "sneha.kulkarni@mitsgwalior.in"
+    }
+]
