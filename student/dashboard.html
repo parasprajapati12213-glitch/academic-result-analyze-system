@@ -93,6 +93,81 @@
     .m1{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#000}
     .m2{background:linear-gradient(135deg,#9ca3af,#d1d5db);color:#000}
     .m3{background:linear-gradient(135deg,#b45309,#d97706);color:#fff}
+  
+    /* ── Student Switcher Bar ── */
+    .student-switcher-bar {
+      background: linear-gradient(135deg, rgba(6, 18, 38, 0.95), rgba(11, 28, 60, 0.85));
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: 16px;
+      padding: 16px 22px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: 0 8px 32px rgba(0, 240, 255, 0.12), inset 0 1px 0 rgba(255,255,255,0.08);
+      backdrop-filter: blur(16px);
+    }
+    .switcher-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .switcher-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 163, 255, 0.2));
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+    .switcher-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .switcher-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .switcher-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .switcher-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sky);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .switcher-select {
+      background: rgba(2, 10, 24, 0.9);
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      border-radius: 10px;
+      color: #fff;
+      padding: 9px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      min-width: 270px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      transition: all .2s;
+    }
+    .switcher-select:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.35);
+    }
+
   </style>
 </head>
 <body>
@@ -100,10 +175,60 @@
 
 <main class="page">
 
+  <!-- ── Interactive Student Profile Switcher & Inspection Bar ── -->
+  <div class="student-switcher-bar">
+    <div class="switcher-left">
+      <div class="switcher-icon">🎓</div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="switcher-title">Student Academic Dashboard</span>
+          <span id="sessionRoleBadge" class="stu-tag stu-tag-verified" style="font-size:11px">Verified Record</span>
+        </div>
+        <div class="switcher-sub" id="switcherStatusText">
+          Inspecting verified academic marksheets, relative GPA &amp; 3D charts
+        </div>
+      </div>
+    </div>
+    <div class="switcher-right">
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <label for="dashboardStudentSelect" class="switcher-label">Switch Student:</label>
+          <select id="dashboardStudentSelect" class="switcher-select" onchange="onSwitchDashboardStudent(this.value)">
+            <!-- Populated dynamically with all 84 cohort students -->
+          </select>
+        </div>
+        <div style="font-size:11px;color:var(--muted)">
+          Switch student to inspect marksheet, SGPA/CGPA &amp; 3D charts
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Faculty Notice Banner (Non-blocking) -->
+  <div id="facultyNoticeSection" style="display:none;margin-bottom:20px">
+    <div class="notice-box" style="background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.3);color:#fbbf24">
+      <span style="font-size:22px">🧑‍🏫</span>
+      <div style="flex:1">
+        <strong>Faculty Preview Mode:</strong> You are logged in with Faculty credentials. The student dashboard below is currently previewing the selected student's marksheet and 3D performance curve. You can switch to any student or jump back to the faculty portal.
+      </div>
+      <a href="../faculty/frontend/index.html" class="btn btn-secondary" style="font-size:12px;padding:6px 14px">🧑‍🏫 Open Faculty Portal</a>
+    </div>
+  </div>
+
+  <!-- Unlinked Notice Banner (Non-blocking) -->
+  <div id="unlinkedSection" style="display:none;margin-bottom:20px">
+    <div class="notice-box" style="background:rgba(56,189,248,0.08);border-color:rgba(56,189,248,0.3);color:var(--sky)">
+      <span style="font-size:22px">ℹ️</span>
+      <div style="flex:1">
+        <strong>Institutional Account:</strong> Logged in as <code id="unlinkedEmail" style="color:var(--cyan);font-weight:700">student@mitsgwl.ac.in</code>. Showing default student cohort profile. Select your roll number from the switcher above to view your personalized results.
+      </div>
+    </div>
+  </div>
+
   <!-- ══════════════════════════════════════════════════════════════
-       STUDENT VIEW (Auto-shown when logged in as a student)
+       STUDENT VIEW (Always visible with live results)
   ══════════════════════════════════════════════════════════════ -->
-  <div id="studentSection" style="display:none">
+  <div id="studentSection">
 
     <!-- Hero Card -->
     <div class="student-hero">
@@ -311,44 +436,7 @@
 
   </div>
 
-  <!-- ══════════════════════════════════════════════════════════════
-       UNLINKED STUDENT NOTICE (If email is not in records)
-  ══════════════════════════════════════════════════════════════ -->
-  <div id="unlinkedSection" style="display:none">
-    <div class="warning-card">
-      <div style="font-size:48px;margin-bottom:12px">⚠️</div>
-      <h3>Academic Record Not Linked</h3>
-      <p>
-        You are currently logged in with email:<br/>
-        <strong style="color:var(--cyan);font-family:monospace" id="unlinkedEmail">user@email.com</strong>
-      </p>
-      <p style="text-align:left;background:rgba(2,10,24,0.6);padding:14px;border-radius:10px;border:1px solid rgba(239,68,68,0.25)">
-        • Your faculty has not yet added your student record with this email address.<br/>
-        • Please contact your course coordinator or faculty to register your email in the <strong>Faculty Portal</strong> under <strong>Students</strong>.<br/>
-        • Once added, your SGPA, CGPA, and relative grading results will automatically appear here!
-      </p>
-      <button class="btn btn-primary" onclick="RA.logout()">Switch Account / Logout</button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════════════
-       FACULTY NOTICE VIEW (Redirect / Quick Link to Faculty Portal)
-  ══════════════════════════════════════════════════════════════ -->
-  <div id="facultyNoticeSection" style="display:none;padding:30px 10px;text-align:center">
-    <div class="card" style="max-width:620px;margin:30px auto;padding:36px 28px;border:1px solid rgba(0,240,255,0.3);background:var(--glass-bg-card);box-shadow:0 14px 40px rgba(0,0,0,0.5)">
-      <div style="font-size:46px;margin-bottom:12px">🧑‍🏫</div>
-      <h2 style="font-size:22px;font-weight:800;color:#fff;margin-bottom:8px">Faculty Account Active</h2>
-      <p style="color:var(--muted);font-size:13.5px;line-height:1.6;margin-bottom:22px">
-        You are logged in with Faculty credentials. The student dashboard displays personalized metrics for individual students. Use the Faculty Portal to access your workspace.
-      </p>
-      <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap">
-        <a href="../faculty/frontend/index.html" class="btn btn-primary" style="padding:11px 24px;font-size:14px">🧑‍🏫 Open Faculty Portal</a>
-        <a href="results.html" class="btn btn-secondary" style="padding:11px 20px;font-size:14px">📊 Browse All Student Results</a>
-      </div>
-    </div>
-  </div>
-
-</main>
+  </main>
 
 <script>
   initPage('dashboard');
@@ -361,35 +449,87 @@
   let gradesPieChartInst = null;
   let histogramChartInst = null;
 
-  const session = RA.getSession();
+  // 1. Ensure master storage is initialized with all 84 students & 252 semester results
+  if (typeof initMasterStorage === 'function') initMasterStorage();
+
+  const allStudents = (typeof RA.getStudents === 'function')
+    ? RA.getStudents().slice().sort((a,b) => (a.rollNo || '').localeCompare(b.rollNo || ''))
+    : [];
+  const session = (typeof RA.getSession === 'function') ? RA.getSession() : {};
   const isStudent = session.role === 'student';
+  const isFaculty = session.role === 'faculty' || session.role === 'teacher';
+  const userEmail = (session.email || '').trim().toLowerCase();
 
-  if (isStudent) {
-    // 🎓 Student Experience
-    if (typeof initMasterStorage === 'function') initMasterStorage();
-    const userEmail = (session.email || '').trim().toLowerCase();
-    let student = RA.getStudentByEmail ? RA.getStudentByEmail(userEmail) : null;
-    if (!student && session.studentId) {
-      student = RA.getStudent ? RA.getStudent(session.studentId) : null;
-    }
-    if (!student && session.rollNo) {
-      student = RA.getStudents().find(s => (s.rollNo || '').trim().toLowerCase() === (session.rollNo || '').trim().toLowerCase()) || null;
-    }
-    if (!student && session.name) {
-      student = RA.getStudents().find(s => (s.name || '').trim().toLowerCase() === (session.name || '').trim().toLowerCase()) || null;
-    }
+  // 2. Identify initial target student
+  let targetStudent = null;
+  const urlParams = new URLSearchParams(window.location.search);
+  const sidParam = urlParams.get('sid') || urlParams.get('id');
+  const rollParam = urlParams.get('roll') || urlParams.get('rollNo');
 
-    if (student) {
-      currentStudent = student;
-      document.getElementById('studentSection').style.display = 'block';
-      renderStudentDashboard(student);
-    } else {
+  if (sidParam && RA.getStudent) {
+    targetStudent = RA.getStudent(sidParam);
+  }
+  if (!targetStudent && rollParam) {
+    targetStudent = allStudents.find(s => (s.rollNo || '').trim().toLowerCase() === rollParam.trim().toLowerCase());
+  }
+  if (!targetStudent && userEmail && RA.getStudentByEmail) {
+    targetStudent = RA.getStudentByEmail(userEmail);
+  }
+  if (!targetStudent && session.studentId && RA.getStudent) {
+    targetStudent = RA.getStudent(session.studentId);
+  }
+  if (!targetStudent && session.rollNo) {
+    targetStudent = allStudents.find(s => (s.rollNo || '').trim().toLowerCase() === (session.rollNo || '').trim().toLowerCase());
+  }
+  if (!targetStudent && session.name) {
+    targetStudent = allStudents.find(s => (s.name || '').trim().toLowerCase() === (session.name || '').trim().toLowerCase());
+  }
+
+  // Universal Fallback: Default to Paras Prajapati (BTCB25O1089) or first student
+  if (!targetStudent && allStudents.length > 0) {
+    targetStudent = allStudents.find(s => (s.rollNo || '').includes('1089') || (s.name || '').toLowerCase().includes('paras')) || allStudents[0];
+    if (isStudent && userEmail) {
       document.getElementById('unlinkedSection').style.display = 'block';
-      document.getElementById('unlinkedEmail').textContent = userEmail || 'unknown';
+      document.getElementById('unlinkedEmail').textContent = userEmail;
     }
-  } else {
-    // 🧑‍🏫 Faculty Experience
+  }
+
+  // Update role notices
+  if (isFaculty) {
     document.getElementById('facultyNoticeSection').style.display = 'block';
+    const roleBadge = document.getElementById('sessionRoleBadge');
+    if (roleBadge) {
+      roleBadge.textContent = 'Faculty Preview';
+      roleBadge.style.background = 'rgba(245,158,11,0.15)';
+      roleBadge.style.color = '#fbbf24';
+      roleBadge.style.borderColor = 'rgba(245,158,11,0.35)';
+    }
+  }
+
+  // 3. Populate student switcher
+  const selEl = document.getElementById('dashboardStudentSelect');
+  if (selEl && allStudents.length > 0) {
+    selEl.innerHTML = allStudents.map(s => {
+      const cls = s.className || s.branch || 'CSBS';
+      const isSel = targetStudent && (s.id === targetStudent.id);
+      return `<option value="${s.id}" ${isSel ? 'selected' : ''}>${RA.escHTML(s.rollNo)} — ${RA.escHTML(s.name)} (${cls})</option>`;
+    }).join('');
+  }
+
+  // 4. Render the dashboard immediately
+  if (targetStudent) {
+    currentStudent = targetStudent;
+    document.getElementById('studentSection').style.display = 'block';
+    renderStudentDashboard(currentStudent);
+  }
+
+  function onSwitchDashboardStudent(studentId) {
+    const s = (typeof RA.getStudent === 'function')
+      ? RA.getStudent(studentId)
+      : allStudents.find(x => x.id === studentId);
+    if (!s) return;
+    currentStudent = s;
+    renderStudentDashboard(currentStudent);
   }
 
   // ══════════════════════════════════════════════════════════════

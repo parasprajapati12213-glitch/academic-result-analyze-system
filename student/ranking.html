@@ -97,6 +97,81 @@
     .warning-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.30);border-radius:16px;padding:32px 24px;text-align:center;margin:40px auto;max-width:540px}
     .warning-card h3{color:#f87171;font-size:18px;margin-bottom:8px}
     .warning-card p{color:var(--muted);font-size:13.5px;margin-bottom:20px;line-height:1.6}
+  
+    /* ── Student Switcher Bar ── */
+    .student-switcher-bar {
+      background: linear-gradient(135deg, rgba(6, 18, 38, 0.95), rgba(11, 28, 60, 0.85));
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: 16px;
+      padding: 16px 22px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: 0 8px 32px rgba(0, 240, 255, 0.12), inset 0 1px 0 rgba(255,255,255,0.08);
+      backdrop-filter: blur(16px);
+    }
+    .switcher-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .switcher-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 163, 255, 0.2));
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+    .switcher-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .switcher-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .switcher-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .switcher-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sky);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .switcher-select {
+      background: rgba(2, 10, 24, 0.9);
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      border-radius: 10px;
+      color: #fff;
+      padding: 9px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      min-width: 270px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      transition: all .2s;
+    }
+    .switcher-select:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.35);
+    }
+
   </style>
 </head>
 <body>
@@ -104,10 +179,60 @@
 
 <main class="page">
 
+  <!-- ── Interactive Student Profile Switcher & Inspection Bar ── -->
+  <div class="student-switcher-bar">
+    <div class="switcher-left">
+      <div class="switcher-icon">🏆</div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="switcher-title">Student Class &amp; College Rankings</span>
+          <span id="sessionRoleBadge" class="stu-tag stu-tag-gold" style="font-size:11px">Relative Grading</span>
+        </div>
+        <div class="switcher-sub" id="switcherStatusText">
+          Live class standing, department &amp; college leaderboards, and 3D Gaussian bell curve
+        </div>
+      </div>
+    </div>
+    <div class="switcher-right">
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <label for="rankingStudentSelect" class="switcher-label">Switch Student:</label>
+          <select id="rankingStudentSelect" class="switcher-select" onchange="onSwitchRankingStudent(this.value)">
+            <!-- Populated dynamically with all 84 cohort students -->
+          </select>
+        </div>
+        <div style="font-size:11px;color:var(--muted)">
+          Inspect individual rank, percentile &amp; gap to topper
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Faculty Notice Banner (Non-blocking) -->
+  <div id="facultyRankingNotice" style="display:none;margin-bottom:20px">
+    <div class="notice-box" style="background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.3);color:#fbbf24">
+      <span style="font-size:22px">🧑‍🏫</span>
+      <div style="flex:1">
+        <strong>Faculty Preview Mode:</strong> Viewing ranking analysis from the perspective of the selected student. Switch student above to inspect their class, department, and college standing.
+      </div>
+      <a href="../faculty/frontend/index.html" class="btn btn-secondary" style="font-size:12px;padding:6px 14px">🧑‍🏫 Open Faculty Portal</a>
+    </div>
+  </div>
+
+  <!-- Unlinked Notice Banner (Non-blocking) -->
+  <div id="unlinkedSection" style="display:none;margin-bottom:20px">
+    <div class="notice-box" style="background:rgba(56,189,248,0.08);border-color:rgba(56,189,248,0.3);color:var(--sky)">
+      <span style="font-size:22px">ℹ️</span>
+      <div style="flex:1">
+        <strong>Institutional Account:</strong> Logged in as <code id="unlinkedEmail" style="color:var(--cyan);font-weight:700">student@mitsgwl.ac.in</code>. Showing default student rankings. Select your roll number above to inspect your standing.
+      </div>
+    </div>
+  </div>
+
   <!-- ══════════════════════════════════════════════════════════════
-       STUDENT RANKING VIEW
+       STUDENT RANKING VIEW (Always visible)
   ══════════════════════════════════════════════════════════════ -->
-  <div id="studentRankingSection" style="display:none">
+  <div id="studentRankingSection">
 
     <!-- Hero Card -->
     <div class="hero-banner">
@@ -398,43 +523,7 @@
 
   </div>
 
-  <!-- ══════════════════════════════════════════════════════════════
-       UNLINKED STUDENT NOTICE
-  ══════════════════════════════════════════════════════════════ -->
-  <div id="unlinkedSection" style="display:none">
-    <div class="warning-card">
-      <div style="font-size:48px;margin-bottom:12px">⚠️</div>
-      <h3>Academic Record Not Linked</h3>
-      <p>
-        You are currently logged in with email:<br/>
-        <strong style="color:var(--cyan);font-family:monospace" id="unlinkedEmail">user@email.com</strong>
-      </p>
-      <p style="text-align:left;background:rgba(2,10,24,0.6);padding:14px;border-radius:10px;border:1px solid rgba(239,68,68,0.25)">
-        • Your faculty has not yet registered your student record with this email address.<br/>
-        • Once added in the Faculty Portal, your class, branch, department, and college ranks will automatically be computed and shown here.
-      </p>
-      <button class="btn btn-primary" onclick="RA.logout()">Switch Account / Logout</button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════════════
-       FACULTY NOTICE VIEW
-  ══════════════════════════════════════════════════════════════ -->
-  <div id="facultyRankingNotice" style="display:none;padding:30px 10px;text-align:center">
-    <div class="card" style="max-width:620px;margin:30px auto;padding:36px 28px;border:1px solid rgba(0,240,255,0.3);background:var(--glass-bg-card);box-shadow:0 14px 40px rgba(0,0,0,0.5)">
-      <div style="font-size:46px;margin-bottom:12px">🧑‍🏫</div>
-      <h2 style="font-size:22px;font-weight:800;color:#fff;margin-bottom:8px">Faculty Account Active</h2>
-      <p style="color:var(--muted);font-size:13.5px;line-height:1.6;margin-bottom:22px">
-        You are logged in with Faculty credentials. The rankings page computes personalized class, branch, department, and college ranks for student accounts.
-      </p>
-      <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap">
-        <a href="../faculty/frontend/index.html" class="btn btn-primary" style="padding:11px 24px;font-size:14px">🧑‍🏫 Open Faculty Portal</a>
-        <a href="results.html" class="btn btn-secondary" style="padding:11px 20px;font-size:14px">📊 Browse All Student Results</a>
-      </div>
-    </div>
-  </div>
-
-</main>
+  </main>
 
 <script>
   initPage('ranking');
@@ -450,33 +539,87 @@
   let percentileChartInst = null;
   let difficultyPieChartInst = null;
 
-  const session = RA.getSession();
+  // 1. Ensure master storage is initialized with all 84 students & 252 semester results
+  if (typeof initMasterStorage === 'function') initMasterStorage();
+
+  const allStudents = (typeof RA.getStudents === 'function')
+    ? RA.getStudents().slice().sort((a,b) => (a.rollNo || '').localeCompare(b.rollNo || ''))
+    : [];
+  const session = (typeof RA.getSession === 'function') ? RA.getSession() : {};
   const isStudent = session.role === 'student';
+  const isFaculty = session.role === 'faculty' || session.role === 'teacher';
+  const userEmail = (session.email || '').trim().toLowerCase();
 
-  if (isStudent) {
-    if (typeof initMasterStorage === 'function') initMasterStorage();
-    const userEmail = (session.email || '').trim().toLowerCase();
-    let student = RA.getStudentByEmail ? RA.getStudentByEmail(userEmail) : null;
-    if (!student && session.studentId) {
-      student = RA.getStudent ? RA.getStudent(session.studentId) : null;
-    }
-    if (!student && session.rollNo) {
-      student = RA.getStudents().find(s => (s.rollNo || '').trim().toLowerCase() === (session.rollNo || '').trim().toLowerCase()) || null;
-    }
-    if (!student && session.name) {
-      student = RA.getStudents().find(s => (s.name || '').trim().toLowerCase() === (session.name || '').trim().toLowerCase()) || null;
-    }
+  // 2. Identify initial target student
+  let targetStudent = null;
+  const urlParams = new URLSearchParams(window.location.search);
+  const sidParam = urlParams.get('sid') || urlParams.get('id');
+  const rollParam = urlParams.get('roll') || urlParams.get('rollNo');
 
-    if (student) {
-      currentStudent = student;
-      document.getElementById('studentRankingSection').style.display = 'block';
-      initStudentRankings(student);
-    } else {
+  if (sidParam && RA.getStudent) {
+    targetStudent = RA.getStudent(sidParam);
+  }
+  if (!targetStudent && rollParam) {
+    targetStudent = allStudents.find(s => (s.rollNo || '').trim().toLowerCase() === rollParam.trim().toLowerCase());
+  }
+  if (!targetStudent && userEmail && RA.getStudentByEmail) {
+    targetStudent = RA.getStudentByEmail(userEmail);
+  }
+  if (!targetStudent && session.studentId && RA.getStudent) {
+    targetStudent = RA.getStudent(session.studentId);
+  }
+  if (!targetStudent && session.rollNo) {
+    targetStudent = allStudents.find(s => (s.rollNo || '').trim().toLowerCase() === (session.rollNo || '').trim().toLowerCase());
+  }
+  if (!targetStudent && session.name) {
+    targetStudent = allStudents.find(s => (s.name || '').trim().toLowerCase() === (session.name || '').trim().toLowerCase());
+  }
+
+  // Universal Fallback: Default to Paras Prajapati (BTCB25O1089) or first student
+  if (!targetStudent && allStudents.length > 0) {
+    targetStudent = allStudents.find(s => (s.rollNo || '').includes('1089') || (s.name || '').toLowerCase().includes('paras')) || allStudents[0];
+    if (isStudent && userEmail) {
       document.getElementById('unlinkedSection').style.display = 'block';
-      document.getElementById('unlinkedEmail').textContent = userEmail || 'unknown';
+      document.getElementById('unlinkedEmail').textContent = userEmail;
     }
-  } else {
+  }
+
+  // Update role notices
+  if (isFaculty) {
     document.getElementById('facultyRankingNotice').style.display = 'block';
+    const roleBadge = document.getElementById('sessionRoleBadge');
+    if (roleBadge) {
+      roleBadge.textContent = 'Faculty Preview';
+      roleBadge.style.background = 'rgba(245,158,11,0.15)';
+      roleBadge.style.color = '#fbbf24';
+      roleBadge.style.borderColor = 'rgba(245,158,11,0.35)';
+    }
+  }
+
+  // 3. Populate student switcher
+  const rankSelEl = document.getElementById('rankingStudentSelect');
+  if (rankSelEl && allStudents.length > 0) {
+    rankSelEl.innerHTML = allStudents.map(s => {
+      const cls = s.className || s.branch || 'CSBS';
+      const isSel = targetStudent && (s.id === targetStudent.id);
+      return `<option value="${s.id}" ${isSel ? 'selected' : ''}>${RA.escHTML(s.rollNo)} — ${RA.escHTML(s.name)} (${cls})</option>`;
+    }).join('');
+  }
+
+  // 4. Render ranking view immediately
+  if (targetStudent) {
+    currentStudent = targetStudent;
+    document.getElementById('studentRankingSection').style.display = 'block';
+    initStudentRankings(currentStudent);
+  }
+
+  function onSwitchRankingStudent(studentId) {
+    const s = (typeof RA.getStudent === 'function')
+      ? RA.getStudent(studentId)
+      : allStudents.find(x => x.id === studentId);
+    if (!s) return;
+    currentStudent = s;
+    initStudentRankings(currentStudent);
   }
 
   function initStudentRankings(stu) {
