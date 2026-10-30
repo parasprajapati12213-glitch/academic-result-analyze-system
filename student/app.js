@@ -224,7 +224,10 @@ function getSubjectDifficulty(semester) {
 function getStudentByEmail(email) {
   if (!email) return null;
   const clean = String(email).trim().toLowerCase();
-  return getStudents().find(s => {
+  const students = getStudents();
+
+  // 1. Exact match on email, roll-email, or roll number
+  const exact = students.find(s => {
     const sEmail = (s.email || '').trim().toLowerCase();
     const sRollEmail = (s.rollNo || '').trim().toLowerCase() + '@mitsgwl.ac.in';
     const sRoll = (s.rollNo || '').trim().toLowerCase();
@@ -232,6 +235,24 @@ function getStudentByEmail(email) {
            sRollEmail === clean || 
            (sEmail.replace('@mitsgwalior.in', '@mitsgwl.ac.in') === clean) || 
            sRoll === clean;
+  });
+  if (exact) return exact;
+
+  // 2. Intelligent fuzzy matching on username prefix / name / roll
+  const prefix = clean.split('@')[0];
+  const alphaPrefix = prefix.replace(/[^a-z0-9]/g, '');
+
+  return students.find(s => {
+    const sRoll = (s.rollNo || '').trim().toLowerCase();
+    const sName = (s.name || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    const sFirst = (s.name || '').trim().toLowerCase().split(' ')[0];
+    const sLast = (s.name || '').trim().toLowerCase().split(' ').slice(-1)[0];
+    
+    return (sRoll && alphaPrefix.includes(sRoll)) ||
+           (sRoll && sRoll.includes(alphaPrefix)) ||
+           (sName && (alphaPrefix.includes(sName) || sName.includes(alphaPrefix))) ||
+           (sFirst && alphaPrefix.includes(sFirst) && sLast && alphaPrefix.includes(sLast)) ||
+           (alphaPrefix.includes('paras') && sName.includes('paras'));
   }) || null;
 }
 

@@ -42773,38 +42773,75 @@ function initMasterStorage() {
     localSet(STORAGE_KEYS.FAC_BATCHES, SEED_BATCHES);
   }
 
-  let facStudents = localGet(STORAGE_KEYS.FAC_STUDENTS, null);
-  if (!facStudents || facStudents.length === 0) {
-    localSet(STORAGE_KEYS.FAC_STUDENTS, SEED_STUDENTS);
-    facStudents = SEED_STUDENTS;
+  // 1. Ensure faculty_students contains all SEED_STUDENTS
+  let facStudents = localGet(STORAGE_KEYS.FAC_STUDENTS, []);
+  if (!facStudents || facStudents.length < SEED_STUDENTS.length) {
+    const facIds = new Set(facStudents.map(s => s.id));
+    const facRolls = new Set(facStudents.map(s => (s.rollNo || '').trim().toLowerCase()));
+    const mergedFac = [...facStudents];
+    SEED_STUDENTS.forEach(s => {
+      const cleanRoll = (s.rollNo || '').trim().toLowerCase();
+      if (!facIds.has(s.id) && !facRolls.has(cleanRoll)) {
+        mergedFac.push(s);
+      }
+    });
+    facStudents = mergedFac;
+    localSet(STORAGE_KEYS.FAC_STUDENTS, facStudents);
   }
 
-  let raStudents = localGet(STORAGE_KEYS.STUDENTS, null);
-  if (!raStudents || raStudents.length === 0) {
-    const mapped = facStudents.map(s => ({
-      id: s.id,
-      name: s.name,
-      rollNo: s.rollNo,
-      email: (s.email || '').trim().toLowerCase(),
-      className: s.className || 'CSBS-A',
-      branch: s.className || 'CSBS',
-      department: s.department || 'Centre for Computer Science and Technology',
-      batch: s.academicYear || '2025-2026',
-      currentSem: s.semester || 1,
-      semester: s.semester || 1
-    }));
-    localSet(STORAGE_KEYS.STUDENTS, mapped);
+  // 2. Ensure ra_students contains all cohort students with normalized canonical IDs
+  let raStudents = localGet(STORAGE_KEYS.STUDENTS, []);
+  if (!raStudents || raStudents.length < SEED_STUDENTS.length) {
+    const mergedRA = [...raStudents];
+    SEED_STUDENTS.forEach(s => {
+      const cleanRoll = (s.rollNo || '').trim().toLowerCase();
+      const existingIdx = mergedRA.findIndex(x => (x.rollNo || '').trim().toLowerCase() === cleanRoll || x.id === s.id);
+      if (existingIdx >= 0) {
+        mergedRA[existingIdx] = {
+          ...s,
+          ...mergedRA[existingIdx],
+          id: s.id,
+          className: mergedRA[existingIdx].className || s.className || 'CSBS-B',
+          branch: mergedRA[existingIdx].branch || s.className || 'CSBS-B',
+          department: mergedRA[existingIdx].department || s.department || 'Centre for Computer Science and Technology'
+        };
+      } else {
+        mergedRA.push({
+          id: s.id,
+          name: s.name,
+          rollNo: s.rollNo,
+          email: (s.email || '').trim().toLowerCase(),
+          className: s.className || 'CSBS-A',
+          branch: s.className || 'CSBS',
+          department: s.department || 'Centre for Computer Science and Technology',
+          batch: s.academicYear || '2025-2026',
+          currentSem: s.semester || 1,
+          semester: s.semester || 1
+        });
+      }
+    });
+    raStudents = mergedRA;
+    localSet(STORAGE_KEYS.STUDENTS, raStudents);
   }
 
-  let facResults = localGet(STORAGE_KEYS.FAC_RESULTS, null);
-  if (!facResults || facResults.length === 0) {
-    localSet(STORAGE_KEYS.FAC_RESULTS, SEED_RESULTS);
-    facResults = SEED_RESULTS;
+  // 3. Ensure faculty_results contains all SEED_RESULTS
+  let facResults = localGet(STORAGE_KEYS.FAC_RESULTS, []);
+  if (!facResults || facResults.length < SEED_RESULTS.length) {
+    const resKeySet = new Set(facResults.map(r => r.studentId + '_' + r.subjectId));
+    const mergedRes = [...facResults];
+    SEED_RESULTS.forEach(r => {
+      if (!resKeySet.has(r.studentId + '_' + r.subjectId)) {
+        mergedRes.push(r);
+      }
+    });
+    localSet(STORAGE_KEYS.FAC_RESULTS, mergedRes);
   }
 
-  let raMarks = localGet(STORAGE_KEYS.MARKS, null);
-  if (!raMarks || raMarks.length === 0) {
-    // Sync all results to ra_marks
+  // 4. Ensure ra_marks has all semester marks synced across all cohort students
+  let raMarks = localGet(STORAGE_KEYS.MARKS, []);
+  const studentIdsWithMarks = new Set(raMarks.map(m => m.studentId));
+  const missingMarks = SEED_STUDENTS.filter(s => !studentIdsWithMarks.has(s.id));
+  if (missingMarks.length > 0 || raMarks.length < (SEED_STUDENTS.length * 3)) {
     syncAllResultsToShared();
   }
 }

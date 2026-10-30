@@ -6,6 +6,7 @@
   <title>Result Analyzer – Student Rankings & Paper Difficulty</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="../faculty/frontend/js/api.js"></script>
   <script src="app.js"></script>
   <script src="leo_chatbot.js"></script>
   <style>
@@ -453,8 +454,18 @@
   const isStudent = session.role === 'student';
 
   if (isStudent) {
+    if (typeof initMasterStorage === 'function') initMasterStorage();
     const userEmail = (session.email || '').trim().toLowerCase();
-    const student = RA.getStudentByEmail ? RA.getStudentByEmail(userEmail) : null;
+    let student = RA.getStudentByEmail ? RA.getStudentByEmail(userEmail) : null;
+    if (!student && session.studentId) {
+      student = RA.getStudent ? RA.getStudent(session.studentId) : null;
+    }
+    if (!student && session.rollNo) {
+      student = RA.getStudents().find(s => (s.rollNo || '').trim().toLowerCase() === (session.rollNo || '').trim().toLowerCase()) || null;
+    }
+    if (!student && session.name) {
+      student = RA.getStudents().find(s => (s.name || '').trim().toLowerCase() === (session.name || '').trim().toLowerCase()) || null;
+    }
 
     if (student) {
       currentStudent = student;
