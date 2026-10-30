@@ -63,7 +63,26 @@ function switchAnalysisTab(tabName) {
   });
 }
 
-// ── 1. Overview Tab ─────────────────────────────────────────────────────────
+// ── 1. Overview Tab & Interactive Class Leaderboards ────────────────────────
+let _overviewClassFilter = 'ALL';
+let _overviewMetric = 'cgpa'; // 'cgpa' or 'sgpa'
+let _overviewSearchQuery = '';
+
+function setOverviewMetric(metric) {
+  _overviewMetric = metric;
+  updateOverviewDisplay();
+}
+
+function onOverviewClassChange(cls) {
+  _overviewClassFilter = cls;
+  updateOverviewDisplay();
+}
+
+function onOverviewSearch(q) {
+  _overviewSearchQuery = (q || '').toLowerCase().trim();
+  updateOverviewDisplay();
+}
+
 function renderOverviewTab() {
   const c = window._classData;
   const container = document.getElementById('tabContent_overview');
@@ -74,31 +93,11 @@ function renderOverviewTab() {
     return;
   }
 
-  const passRate = c.totalStudents > 0 ? ((c.passCount / c.totalStudents) * 100.0) : 0;
+  const uniqueClasses = Array.from(new Set(c.rankings.map(r => r.className || 'CSBS-A'))).filter(Boolean).sort();
 
   container.innerHTML = `
-    <div class="stats-grid">
-      <div class="stat-card blue">
-        <div class="stat-label">Class Average CGPA</div>
-        <div class="stat-value">${fmt2(c.classAvgCgpa)} <span style="font-size:14px; color:var(--slate-400);">/ 10</span></div>
-        <div class="stat-sub">Across all enrolled students</div>
-      </div>
-      <div class="stat-card gold">
-        <div class="stat-label">Highest CGPA</div>
-        <div class="stat-value">${fmt2(c.highestCgpa)} <span style="font-size:14px; color:var(--slate-400);">/ 10</span></div>
-        <div class="stat-sub">Class Rank 1 score</div>
-      </div>
-      <div class="stat-card red">
-        <div class="stat-label">Lowest CGPA</div>
-        <div class="stat-value">${fmt2(c.lowestCgpa)} <span style="font-size:14px; color:var(--slate-400);">/ 10</span></div>
-        <div class="stat-sub">Lowest score in class</div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-label">Pass Percentage</div>
-        <div class="stat-value">${fmt1(passRate)}%</div>
-        <div class="stat-sub">${c.passCount} passed · ${c.failCount} backlogs</div>
-      </div>
-    </div>
+    <!-- Dynamic Stats Grid (Synced with Class Filter) -->
+    <div class="stats-grid" id="overviewStatsGrid"></div>
 
     <!-- 3D Interactive Charts (Student Interface Graph Effects) -->
     <div class="two-col">
@@ -120,11 +119,11 @@ function renderOverviewTab() {
       <div class="card chart-card-3d">
         <div class="chart-3d-inner">
           <div class="card-header">
-            <h2>🏆 Top Cohort CGPA Benchmark (Horizontal Pillar)</h2>
-            <span class="badge" style="background:rgba(251,191,36,0.12);color:#fbbf24;border-color:rgba(251,191,36,0.3)">Top Performers</span>
+            <h2 id="rankingChartTitle">🏆 Top Performers Benchmark</h2>
+            <span class="badge" id="rankingChartBadge" style="background:rgba(251,191,36,0.12);color:#fbbf24;border-color:rgba(251,191,36,0.3)">Top Performers</span>
           </div>
           <div class="chart-inspector" id="rankingInspector">
-            <span>💡</span> <span>Hover over any student bar to pop up CGPA &amp; standing</span>
+            <span>💡</span> <span>Hover over any student bar to pop up rank, scores &amp; standing</span>
           </div>
           <div class="card-body" style="padding:10px 18px 18px;height:300px;position:relative">
             <canvas id="cgpaRankingChart"></canvas>
@@ -133,58 +132,197 @@ function renderOverviewTab() {
       </div>
     </div>
 
-    <!-- Student Rank List -->
+    <!-- Student Rank List & Class Section Filter Card -->
     <div class="card">
-      <div class="card-header">
-        <h2>Class Rank List (Sorted by CGPA)</h2>
-        <div style="font-size:12px; color:var(--slate-500);">Total Students: <strong>${c.rankings.length}</strong></div>
+      <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+        <div>
+          <h2 style="font-size:17px; margin-bottom:2px;">🏆 Comprehensive Student Rankings &amp; Class Leaderboard</h2>
+          <div style="font-size:12px; color:var(--slate-400);" id="overviewFilterSummary">Displaying student standing across Class, Department, and College tiers</div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <!-- Class Filter Dropdown -->
+          <select class="form-control" style="width:auto; min-width:170px;" id="overviewClassSelect" onchange="onOverviewClassChange(this.value)">
+            <option value="ALL">All Cohort (${c.rankings.length} Students)</option>
+            ${uniqueClasses.map(cls => {
+              const cnt = c.rankings.filter(r => (r.className || 'CSBS-A') === cls).length;
+              return `<option value="${cls}" ${cls === _overviewClassFilter ? 'selected' : ''}>Class ${cls} (${cnt} Students)</option>`;
+            }).join('')}
+          </select>
+
+          <!-- Metric Toggle (CGPA vs SGPA) -->
+          <div style="display:inline-flex; border:1px solid rgba(56,189,248,0.25); border-radius:8px; overflow:hidden; background:rgba(3,7,18,0.6);">
+            <button id="btnMetricCGPA" class="btn btn-sm ${(_overviewMetric === 'cgpa' ? 'btn-primary' : 'btn-outline')}" style="border:none; border-radius:0; padding:6px 14px;" onclick="setOverviewMetric('cgpa')">CGPA Rank</button>
+            <button id="btnMetricSGPA" class="btn btn-sm ${(_overviewMetric === 'sgpa' ? 'btn-primary' : 'btn-outline')}" style="border:none; border-radius:0; padding:6px 14px;" onclick="setOverviewMetric('sgpa')">SGPA Rank</button>
+          </div>
+
+          <!-- Live Search Input -->
+          <input type="text" class="search-input" id="overviewSearchInput" style="width:200px; padding:6px 12px; font-size:12.5px;"
+            placeholder="Search student / roll no..." oninput="onOverviewSearch(this.value)">
+        </div>
       </div>
-      <div class="table-wrap">
+
+      <div class="table-wrap" id="overviewRankTableWrap"></div>
+    </div>
+  `;
+
+  renderGradeDistChart(c.gradeDist);
+  updateOverviewDisplay();
+}
+
+function updateOverviewDisplay() {
+  const c = window._classData;
+  if (!c || !c.rankings) return;
+
+  const allRankings = c.rankings;
+  let filtered = allRankings.filter(st => {
+    const matchClass = (_overviewClassFilter === 'ALL') || (st.className === _overviewClassFilter);
+    const matchQuery = !_overviewSearchQuery ||
+      st.name.toLowerCase().includes(_overviewSearchQuery) ||
+      st.rollNo.toLowerCase().includes(_overviewSearchQuery);
+    return matchClass && matchQuery;
+  });
+
+  // Sort by active metric
+  filtered.sort((a, b) => {
+    const diff = (_overviewMetric === 'sgpa') ? (b.sgpa - a.sgpa) : (b.cgpa - a.cgpa);
+    if (Math.abs(diff) > 0.001) return diff;
+    const sdiff = (_overviewMetric === 'sgpa') ? (b.cgpa - a.cgpa) : (b.sgpa - a.sgpa);
+    if (Math.abs(sdiff) > 0.001) return sdiff;
+    return a.name.localeCompare(b.name);
+  });
+
+  // Update Metric Buttons
+  const btnCGPA = document.getElementById('btnMetricCGPA');
+  const btnSGPA = document.getElementById('btnMetricSGPA');
+  if (btnCGPA && btnSGPA) {
+    if (_overviewMetric === 'cgpa') {
+      btnCGPA.className = 'btn btn-sm btn-primary';
+      btnSGPA.className = 'btn btn-sm btn-outline';
+    } else {
+      btnCGPA.className = 'btn btn-sm btn-outline';
+      btnSGPA.className = 'btn btn-sm btn-primary';
+    }
+  }
+
+  // Update Stats Grid
+  const statsEl = document.getElementById('overviewStatsGrid');
+  if (statsEl) {
+    const targetPool = (_overviewClassFilter === 'ALL') ? allRankings : allRankings.filter(st => st.className === _overviewClassFilter);
+    const poolSize = targetPool.length || 1;
+    const totalScore = targetPool.reduce((sum, s) => sum + (_overviewMetric === 'sgpa' ? s.sgpa : s.cgpa), 0);
+    const avgScore = +(totalScore / poolSize).toFixed(2);
+    const highestScore = targetPool.length > 0 ? Math.max(...targetPool.map(s => _overviewMetric === 'sgpa' ? s.sgpa : s.cgpa)).toFixed(2) : '0.00';
+    const lowestScore  = targetPool.length > 0 ? Math.min(...targetPool.map(s => _overviewMetric === 'sgpa' ? s.sgpa : s.cgpa)).toFixed(2) : '0.00';
+    const passCount = targetPool.filter(s => s.status === 'Pass').length;
+    const passRate  = +((passCount / poolSize) * 100.0).toFixed(1);
+    const scopeLabel = _overviewClassFilter === 'ALL' ? 'College Cohort' : `Class ${_overviewClassFilter}`;
+    const metricLabel = _overviewMetric.toUpperCase();
+
+    statsEl.innerHTML = `
+      <div class="stat-card blue">
+        <div class="stat-label">${scopeLabel} Avg ${metricLabel}</div>
+        <div class="stat-value">${fmt2(avgScore)} <span style="font-size:14px; color:var(--slate-400);">/ 10</span></div>
+        <div class="stat-sub">${poolSize} students evaluated</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-label">Highest ${metricLabel}</div>
+        <div class="stat-value">${highestScore} <span style="font-size:14px; color:var(--slate-400);">/ 10</span></div>
+        <div class="stat-sub">${scopeLabel} Rank 1 Score</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Lowest ${metricLabel}</div>
+        <div class="stat-value">${lowestScore} <span style="font-size:14px; color:var(--slate-400);">/ 10</span></div>
+        <div class="stat-sub">Lowest in ${scopeLabel}</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Pass Percentage</div>
+        <div class="stat-value">${passRate}%</div>
+        <div class="stat-sub">${passCount} passed · ${poolSize - passCount} backlogs</div>
+      </div>
+    `;
+  }
+
+  // Update Summary Subtitle
+  const subEl = document.getElementById('overviewFilterSummary');
+  if (subEl) {
+    const scopeStr = _overviewClassFilter === 'ALL' ? 'All Classes (Full Cohort)' : `Class ${_overviewClassFilter}`;
+    subEl.innerHTML = `Showing <strong>${filtered.length}</strong> students · Filter: <strong>${scopeStr}</strong> · Sorted by <strong>${_overviewMetric.toUpperCase()}</strong>`;
+  }
+
+  // Update Table
+  const tableEl = document.getElementById('overviewRankTableWrap');
+  if (tableEl) {
+    if (filtered.length === 0) {
+      tableEl.innerHTML = `<div style="text-align:center; padding:36px; color:var(--slate-400);">No students match your filter criteria.</div>`;
+    } else {
+      tableEl.innerHTML = `
         <table>
           <thead>
             <tr>
-              <th style="width:60px;">Rank</th>
+              <th style="width:65px;">Rank</th>
               <th>Roll No</th>
               <th>Student Name</th>
               <th>Class</th>
+              <th style="text-align:center;">Class Standing</th>
+              <th style="text-align:center;">Dept Rank</th>
+              <th style="text-align:center;">College Rank</th>
               <th style="text-align:center;">Credits Cleared</th>
               <th style="text-align:center;">SGPA</th>
               <th style="text-align:center;">CGPA</th>
               <th>Division</th>
               <th>Status</th>
-              <th style="text-align:center;">Marksheet</th>
+              <th style="text-align:center;">Action</th>
             </tr>
           </thead>
           <tbody>
-            ${c.rankings.map((st, idx) => `
-              <tr>
-                <td>
-                  ${idx === 0 ? '<strong style="color:#d97706;">🥇 1</strong>' :
-                    idx === 1 ? '<strong style="color:#64748b;">🥈 2</strong>' :
-                    idx === 2 ? '<strong style="color:#b45309;">🥉 3</strong>' :
-                    `<span style="color:var(--slate-500); font-weight:600;">${idx + 1}</span>`}
-                </td>
-                <td><code><strong>${escHtml(st.rollNo)}</strong></code></td>
-                <td><strong>${escHtml(st.name)}</strong></td>
-                <td>${escHtml(st.className || 'CSBS')}</td>
-                <td style="text-align:center; font-weight:600;">${st.creditsEarned} / ${st.creditsTotal}</td>
-                <td style="text-align:center; font-weight:700;">${fmt2(st.sgpa)}</td>
-                <td style="text-align:center; font-weight:800; color:var(--mits-blue); font-size:14px;">${fmt2(st.cgpa)}</td>
-                <td>${divisionBadge(st.academicClass)}</td>
-                <td>${statusBadge(st.status)}</td>
-                <td style="text-align:center;">
-                  <button class="btn btn-outline btn-sm" onclick="viewStudentReport('${st.id}')">View</button>
-                </td>
-              </tr>
-            `).join('')}
+            ${filtered.map((st, idx) => {
+              const effectiveClassRank = (_overviewMetric === 'sgpa') ? st.sgpaClassRank : st.classRank;
+              const effectiveDeptRank  = (_overviewMetric === 'sgpa') ? st.sgpaDeptRank : st.deptRank;
+              const effectiveColRank   = (_overviewMetric === 'sgpa') ? st.sgpaCollegeRank : st.collegeRank;
+
+              const rankDisplay = (idx === 0) ? '<strong style="color:#fbbf24;">🥇 1</strong>' :
+                                  (idx === 1) ? '<strong style="color:#cbd5e1;">🥈 2</strong>' :
+                                  (idx === 2) ? '<strong style="color:#f59e0b;">🥉 3</strong>' :
+                                  `<span style="color:var(--slate-400); font-weight:700;">#${idx + 1}</span>`;
+
+              const classStandingBadge = `
+                <span class="badge" style="background:rgba(245,158,11,0.14);border:1px solid rgba(245,158,11,0.35);color:#fbbf24;font-weight:700;padding:4px 10px;border-radius:8px">
+                  🏆 #${effectiveClassRank} <small style="opacity:0.85">of ${st.totalInClass}</small>
+                </span>
+              `;
+
+              const deptDisplay = `<span style="color:var(--sky);font-weight:600">#${effectiveDeptRank}</span> <small style="color:var(--slate-500)">/${st.totalInDept}</small>`;
+              const colDisplay  = `<span style="color:#c4b5fd;font-weight:600">#${effectiveColRank}</span> <small style="color:var(--slate-500)">/${st.totalInCollege}</small>`;
+
+              return `
+                <tr>
+                  <td>${rankDisplay}</td>
+                  <td><code><strong>${escHtml(st.rollNo)}</strong></code></td>
+                  <td><strong>${escHtml(st.name)}</strong></td>
+                  <td><span class="badge" style="background:rgba(56,189,248,0.12);color:var(--sky);border-color:rgba(56,189,248,0.3)">${escHtml(st.className || 'CSBS-A')}</span></td>
+                  <td style="text-align:center;">${classStandingBadge}</td>
+                  <td style="text-align:center;">${deptDisplay}</td>
+                  <td style="text-align:center;">${colDisplay}</td>
+                  <td style="text-align:center; font-weight:600;">${st.creditsEarned} / ${st.creditsTotal}</td>
+                  <td style="text-align:center; font-weight:700; color:${_overviewMetric === 'sgpa' ? 'var(--cyan)' : 'inherit'};">${fmt2(st.sgpa)}</td>
+                  <td style="text-align:center; font-weight:800; color:${_overviewMetric === 'cgpa' ? 'var(--cyan)' : 'var(--mits-blue)'}; font-size:14px;">${fmt2(st.cgpa)}</td>
+                  <td>${divisionBadge(st.academicClass)}</td>
+                  <td>${statusBadge(st.status)}</td>
+                  <td style="text-align:center;">
+                    <button class="btn btn-outline btn-sm" onclick="viewStudentReport('${st.id}')">View</button>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
           </tbody>
         </table>
-      </div>
-    </div>
-  `;
+      `;
+    }
+  }
 
-  renderGradeDistChart(c.gradeDist);
-  renderCgpaRankingChart(c.rankings);
+  // Update Top Performers Chart
+  renderCgpaRankingChart(filtered);
 }
 
 function renderGradeDistChart(dist) {
@@ -280,9 +418,21 @@ function renderCgpaRankingChart(rankings) {
   if (!ctx || !rankings) return;
   if (analysisCharts.cgpaRankingChart) analysisCharts.cgpaRankingChart.destroy();
 
+  const isSGPA = (_overviewMetric === 'sgpa');
+  const metricName = isSGPA ? 'SGPA' : 'CGPA';
+  const titleEl = document.getElementById('rankingChartTitle');
+  const badgeEl = document.getElementById('rankingChartBadge');
+  if (titleEl) {
+    const scopeName = _overviewClassFilter === 'ALL' ? 'Cohort' : `Class ${_overviewClassFilter}`;
+    titleEl.textContent = `🏆 Top ${scopeName} ${metricName} Benchmark (Horizontal Pillar)`;
+  }
+  if (badgeEl) {
+    badgeEl.textContent = `Top ${metricName} Performers`;
+  }
+
   const topCohort = rankings.slice(0, 8);
   const labels = topCohort.map(s => s.name.split(' ')[0]);
-  const data = topCohort.map(s => s.cgpa);
+  const data = topCohort.map(s => isSGPA ? s.sgpa : s.cgpa);
 
   let barGrad = '#00F0FF';
   if (ctx.getContext) {
@@ -300,7 +450,7 @@ function renderCgpaRankingChart(rankings) {
     data: {
       labels: labels,
       datasets: [{
-        label: 'CGPA',
+        label: metricName,
         data: data,
         backgroundColor: barGrad,
         borderRadius: 6,
@@ -318,11 +468,13 @@ function renderCgpaRankingChart(rankings) {
         if (activeElements.length > 0) {
           const idx = activeElements[0].index;
           const st = topCohort[idx];
+          const val = isSGPA ? st.sgpa : st.cgpa;
+          const cRank = isSGPA ? st.sgpaClassRank : st.classRank;
           rankInspector.classList.add('active');
-          rankInspector.innerHTML = `<strong>✨ Pop-up Rank: #${idx + 1} ${st.name} (${st.rollNo}):</strong> CGPA: <strong>${st.cgpa.toFixed(2)} / 10.00</strong> · Division: <strong>${st.academicClass || 'First Division'}</strong>`;
+          rankInspector.innerHTML = `<strong>✨ Pop-up Rank: #${idx + 1} ${st.name} (${st.rollNo}):</strong> ${metricName}: <strong>${val.toFixed(2)} / 10.00</strong> · Class Standing: <strong>#${cRank} in ${st.className}</strong>`;
         } else {
           rankInspector.classList.remove('active');
-          rankInspector.innerHTML = `<span>💡</span> <span>Hover over any student bar to pop up CGPA &amp; standing</span>`;
+          rankInspector.innerHTML = `<span>💡</span> <span>Hover over any student bar to pop up ${metricName} &amp; standing</span>`;
         }
       },
       scales: {
@@ -354,7 +506,7 @@ function renderCgpaRankingChart(rankings) {
               const st = topCohort[items[0].dataIndex];
               return `Rank #${items[0].dataIndex + 1}: ${st.name} (${st.rollNo})`;
             },
-            label: (ctx) => ` Cumulative CGPA: ${Number(ctx.raw).toFixed(2)} / 10.00`
+            label: (ctx) => ` ${metricName}: ${Number(ctx.raw).toFixed(2)} / 10.00 (${topCohort[ctx.dataIndex]?.academicClass || 'First Class'})`
           }
         }
       }

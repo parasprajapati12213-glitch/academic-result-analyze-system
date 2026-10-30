@@ -1,25 +1,36 @@
 // students.js — Student Management Page
 
 let _students = [];
+let _studentRanksMap = {};
 
 async function loadStudents() {
-  const sr = await API.getStudents();
+  const [sr, ranksMap] = await Promise.all([
+    API.getStudents(),
+    (typeof API.getStudentRankingsMap === 'function') ? API.getStudentRankingsMap() : {}
+  ]);
   _students = sr.ok ? sr.data : [];
+  _studentRanksMap = ranksMap || {};
+
+  const uniqueClasses = Array.from(new Set(_students.map(s => s.className || 'CSBS-A'))).filter(Boolean).sort();
 
   document.getElementById('pageContent').innerHTML = `
     <div class="page-header">
       <div>
-        <h1>Students</h1>
-        <p>Manage student records, roll numbers, and classes</p>
+        <h1>Students &amp; Cohort Rankings</h1>
+        <p>Manage student records, roll numbers, class sections, and academic standing</p>
       </div>
       <button class="btn btn-primary" onclick="openAddStudentModal()">+ Add Student</button>
     </div>
 
     <div class="card">
-      <div class="filter-bar">
-        <input type="text" class="search-input" id="studentSearch"
+      <div class="filter-bar" style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+        <input type="text" class="search-input" id="studentSearch" style="flex:1; min-width:240px;"
           placeholder="Search by student name or roll number..." oninput="filterStudents()">
-        <select class="form-control" style="width:auto" id="semesterFilter" onchange="filterStudents()">
+        <select class="form-control" style="width:auto; min-width:160px;" id="classFilter" onchange="filterStudents()">
+          <option value="">All Classes / Sections</option>
+          ${uniqueClasses.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
+        </select>
+        <select class="form-control" style="width:auto; min-width:140px;" id="semesterFilter" onchange="filterStudents()">
           <option value="">All Semesters</option>
           ${[1,2,3,4,5,6,7,8].map(s=>`<option value="${s}">Semester ${s}</option>`).join('')}
         </select>
@@ -32,10 +43,12 @@ async function loadStudents() {
 }
 
 function filterStudents() {
-  const q   = (document.getElementById('studentSearch')?.value || '').toLowerCase();
-  const sem = document.getElementById('semesterFilter')?.value || '';
+  const q   = (document.getElementById('studentSearch')?.value || '').toLowerCase().trim();
+  const cls = (document.getElementById('classFilter')?.value || '').trim();
+  const sem = (document.getElementById('semesterFilter')?.value || '').trim();
   const filtered = _students.filter(st =>
     (!q || st.name.toLowerCase().includes(q) || st.rollNo.toLowerCase().includes(q) || (st.email && st.email.toLowerCase().includes(q))) &&
+    (!cls || (st.className || 'CSBS-A') === cls) &&
     (!sem || String(st.semester) === sem)
   );
   renderStudentsTable(filtered);
@@ -60,35 +73,57 @@ function renderStudentsTable(students) {
             <th>Roll No</th>
             <th>Student Name</th>
             <th>Class</th>
+            <th style="text-align:center;">Class Rank</th>
+            <th style="text-align:center;">Dept &amp; College Rank</th>
+            <th style="text-align:center;">CGPA</th>
             <th>Semester</th>
-            <th>Department</th>
-            <th>Session</th>
             <th style="text-align:center;">Actions</th>
           </tr>
         </thead>
         <tbody>
-          ${students.map((st, i) => `
-            <tr>
-              <td>${i + 1}</td>
-              <td><code><strong>${escHtml(st.rollNo)}</strong></code></td>
-              <td>
-                <strong>${escHtml(st.name)}</strong>
-                <br>
-                <small style="color:var(--slate-500); font-family:monospace; font-size:11px;">✉ ${escHtml(st.email || 'No email assigned')}</small>
-              </td>
-              <td>${escHtml(st.className || 'CSBS-A')}</td>
-              <td>Sem ${st.semester}</td>
-              <td>${escHtml(st.department || 'Computer Science')}</td>
-              <td>${escHtml(st.academicYear || '2025-26')}</td>
-              <td style="text-align:center;">
-                <div style="display:inline-flex; gap:6px;">
-                  <button class="btn btn-outline btn-sm" onclick="viewTranscript('${st.id}')">Marksheet</button>
-                  <button class="btn btn-outline btn-sm" onclick="openEditStudentModal('${st.id}')">Edit</button>
-                  <button class="btn btn-outline btn-sm" style="color:var(--danger);" onclick="deleteStudent('${st.id}','${escHtml(st.name)}')">Delete</button>
-                </div>
-              </td>
-            </tr>
-          `).join('')}
+          ${students.map((st, i) => {
+            const rk = _studentRanksMap[st.id] || _studentRanksMap[st.rollNo];
+            const classRankBadge = rk ? `
+              <span class="badge" style="background:rgba(245,158,11,0.14);border:1px solid rgba(245,158,11,0.35);color:#fbbf24;font-weight:700;padding:4px 10px;border-radius:8px">
+                ${rk.classRank === 1 ? '🥇 #1' : rk.classRank === 2 ? '🥈 #2' : rk.classRank === 3 ? '🥉 #3' : '#' + rk.classRank} <small style="opacity:0.85">of ${rk.totalInClass}</small>
+              </span>
+            ` : '<span style="color:var(--slate-500)">—</span>';
+
+            const multiRankInfo = rk ? `
+              <div style="font-size:11.5px;color:var(--slate-400);line-height:1.4">
+                <div>🏛️ Dept: <strong style="color:var(--sky)">#${rk.deptRank}</strong> <span style="opacity:0.7">/${rk.totalInDept}</span></div>
+                <div>🎓 College: <strong style="color:#c4b5fd">#${rk.collegeRank}</strong> <span style="opacity:0.7">/${rk.totalInCollege}</span></div>
+              </div>
+            ` : '<span style="color:var(--slate-500)">—</span>';
+
+            const cgpaDisplay = rk && rk.cgpa > 0 ? `
+              <strong style="color:var(--cyan);font-size:14px;font-weight:800">${fmt2(rk.cgpa)}</strong>
+            ` : '<span style="color:var(--slate-500)">—</span>';
+
+            return `
+              <tr>
+                <td>${i + 1}</td>
+                <td><code><strong>${escHtml(st.rollNo)}</strong></code></td>
+                <td>
+                  <strong>${escHtml(st.name)}</strong>
+                  <br>
+                  <small style="color:var(--slate-500); font-family:monospace; font-size:11px;">✉ ${escHtml(st.email || 'No email assigned')}</small>
+                </td>
+                <td><span class="badge" style="background:rgba(56,189,248,0.12);color:var(--sky);border-color:rgba(56,189,248,0.3)">${escHtml(st.className || 'CSBS-A')}</span></td>
+                <td style="text-align:center;">${classRankBadge}</td>
+                <td style="text-align:center;">${multiRankInfo}</td>
+                <td style="text-align:center;">${cgpaDisplay}</td>
+                <td>Sem ${st.semester}</td>
+                <td style="text-align:center;">
+                  <div style="display:inline-flex; gap:6px;">
+                    <button class="btn btn-outline btn-sm" onclick="viewTranscript('${st.id}')">Marksheet</button>
+                    <button class="btn btn-outline btn-sm" onclick="openEditStudentModal('${st.id}')">Edit</button>
+                    <button class="btn btn-outline btn-sm" style="color:var(--danger);" onclick="deleteStudent('${st.id}','${escHtml(st.name)}')">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('')}
         </tbody>
       </table>
     </div>

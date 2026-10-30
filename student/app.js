@@ -246,18 +246,18 @@ function getRelativeGrade(score, allScores) {
   if (score < 40) return { grade: 'F', points: 0 };
   const valid = (allScores || []).filter(s => typeof s === 'number' && !isNaN(s) && s >= 0);
   if (valid.length < 3) {
-    return getGrade(score); // Fallback to absolute scale for small samples
+    return getGrade(score);
   }
   const mean = valid.reduce((a, b) => a + b, 0) / valid.length;
   const sd   = Math.sqrt(valid.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / valid.length) || 1;
+  const z    = (score - mean) / sd;
 
-  if (score >= mean + 2.0 * sd)   return { grade: 'O',  points: 10 };
-  if (score >= mean + 1.5 * sd)   return { grade: 'A+', points: 9  };
-  if (score >= mean + 1.0 * sd)   return { grade: 'A',  points: 8  };
-  if (score >= mean + 0.5 * sd)   return { grade: 'B+', points: 7  };
-  if (score >= mean)              return { grade: 'B',  points: 6  };
-  if (score >= mean - 0.5 * sd)   return { grade: 'C',  points: 5  };
-  if (score >= 40)                return { grade: 'P',  points: 4  };
+  if (z >= 1.5)  return { grade: 'O',  points: 10 };
+  if (z >= 1.0)  return { grade: 'A+', points: 9  };
+  if (z >= 0.5)  return { grade: 'A',  points: 8  };
+  if (z >= 0.0)  return { grade: 'B+', points: 7  };
+  if (z >= -0.5) return { grade: 'B',  points: 6  };
+  if (score >= 40) return { grade: 'C', points: 5 };
   return { grade: 'F', points: 0 };
 }
 
@@ -277,8 +277,11 @@ function calcRelativeSGPA(subjects, classMarkMap) {
   if (!subjects || !subjects.length) return 0;
   let tp = 0, tc = 0;
   for (const s of subjects) {
-    const allScores = (classMarkMap && classMarkMap[s.code]) ? classMarkMap[s.code] : [];
-    const { points } = getRelativeGrade(s.total, allScores);
+    let points = s.points;
+    if (points === undefined || points === null || points < 0) {
+      const allScores = (classMarkMap && classMarkMap[s.code]) ? classMarkMap[s.code] : [];
+      points = getRelativeGrade(s.total, allScores).points;
+    }
     tp += points * s.credits;
     tc += s.credits;
   }
@@ -292,8 +295,11 @@ function calcRelativeCGPA(studentId) {
   for (const record of allMarks) {
     const map = buildClassMarkMap(record.semester);
     for (const s of record.subjects) {
-      const allScores = map[s.code] || [];
-      const { points } = getRelativeGrade(s.total, allScores);
+      let points = s.points;
+      if (points === undefined || points === null || points < 0) {
+        const allScores = map[s.code] || [];
+        points = getRelativeGrade(s.total, allScores).points;
+      }
       tp += points * s.credits;
       tc += s.credits;
     }
@@ -303,7 +309,13 @@ function calcRelativeCGPA(studentId) {
 
 // ── Department & Multi-Branch Hierarchy ──────────────────────
 const DEPARTMENT_BRANCH_MAP = {
-  'Computer Science & Engineering': [
+  'Centre for Computer Science and Technology': [
+    'Centre for Computer Science and Technology',
+    'Department of Computer Science and Technology',
+    'Computer Science and Business Systems',
+    'CSBS',
+    'CSBS-A',
+    'CSBS-B',
     'Computer Science & Engineering',
     'CSE',
     'CSE (AI & ML)',
@@ -325,14 +337,14 @@ const DEPARTMENT_BRANCH_MAP = {
 };
 
 function getDepartmentForBranch(branch) {
-  if (!branch) return 'Computer Science & Engineering';
+  if (!branch) return 'Centre for Computer Science and Technology';
   const clean = String(branch).trim().toLowerCase();
   for (const [dept, branches] of Object.entries(DEPARTMENT_BRANCH_MAP)) {
     if (branches.some(b => b.toLowerCase() === clean || clean.includes(b.toLowerCase()))) {
       return dept;
     }
   }
-  return 'Computer Science & Engineering';
+  return 'Centre for Computer Science and Technology';
 }
 
 // ── Exam Component Breakdown (Minor, Lab, Major, Total) ──────
@@ -362,96 +374,152 @@ function getExamBreakdown(s) {
 
 // ── Multi-Tier Hierarchy Ranks (Class, Branch, Dept, College) ─
 function getStudentHierarchyRanks(studentId, semester) {
-  const semNum = Number(semester);
+  const semNum = Number(semester) || 1;
   const student = getStudent(studentId);
   if (!student) return null;
 
-  const studentBranch = student.branch || 'CSE';
+  const studentClass  = student.className || student.branch || 'CSBS-A';
+  const studentBranch = student.branch || (student.className ? student.className.split('-')[0] : 'CSBS');
   const studentDept   = student.department || getDepartmentForBranch(studentBranch);
   const allStudents   = getStudents();
   const classMap      = buildClassMarkMap(semNum);
 
-  // Pool for current semester SGPA
-  const semStudents = allStudents.map(s => {
+  // Compile detailed metrics for all students
+  const fullRoster = allStudents.map(s => {
     const semRecord = getMarksForStudentSem(s.id, semNum);
-    if (!semRecord) return null;
-    const sgpa = calcRelativeSGPA(semRecord.subjects, classMap);
-    const sBranch = s.branch || 'CSE';
-    const sDept   = s.department || getDepartmentForBranch(sBranch);
+    const sgpaVal = semRecord ? calcRelativeSGPA(semRecord.subjects, classMap) : 0;
+    const cgpaVal = calcRelativeCGPA(s.id);
+    const sCredits = semRecord ? semRecord.subjects.reduce((sum, sub) => sum + (sub.credits || 0), 0) : 0;
+    const sFails = semRecord ? semRecord.subjects.filter(sub => (sub.total || 0) < 40).length : 0;
+    const sStatus = sFails === 0 && sCredits > 0 ? 'Pass' : (sFails > 0 ? 'Backlog' : 'Pending');
+
+    const sClass = s.className || s.branch || 'CSBS-A';
+    const sBranch = s.branch || (s.className ? s.className.split('-')[0] : 'CSBS');
+    const sDept = s.department || getDepartmentForBranch(sBranch);
+
     return {
       id: s.id,
       name: s.name,
       rollNo: s.rollNo,
+      email: s.email || '',
+      className: sClass,
       branch: sBranch,
       department: sDept,
-      batch: s.batch || '2021',
-      sgpa: sgpa,
-      cgpa: calcRelativeCGPA(s.id)
+      batch: s.batch || s.academicYear || '2025-2026',
+      semester: s.semester || semNum,
+      sgpa: sgpaVal,
+      cgpa: cgpaVal,
+      credits: sCredits,
+      fails: sFails,
+      status: sStatus,
+      isMe: (s.id === studentId)
     };
-  }).filter(Boolean);
+  });
 
-  // Fallback if current student has no record in this semester yet
-  const studentSemEntry = semStudents.find(x => x.id === studentId);
-  const mySGPA = studentSemEntry ? studentSemEntry.sgpa : 0;
-  const myCGPA = calcRelativeCGPA(studentId);
-
-  // 1. College Pool (All students in MITS)
-  const collegeSGPA = [...semStudents].sort((a,b) => b.sgpa - a.sgpa);
-  const collegeCGPA = [...allStudents].map(s => ({ id: s.id, name: s.name, cgpa: calcRelativeCGPA(s.id), branch: s.branch, department: s.department || getDepartmentForBranch(s.branch) })).filter(x => x.cgpa > 0).sort((a,b) => b.cgpa - a.cgpa);
-
-  // 2. Department Pool (Students across all branches in this department)
-  const deptSGPA = collegeSGPA.filter(s => s.department === studentDept);
-  const deptCGPA = collegeCGPA.filter(s => s.department === studentDept);
-
-  // 3. Branch Pool (Students in this specific branch)
-  const branchSGPA = deptSGPA.filter(s => s.branch.toLowerCase() === studentBranch.toLowerCase());
-  const branchCGPA = deptCGPA.filter(s => (s.branch || '').toLowerCase() === studentBranch.toLowerCase());
-
-  // 4. Class / Section Pool (Same batch & branch)
-  const classSGPA = branchSGPA.filter(s => (s.batch || '2021') === (student.batch || '2021'));
-  const classCGPA = branchCGPA.filter(s => (s.batch || '2021') === (student.batch || '2021'));
-
-  // Calculate Ranks (1-indexed)
-  const findRank = (arr, id, key = 'sgpa') => {
-    const idx = arr.findIndex(x => x.id === id);
-    return idx >= 0 ? idx + 1 : 1;
+  const meEntry = fullRoster.find(x => x.id === studentId) || {
+    id: studentId, name: student.name, rollNo: student.rollNo,
+    className: studentClass, branch: studentBranch, department: studentDept,
+    sgpa: 0, cgpa: 0, credits: 0, status: 'Pending', isMe: true
   };
 
-  const cRank = findRank(classSGPA.length ? classSGPA : branchSGPA, studentId);
-  const bRank = findRank(branchSGPA.length ? branchSGPA : collegeSGPA, studentId);
-  const dRank = findRank(deptSGPA.length ? deptSGPA : collegeSGPA, studentId);
-  const colRank = findRank(collegeSGPA, studentId);
+  // Helper to build ranked lists for any array and metric
+  function buildRankedList(arr, metricKey) {
+    const sorted = [...arr].sort((a, b) => {
+      const diff = b[metricKey] - a[metricKey];
+      if (Math.abs(diff) > 0.001) return diff;
+      return a.name.localeCompare(b.name);
+    });
+    return sorted.map((st, idx) => ({
+      ...st,
+      rank: idx + 1,
+      score: st[metricKey],
+      gapToMe: +(st[metricKey] - meEntry[metricKey]).toFixed(2)
+    }));
+  }
 
-  const cTotal = Math.max(1, (classSGPA.length ? classSGPA : branchSGPA).length);
-  const bTotal = Math.max(1, (branchSGPA.length ? branchSGPA : collegeSGPA).length);
-  const dTotal = Math.max(1, (deptSGPA.length ? deptSGPA : collegeSGPA).length);
-  const colTotal = Math.max(1, collegeSGPA.length);
+  // 1. Class / Section Pool
+  const classPool = fullRoster.filter(s => s.className.toLowerCase() === studentClass.toLowerCase());
+  const effectiveClassPool = classPool.length > 0 ? classPool : fullRoster.filter(s => s.branch.toLowerCase() === studentBranch.toLowerCase());
 
-  // CGPA Ranks
-  const cgCRank = findRank(classCGPA.length ? classCGPA : branchCGPA, studentId, 'cgpa');
-  const cgBRank = findRank(branchCGPA.length ? branchCGPA : collegeCGPA, studentId, 'cgpa');
-  const cgDRank = findRank(deptCGPA.length ? deptCGPA : collegeCGPA, studentId, 'cgpa');
-  const cgColRank = findRank(collegeCGPA, studentId, 'cgpa');
+  // 2. Branch Pool
+  const branchPool = fullRoster.filter(s => s.branch.toLowerCase() === studentBranch.toLowerCase());
+  const effectiveBranchPool = branchPool.length > 0 ? branchPool : fullRoster;
+
+  // 3. Department Pool
+  const deptPool = fullRoster.filter(s => s.department.toLowerCase() === studentDept.toLowerCase());
+  const effectiveDeptPool = deptPool.length > 0 ? deptPool : fullRoster;
+
+  // 4. College Pool
+  const collegePool = fullRoster;
+
+  // Build ranked lists for SGPA
+  const classListSGPA   = buildRankedList(effectiveClassPool, 'sgpa');
+  const branchListSGPA  = buildRankedList(effectiveBranchPool, 'sgpa');
+  const deptListSGPA    = buildRankedList(effectiveDeptPool, 'sgpa');
+  const collegeListSGPA = buildRankedList(collegePool, 'sgpa');
+
+  // Build ranked lists for CGPA
+  const classListCGPA   = buildRankedList(effectiveClassPool, 'cgpa');
+  const branchListCGPA  = buildRankedList(effectiveBranchPool, 'cgpa');
+  const deptListCGPA    = buildRankedList(effectiveDeptPool, 'cgpa');
+  const collegeListCGPA = buildRankedList(collegePool, 'cgpa');
+
+  // Find student ranks
+  const getRankInfo = (list) => {
+    const found = list.find(x => x.id === studentId);
+    const r = found ? found.rank : 1;
+    const tot = list.length || 1;
+    const pct = Math.max(1, Math.round(((tot - r + 1) / tot) * 100));
+    return { rank: r, total: tot, pct };
+  };
+
+  const cInfoS = getRankInfo(classListSGPA);
+  const bInfoS = getRankInfo(branchListSGPA);
+  const dInfoS = getRankInfo(deptListSGPA);
+  const colInfoS = getRankInfo(collegeListSGPA);
+
+  const cInfoC = getRankInfo(classListCGPA);
+  const bInfoC = getRankInfo(branchListCGPA);
+  const dInfoC = getRankInfo(deptListCGPA);
+  const colInfoC = getRankInfo(collegeListCGPA);
 
   return {
+    studentClass,
     studentBranch,
     studentDept,
+    class: { rank: cInfoS.rank, total: cInfoS.total, pct: cInfoS.pct, name: studentClass },
+    branch: { rank: bInfoS.rank, total: bInfoS.total, pct: bInfoS.pct, name: studentBranch },
+    dept: { rank: dInfoS.rank, total: dInfoS.total, pct: dInfoS.pct, name: studentDept },
+    college: { rank: colInfoS.rank, total: colInfoS.total, pct: colInfoS.pct },
     sgpa: {
-      myScore: mySGPA,
-      classRank: cRank, classTotal: cTotal, classPct: Math.max(1, Math.round((cTotal - cRank + 1) / cTotal * 100)),
-      branchRank: bRank, branchTotal: bTotal, branchPct: Math.max(1, Math.round((bTotal - bRank + 1) / bTotal * 100)),
-      deptRank: dRank, deptTotal: dTotal, deptPct: Math.max(1, Math.round((dTotal - dRank + 1) / dTotal * 100)),
-      collegeRank: colRank, collegeTotal: colTotal, collegePct: Math.max(1, Math.round((colTotal - colRank + 1) / colTotal * 100)),
-      topper: collegeSGPA[0] || null,
-      classTopper: classSGPA[0] || branchSGPA[0] || null
+      myScore: meEntry.sgpa,
+      classRank: cInfoS.rank, classTotal: cInfoS.total, classPct: cInfoS.pct,
+      branchRank: bInfoS.rank, branchTotal: bInfoS.total, branchPct: bInfoS.pct,
+      deptRank: dInfoS.rank, deptTotal: dInfoS.total, deptPct: dInfoS.pct,
+      collegeRank: colInfoS.rank, collegeTotal: colInfoS.total, collegePct: colInfoS.pct,
+      topper: classListSGPA[0] || null,
+      classTopper: classListSGPA[0] || null,
+      deptTopper: deptListSGPA[0] || null,
+      collegeTopper: collegeListSGPA[0] || null,
+      classList: classListSGPA,
+      branchList: branchListSGPA,
+      deptList: deptListSGPA,
+      collegeList: collegeListSGPA
     },
     cgpa: {
-      myScore: myCGPA,
-      classRank: cgCRank, classTotal: Math.max(1, classCGPA.length),
-      branchRank: cgBRank, branchTotal: Math.max(1, branchCGPA.length),
-      deptRank: cgDRank, deptTotal: Math.max(1, deptCGPA.length),
-      collegeRank: cgColRank, collegeTotal: Math.max(1, collegeCGPA.length),
-      topper: collegeCGPA[0] || null
+      myScore: meEntry.cgpa,
+      classRank: cInfoC.rank, classTotal: cInfoC.total, classPct: cInfoC.pct,
+      branchRank: bInfoC.rank, branchTotal: bInfoC.total, branchPct: bInfoC.pct,
+      deptRank: dInfoC.rank, deptTotal: dInfoC.total, deptPct: dInfoC.pct,
+      collegeRank: colInfoC.rank, collegeTotal: colInfoC.total, collegePct: colInfoC.pct,
+      topper: classListCGPA[0] || null,
+      classTopper: classListCGPA[0] || null,
+      deptTopper: deptListCGPA[0] || null,
+      collegeTopper: collegeListCGPA[0] || null,
+      classList: classListCGPA,
+      branchList: branchListCGPA,
+      deptList: deptListCGPA,
+      collegeList: collegeListCGPA
     }
   };
 }

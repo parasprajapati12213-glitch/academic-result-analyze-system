@@ -116,10 +116,14 @@
             <span class="stu-tag stu-tag-verified">✓ Linked Profile</span>
             <span class="stu-tag" id="stuSemTag">Sem —</span>
             <span class="stu-tag" id="stuBatchTag">Batch —</span>
+            <span class="stu-tag" id="stuClassRankTag" style="background:rgba(245,158,11,0.14);border-color:rgba(245,158,11,0.4);color:#fbbf24;font-weight:700">🏆 Class Rank: #—</span>
+            <span class="stu-tag" id="stuDeptRankTag" style="background:rgba(56,189,248,0.14);border-color:rgba(56,189,248,0.35);color:var(--sky);font-weight:600">🏛️ Dept Rank: #—</span>
+            <span class="stu-tag" id="stuCollegeRankTag" style="background:rgba(167,139,250,0.14);border-color:rgba(167,139,250,0.35);color:#c4b5fd;font-weight:600">🎓 College Rank: #—</span>
           </div>
         </div>
       </div>
-      <div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <a href="ranking.html" class="btn btn-primary">🏅 Class Leaderboard &amp; Rankings</a>
         <button class="btn btn-pdf" onclick="downloadMyPDF()">📄 Download Marksheet (PDF)</button>
       </div>
     </div>
@@ -141,6 +145,7 @@
       <div class="kpi">
         <div class="kpi-val" id="kpiRank">#—</div>
         <div class="kpi-label" id="kpiRankLabel">Class Rank (Sem)</div>
+        <a href="ranking.html" style="display:inline-block;margin-top:6px;font-size:11px;color:var(--cyan);text-decoration:none;font-weight:600">Leaderboard &amp; 3D Curve →</a>
       </div>
       <div class="kpi">
         <div class="kpi-val" id="kpiStatus" style="font-size:22px">Clear</div>
@@ -462,18 +467,25 @@
     document.getElementById('kpiSGPALabel').textContent = 'Semester ' + sem + ' SGPA (Rel.)';
     document.getElementById('footSGPA').textContent = sgpa.toFixed(2);
 
-    // Compute Class Rank in this semester
-    const allSemMarks = RA.getAllMarks().filter(m => m.semester === sem);
-    const rankedStudents = allSemMarks.map(m => {
-      const s = RA.getStudent(m.studentId);
-      const s_sgpa = RA.calcRelativeSGPA ? RA.calcRelativeSGPA(m.subjects, classMap) : RA.calcSGPA(m.subjects);
-      return { id: m.studentId, sgpa: s_sgpa };
-    }).sort((a,b) => b.sgpa - a.sgpa);
+    // Compute Multi-Tier Hierarchical Ranks via RA.getStudentHierarchyRanks
+    const hRanks = (typeof RA.getStudentHierarchyRanks === 'function')
+      ? RA.getStudentHierarchyRanks(currentStudent.id, sem)
+      : null;
 
-    const myRankIdx = rankedStudents.findIndex(r => r.id === currentStudent.id);
-    const rankStr = myRankIdx >= 0 ? '#' + (myRankIdx + 1) + ' of ' + rankedStudents.length : '—';
-    document.getElementById('kpiRank').textContent = rankStr;
-    document.getElementById('kpiRankLabel').textContent = 'Class Rank (Sem ' + sem + ')';
+    if (hRanks && hRanks.sgpa && hRanks.sgpa.classRank) {
+      document.getElementById('kpiRank').textContent = '#' + hRanks.sgpa.classRank + ' of ' + hRanks.sgpa.classTotal;
+      document.getElementById('kpiRankLabel').textContent = 'Class Rank (' + (hRanks.studentClass || 'Class') + ')';
+
+      const classTag = document.getElementById('stuClassRankTag');
+      if (classTag) classTag.innerHTML = `🏆 <strong>Class:</strong> #${hRanks.sgpa.classRank} / ${hRanks.sgpa.classTotal}`;
+      const deptTag = document.getElementById('stuDeptRankTag');
+      if (deptTag) deptTag.innerHTML = `🏛️ <strong>Dept:</strong> #${hRanks.sgpa.deptRank} / ${hRanks.sgpa.deptTotal}`;
+      const collTag = document.getElementById('stuCollegeRankTag');
+      if (collTag) collTag.innerHTML = `🎓 <strong>College:</strong> #${hRanks.sgpa.collegeRank} / ${hRanks.sgpa.collegeTotal}`;
+    } else {
+      document.getElementById('kpiRank').textContent = '—';
+      document.getElementById('kpiRankLabel').textContent = 'Class Rank';
+    }
 
     let semCredits = 0;
     let passedCount = 0;

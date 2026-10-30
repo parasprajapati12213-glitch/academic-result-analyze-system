@@ -161,6 +161,22 @@
       </div>
     </div>
 
+    <!-- Active Class Standing Callout Banner -->
+    <div id="classStandingCallout" style="background:linear-gradient(90deg,rgba(0,240,255,0.12),rgba(56,189,248,0.06));border:1px solid rgba(0,240,255,0.35);border-radius:14px;padding:16px 22px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;box-shadow:0 8px 24px rgba(0,0,0,0.35)">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:42px;height:42px;border-radius:10px;background:rgba(0,240,255,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid rgba(0,240,255,0.4)">🎯</div>
+        <div>
+          <div style="font-size:14.5px;font-weight:800;color:#ffffff" id="standingCalloutHeadline">You are Ranked #— in Class —</div>
+          <div style="font-size:12.5px;color:var(--muted);margin-top:2px" id="standingCalloutDetail">Loading ranking details...</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="stu-tag stu-tag-gold" id="calloutClassTag">Class Rank: #—</span>
+        <span class="stu-tag" style="background:rgba(251,191,36,0.12);color:#fbbf24;border-color:rgba(251,191,36,0.3)" id="calloutDeptTag">Dept Rank: #—</span>
+        <span class="stu-tag" style="background:rgba(236,72,153,0.12);color:#ec4899;border-color:rgba(236,72,153,0.3)" id="calloutColTag">College Rank: #—</span>
+      </div>
+    </div>
+
     <!-- 4-Level Hierarchy Ranking Cards (Class, Branch, Department, College) -->
     <div class="rank-grid">
       <!-- 1. Class / Section Rank -->
@@ -232,6 +248,50 @@
       </div>
     </div>
 
+    <!-- Class Leaderboard & Peer Standings Table Card -->
+    <div class="card" style="margin-bottom:28px">
+      <div class="card-head">
+        <div>
+          <h3 id="leaderboardTitle">🏆 Class Leaderboard &amp; Student Rankings</h3>
+          <p style="font-size:12px;color:var(--muted);margin-top:2px" id="leaderboardSub">Complete ranked roster for your class section (calibrated with faculty evaluation records)</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <!-- Scope Switcher -->
+          <div class="metric-toggle" style="background:rgba(2,10,24,0.65)">
+            <button class="metric-toggle-btn active" id="btnScopeClass" onclick="switchLeaderboardScope('class')">👥 My Class</button>
+            <button class="metric-toggle-btn" id="btnScopeDept" onclick="switchLeaderboardScope('dept')">🏛️ Department</button>
+            <button class="metric-toggle-btn" id="btnScopeCollege" onclick="switchLeaderboardScope('college')">🎓 College</button>
+          </div>
+        </div>
+      </div>
+      <div style="padding:12px 20px;border-bottom:1px solid rgba(56,189,248,0.12);background:rgba(2,10,24,0.5);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)" id="leaderboardSummaryText">
+          Showing ranked students
+        </div>
+        <div style="position:relative;min-width:240px">
+          <input type="text" id="leaderboardSearch" placeholder="🔍 Search classmate by name or roll..." oninput="filterLeaderboardTable()" style="width:100%;padding:7px 12px;font-size:12.5px;border-radius:8px;background:rgba(3,7,18,0.85);border:1px solid rgba(56,189,248,0.25);color:#fff;outline:none">
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:65px;text-align:center">Rank</th>
+              <th>Roll Number</th>
+              <th>Student Name</th>
+              <th>Class / Section</th>
+              <th style="text-align:center" id="thMetricScore">Semester SGPA</th>
+              <th style="text-align:center">Cumulative CGPA</th>
+              <th style="text-align:center">Credits</th>
+              <th style="text-align:center">Standing</th>
+              <th style="text-align:center">Position vs You</th>
+            </tr>
+          </thead>
+          <tbody id="classLeaderboardBody"></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Subject-Wise Ranking & Paper Difficulty Table Card -->
     <div class="card">
       <div class="card-head">
@@ -264,15 +324,15 @@
 
     <!-- 3D Interactive Charts Grid (Large Visualizations with Pop-up Part Highlights & Detailed Insights) -->
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:24px;margin-bottom:28px">
-      <!-- 1. 3D Line Graph: Subject Percentile Trajectory -->
+      <!-- 1. 3D Class Rank & Score Curve (Rank Distribution) -->
       <div class="card chart-card-3d">
         <div class="chart-3d-inner">
           <div class="card-head">
-            <h3>📈 3D Subject Percentile Trajectory (Line Graph)</h3>
-            <span class="stu-tag stu-tag-verified">Top % Curve</span>
+            <h3 id="classRankCurveTitle">📈 3D Class Rank Distribution Curve (Peer Benchmarking)</h3>
+            <span class="stu-tag stu-tag-gold" id="classRankCurveTag">Class Distribution</span>
           </div>
           <div class="chart-inspector" id="percentileInspector">
-            <span>💡</span> <span>Hover over any subject node to pop up rank percentile &amp; class standing</span>
+            <span>💡</span> <span>Hover over any student node along the rank curve to pop up student standing &amp; distance to you</span>
           </div>
           <div class="card-body" style="padding:10px 18px 18px;height:320px;position:relative"><canvas id="percentileChart"></canvas></div>
         </div>
@@ -381,6 +441,7 @@
   let currentStudent = null;
   let activeSemester = 1;
   let activeMetric = 'sgpa'; // 'sgpa' | 'cgpa'
+  let activeLeaderboardScope = 'class'; // 'class' | 'dept' | 'college'
 
   let hierarchyChartInst = null;
   let subjectBenchmarkChartInst = null;
@@ -411,9 +472,9 @@
     document.getElementById('stuAvatar').textContent = stu.name.charAt(0).toUpperCase();
     document.getElementById('stuName').textContent   = stu.name;
     document.getElementById('stuRollAndBranch').textContent =
-      stu.rollNo + ' · ' + (stu.branch || 'CSE') + ' · Batch ' + (stu.batch || '2021');
+      stu.rollNo + ' · ' + (stu.className || stu.branch || 'CSBS') + ' · ' + (stu.department || 'Centre for Computer Science and Technology');
 
-    const dept = stu.department || (RA.getDepartmentForBranch ? RA.getDepartmentForBranch(stu.branch) : 'CSE');
+    const dept = stu.department || (RA.getDepartmentForBranch ? RA.getDepartmentForBranch(stu.branch) : 'Centre for Computer Science and Technology');
     document.getElementById('stuDeptTag').textContent = 'Dept: ' + dept;
 
     const allMarks = RA.getMarksForStudent(stu.id).sort((a,b) => a.semester - b.semester);
@@ -447,7 +508,16 @@
     activeMetric = metric;
     document.getElementById('btnToggleSGPA').classList.toggle('active', metric === 'sgpa');
     document.getElementById('btnToggleCGPA').classList.toggle('active', metric === 'cgpa');
+    document.getElementById('thMetricScore').textContent = metric === 'sgpa' ? 'Semester SGPA' : 'Cumulative CGPA';
     renderAllRankings();
+  }
+
+  function switchLeaderboardScope(scope) {
+    activeLeaderboardScope = scope;
+    document.getElementById('btnScopeClass').classList.toggle('active', scope === 'class');
+    document.getElementById('btnScopeDept').classList.toggle('active', scope === 'dept');
+    document.getElementById('btnScopeCollege').classList.toggle('active', scope === 'college');
+    renderLeaderboardOnly();
   }
 
   function renderAllRankings() {
@@ -457,13 +527,14 @@
 
     const metricData = activeMetric === 'sgpa' ? hier.sgpa : hier.cgpa;
     const metricLabel = activeMetric === 'sgpa' ? 'SGPA' : 'CGPA';
+    window._lastHierData = hier;
 
     // 1. Update Topper Spotlight & Gap
     const topper = metricData.topper;
     if (topper) {
       document.getElementById('topperTitle').textContent = `Top Performer (${metricLabel})`;
       document.getElementById('topperName').textContent = topper.name;
-      document.getElementById('topperDetails').textContent = (topper.rollNo || '') + ' · ' + (topper.branch || hier.studentBranch);
+      document.getElementById('topperDetails').textContent = (topper.rollNo || '') + ' · ' + (topper.className || topper.branch || hier.studentBranch);
       const topScore = activeMetric === 'sgpa' ? (topper.sgpa || 0) : (topper.cgpa || 0);
       document.getElementById('topperScore').textContent = topScore > 0 ? topScore.toFixed(2) : '—';
       document.getElementById('myScore').textContent = metricData.myScore > 0 ? metricData.myScore.toFixed(2) : '—';
@@ -479,10 +550,21 @@
       }
     }
 
-    // 2. Update Hierarchy Cards
+    // 2. Update Active Class Standing Callout Banner
+    const calloutHeadline = document.getElementById('standingCalloutHeadline');
+    const calloutDetail = document.getElementById('standingCalloutDetail');
+    if (calloutHeadline && calloutDetail) {
+      calloutHeadline.innerHTML = `You are Ranked <span style="color:#00F0FF; font-size:16px;">#${metricData.classRank}</span> in Class <strong>${hier.studentClass}</strong> (${metricLabel}: <strong>${metricData.myScore.toFixed(2)}</strong>)`;
+      calloutDetail.innerHTML = `You stand in the <strong>Top ${metricData.classPct}%</strong> of your class (${metricData.classTotal} enrolled classmates). Your Department Rank is <strong>#${metricData.deptRank} of ${metricData.deptTotal}</strong> and College Rank is <strong>#${metricData.collegeRank} of ${metricData.collegeTotal}</strong>.`;
+      document.getElementById('calloutClassTag').textContent = `Class: #${metricData.classRank} / ${metricData.classTotal}`;
+      document.getElementById('calloutDeptTag').textContent = `Dept: #${metricData.deptRank} / ${metricData.deptTotal}`;
+      document.getElementById('calloutColTag').textContent = `College: #${metricData.collegeRank} / ${metricData.collegeTotal}`;
+    }
+
+    // 3. Update Hierarchy Cards
     // Class
     document.getElementById('classRankVal').textContent = '#' + metricData.classRank;
-    document.getElementById('classScopeLabel').textContent = `Class Rank (${hier.studentBranch} Sec)`;
+    document.getElementById('classScopeLabel').textContent = `Class Rank (${hier.studentClass})`;
     document.getElementById('classPctBadge').textContent = `Top ${metricData.classPct}%`;
     document.getElementById('classBar').style.width = metricData.classPct + '%';
     document.getElementById('classTotalSub').textContent = `${metricData.classTotal} Students`;
@@ -508,7 +590,10 @@
     document.getElementById('colBar').style.width = metricData.collegePct + '%';
     document.getElementById('colTotalSub').textContent = `${metricData.collegeTotal} Students`;
 
-    // 3. Subject-wise Rankings & Difficulty
+    // 4. Render Leaderboard Table
+    renderLeaderboardOnly();
+
+    // 5. Subject-wise Rankings & Difficulty
     const subjects = RA.getSubjectWiseRanking ? RA.getSubjectWiseRanking(currentStudent.id, activeSemester) : [];
     const tbody = document.getElementById('subjectRankingBody');
 
@@ -547,13 +632,100 @@
       }).join('');
     }
 
-    // 4. Render All 3D Charts
+    // 6. Render All 3D Charts
     renderHierarchyChart(metricData);
+    renderClassRankDistributionCurve(metricData);
     renderSubjectBenchmarkChart(subjects);
     renderDifficultyChart(subjects);
-    renderPercentileChart(subjects);
     renderDifficultyPieChart(subjects);
     if (window.init3DGraphCards) window.init3DGraphCards();
+  }
+
+  // ── Leaderboard Table Renderer ─────────────────────────────
+  function renderLeaderboardOnly() {
+    if (!window._lastHierData || !currentStudent) return;
+    const hier = window._lastHierData;
+    const metricData = activeMetric === 'sgpa' ? hier.sgpa : hier.cgpa;
+
+    let targetList = metricData.classList;
+    let scopeLabel = `Class ${hier.studentClass}`;
+    if (activeLeaderboardScope === 'dept') {
+      targetList = metricData.deptList;
+      scopeLabel = `Department (${hier.studentDept})`;
+    } else if (activeLeaderboardScope === 'college') {
+      targetList = metricData.collegeList;
+      scopeLabel = 'MITS College-Wide';
+    }
+
+    const q = (document.getElementById('leaderboardSearch')?.value || '').trim().toLowerCase();
+    const filtered = (targetList || []).filter(st => {
+      if (!q) return true;
+      return (st.name || '').toLowerCase().includes(q) || (st.rollNo || '').toLowerCase().includes(q);
+    });
+
+    const tbody = document.getElementById('classLeaderboardBody');
+    const summaryText = document.getElementById('leaderboardSummaryText');
+    const subTitle = document.getElementById('leaderboardSub');
+
+    if (subTitle) {
+      subTitle.textContent = `Ranked roster for ${scopeLabel} (Semester ${activeSemester} · ${activeMetric.toUpperCase()} Ranking)`;
+    }
+
+    if (summaryText) {
+      summaryText.innerHTML = `Showing <strong>${filtered.length}</strong> of <strong>${targetList.length}</strong> students · Scope: <strong style="color:#00F0FF">${scopeLabel}</strong> · You are Rank <strong style="color:#00F0FF">#${metricData.classRank}</strong> in Class`;
+    }
+
+    if (!tbody) return;
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted)">No students match your search query.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(st => {
+      const isMe = st.isMe;
+      const rankBadge = st.rank === 1 ? '<span style="font-size:16px;">🥇</span> <strong>1</strong>' :
+                        st.rank === 2 ? '<span style="font-size:16px;">🥈</span> <strong>2</strong>' :
+                        st.rank === 3 ? '<span style="font-size:16px;">🥉</span> <strong>3</strong>' :
+                        `<span style="font-weight:700;color:var(--muted)">#${st.rank}</span>`;
+
+      let gapHtml = '';
+      if (isMe) {
+        gapHtml = '<strong style="color:#00F0FF;display:inline-flex;align-items:center;gap:4px;"><span>📍</span> <span>You</span></strong>';
+      } else if (st.gapToMe > 0) {
+        gapHtml = `<span style="color:#fbbf24;font-weight:700;">+${st.gapToMe.toFixed(2)} pts</span> <small style="color:var(--muted)">ahead</small>`;
+      } else if (st.gapToMe < 0) {
+        gapHtml = `<span style="color:rgba(186,230,253,0.7);font-weight:600;">${st.gapToMe.toFixed(2)} pts</span> <small style="color:var(--muted)">behind</small>`;
+      } else {
+        gapHtml = '<span style="color:var(--sky);font-weight:600;">Tied score</span>';
+      }
+
+      const rowStyle = isMe ? 'background:rgba(0, 240, 255, 0.12); border-left:4px solid #00F0FF; box-shadow:inset 0 0 16px rgba(0, 240, 255, 0.15);' : '';
+      const sgpaStyle = activeMetric === 'sgpa' ? 'font-size:14.5px;font-weight:800;color:#00F0FF' : 'color:var(--soft)';
+      const cgpaStyle = activeMetric === 'cgpa' ? 'font-size:14.5px;font-weight:800;color:#00F0FF' : 'color:var(--soft)';
+
+      return `<tr style="${rowStyle}">
+        <td style="text-align:center">${rankBadge}</td>
+        <td><code><strong>${RA.escHTML(st.rollNo)}</strong></code></td>
+        <td>
+          <strong>${RA.escHTML(st.name)}</strong>
+          ${isMe ? `<span class="badge" style="background:#00F0FF;color:#030712;font-weight:800;margin-left:8px;font-size:10.5px;padding:2px 8px;">👉 YOU (Rank #${st.rank})</span>` : ''}
+        </td>
+        <td>${RA.escHTML(st.className || 'CSBS')}</td>
+        <td style="text-align:center"><strong style="${sgpaStyle}">${st.sgpa.toFixed(2)}</strong></td>
+        <td style="text-align:center"><strong style="${cgpaStyle}">${st.cgpa.toFixed(2)}</strong></td>
+        <td style="text-align:center;color:var(--muted);">${st.credits}</td>
+        <td style="text-align:center;">
+          <span class="badge ${st.status === 'Pass' ? 'badge-pass' : 'badge-fail'}">
+            ${st.status === 'Pass' ? '✓ Clear' : '⚠ Backlog'}
+          </span>
+        </td>
+        <td style="text-align:center;">${gapHtml}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function filterLeaderboardTable() {
+    renderLeaderboardOnly();
   }
 
   // ── 1. 3D Multi-Tier Percentile Standing Bar ───────────────
@@ -599,7 +771,7 @@
             const total = tierTotals[idx];
             const pctVal = [metricData.classPct, metricData.branchPct, metricData.deptPct, metricData.collegePct][idx];
             inspector.classList.add('active');
-            inspector.innerHTML = `<strong>🏛️ Pop-up Tier: ${tier}:</strong> Your Rank: <strong>#${rank} of ${total}</strong> · Standing: <strong>Top ${pctVal}%</strong> of peer group`;
+            inspector.innerHTML = `<strong>🏛️ Pop-up Tier: ${tier}:</strong> Your Rank: <strong>#${rank} of ${total}</strong> · Standing: <strong>Top ${pctVal}%</strong> of cohort`;
           } else {
             inspector.classList.remove('active');
             inspector.innerHTML = `<span>💡</span> <span>Hover over any tier bar to pop up student count &amp; percentile rank</span>`;
@@ -633,24 +805,141 @@
     });
   }
 
-  // ── 2. 3D Subject Benchmark Bar ────────────────────────────
+  // ── 2. 3D Class Rank Distribution Curve (Plots all students) ─
+  function renderClassRankDistributionCurve(metricData) {
+    if (percentileChartInst) percentileChartInst.destroy();
+    const canvas = document.getElementById('percentileChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const classRoster = metricData.classList || [];
+    if (!classRoster.length) return;
+
+    const labels = classRoster.map(s => '#' + s.rank);
+    const data   = classRoster.map(s => s.score);
+
+    // Styling gradient
+    let strokeGrad = '#00F0FF';
+    let fillGrad = 'rgba(0, 240, 255, 0.15)';
+    if (ctx.createLinearGradient) {
+      const g = ctx.createLinearGradient(0, 0, 500, 0);
+      g.addColorStop(0, '#00F0FF');
+      g.addColorStop(0.5, '#38BDF8');
+      g.addColorStop(1, '#a78bfa');
+      strokeGrad = g;
+
+      const f = ctx.createLinearGradient(0, 0, 0, 320);
+      f.addColorStop(0, 'rgba(0, 240, 255, 0.40)');
+      f.addColorStop(0.6, 'rgba(56, 189, 248, 0.12)');
+      f.addColorStop(1, 'rgba(3, 7, 18, 0)');
+      fillGrad = f;
+    }
+
+    // Point radius & colors (highlighting student's own rank position)
+    const pointRadii = classRoster.map(s => s.isMe ? 11 : 3.5);
+    const pointHoverRadii = classRoster.map(s => s.isMe ? 16 : 8);
+    const pointBgColors = classRoster.map(s => s.isMe ? '#ffffff' : (s.rank <= 3 ? '#fbbf24' : '#00F0FF'));
+    const pointBorderColors = classRoster.map(s => s.isMe ? '#00F0FF' : '#030712');
+    const pointBorderWidths = classRoster.map(s => s.isMe ? 4 : 1.5);
+
+    const inspector = document.getElementById('percentileInspector');
+    const metricLabel = activeMetric.toUpperCase();
+
+    percentileChartInst = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: `${metricLabel} Score`,
+          data: data,
+          borderColor: strokeGrad,
+          backgroundColor: fillGrad,
+          pointBackgroundColor: pointBgColors,
+          pointBorderColor: pointBorderColors,
+          pointBorderWidth: pointBorderWidths,
+          pointRadius: pointRadii,
+          pointHoverRadius: pointHoverRadii,
+          pointHoverBackgroundColor: '#ffffff',
+          pointHoverBorderColor: '#00F0FF',
+          pointHoverBorderWidth: 4,
+          borderWidth: 3.5,
+          fill: true,
+          tension: 0.36
+        }]
+      },
+      options: {
+        onHover: (event, activeElements) => {
+          if (!inspector) return;
+          if (activeElements.length > 0) {
+            const idx = activeElements[0].index;
+            const st = classRoster[idx];
+            const gapStr = st.isMe ? '🌟 Your Current Position' : (st.gapToMe > 0 ? `+${st.gapToMe.toFixed(2)} ahead of you` : `${st.gapToMe.toFixed(2)} behind you`);
+            inspector.classList.add('active');
+            inspector.innerHTML = `<strong>📈 Class Rank Curve: Rank #${st.rank}: ${st.name} (${st.rollNo}):</strong> ${metricLabel}: <strong>${st.score.toFixed(2)} / 10.00</strong> · Standing: <strong>${gapStr}</strong>`;
+          } else {
+            inspector.classList.remove('active');
+            inspector.innerHTML = `<span>💡</span> <span>Hover over any student node along the rank curve to view score and gap to you</span>`;
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            padding: 14,
+            backgroundColor: 'rgba(3, 7, 18, 0.95)',
+            borderColor: '#00F0FF',
+            borderWidth: 2,
+            cornerRadius: 10,
+            callbacks: {
+              title: (items) => {
+                const st = classRoster[items[0].dataIndex];
+                return `Rank #${st.rank}: ${st.name} (${st.rollNo})`;
+              },
+              label: (ctx) => ` ${metricLabel} Score: ${Number(ctx.raw).toFixed(2)} / 10.00`,
+              afterBody: (items) => {
+                const st = classRoster[items[0].dataIndex];
+                if (st.isMe) return '👉 THIS IS YOUR CURRENT STANDING IN CLASS';
+                return st.gapToMe > 0 ? `Score is +${st.gapToMe.toFixed(2)} pts ahead of you` : `Score is ${st.gapToMe.toFixed(2)} pts behind you`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 10 } }, grid: { color: 'rgba(56,189,248,0.06)' } },
+          y: { min: 0, max: 10, ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 11 } }, grid: { color: 'rgba(56,189,248,0.08)' } }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+
+  // ── 3. 3D Subject Benchmark Bar ────────────────────────────
   function renderSubjectBenchmarkChart(subjects) {
     if (subjectBenchmarkChartInst) subjectBenchmarkChartInst.destroy();
     const canvas = document.getElementById('subjectBenchmarkChart');
     if (!canvas || !subjects.length) return;
     const ctx = canvas.getContext('2d');
 
-    const myGrad = ctx.createLinearGradient(0, 0, 0, 320);
-    myGrad.addColorStop(0, '#00F0FF');
-    myGrad.addColorStop(1, 'rgba(0, 163, 255, 0.45)');
+    let myGrad = '#00F0FF';
+    let topGrad = '#fbbf24';
+    let meanGrad = '#94a3b8';
 
-    const topGrad = ctx.createLinearGradient(0, 0, 0, 320);
-    topGrad.addColorStop(0, '#fde047');
-    topGrad.addColorStop(1, 'rgba(251, 191, 36, 0.45)');
+    if (ctx.createLinearGradient) {
+      const g1 = ctx.createLinearGradient(0, 0, 0, 320);
+      g1.addColorStop(0, '#00F0FF');
+      g1.addColorStop(1, 'rgba(0, 163, 255, 0.45)');
+      myGrad = g1;
 
-    const meanGrad = ctx.createLinearGradient(0, 0, 0, 320);
-    meanGrad.addColorStop(0, '#94a3b8');
-    meanGrad.addColorStop(1, 'rgba(71, 85, 105, 0.45)');
+      const g2 = ctx.createLinearGradient(0, 0, 0, 320);
+      g2.addColorStop(0, '#fde047');
+      g2.addColorStop(1, 'rgba(251, 191, 36, 0.45)');
+      topGrad = g2;
+
+      const g3 = ctx.createLinearGradient(0, 0, 0, 320);
+      g3.addColorStop(0, '#94a3b8');
+      g3.addColorStop(1, 'rgba(71, 85, 105, 0.45)');
+      meanGrad = g3;
+    }
 
     const inspector = document.getElementById('rankingBenchmarkInspector');
 
@@ -722,7 +1011,11 @@
               },
               afterBody: (items) => {
                 const s = subjects[items[0].dataIndex];
-                return `──────────────────\nYour Score: ${s.myScore}/100\nTopper: ${s.topper.score}/100 (${s.topper.studentName})\nClass Mean: ${s.mean}/100\nRank in Subject: #${s.myRank} of ${s.totalCount}`;
+                return `──────────────────
+Your Score: ${s.myScore}/100
+Topper: ${s.topper.score}/100 (${s.topper.studentName})
+Class Mean: ${s.mean}/100
+Rank in Subject: #${s.myRank} of ${s.totalCount}`;
               }
             }
           }
@@ -737,7 +1030,7 @@
     });
   }
 
-  // ── 3. 3D Difficulty Histogram Rating ──────────────────────
+  // ── 4. 3D Difficulty Histogram Rating ──────────────────────
   function renderDifficultyChart(subjects) {
     if (difficultyChartInst) difficultyChartInst.destroy();
     const canvas = document.getElementById('difficultyChart');
@@ -789,7 +1082,10 @@
               },
               afterBody: (items) => {
                 const s = subjects[items[0].dataIndex];
-                return `Level: ${s.diffLabel}\nDifficulty Rating: ${s.diffScore}/10\nClass Mean (μ): ${s.mean}/100\nVariance (σ): ±${s.sd}`;
+                return `Level: ${s.diffLabel}
+Difficulty Rating: ${s.diffScore}/10
+Class Mean (μ): ${s.mean}/100
+Variance (σ): ±${s.sd}`;
               }
             }
           }
@@ -797,91 +1093,6 @@
         scales: {
           x: { ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 11, weight: 600 } }, grid: { color: 'rgba(56,189,248,0.08)' } },
           y: { min: 0, max: 10, ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 11 } }, grid: { color: 'rgba(56,189,248,0.08)' } }
-        },
-        responsive: true,
-        maintainAspectRatio: false
-      }
-    });
-  }
-
-  // ── 4. 3D Line Graph: Subject Percentile Trajectory ────────
-  function renderPercentileChart(subjects) {
-    if (percentileChartInst) percentileChartInst.destroy();
-    const canvas = document.getElementById('percentileChart');
-    if (!canvas || !subjects.length) return;
-    const ctx = canvas.getContext('2d');
-
-    const strokeGrad = ctx.createLinearGradient(0, 0, 500, 0);
-    strokeGrad.addColorStop(0, '#00F0FF');
-    strokeGrad.addColorStop(0.5, '#38BDF8');
-    strokeGrad.addColorStop(1, '#a78bfa');
-
-    const fillGrad = ctx.createLinearGradient(0, 0, 0, 320);
-    fillGrad.addColorStop(0, 'rgba(0, 240, 255, 0.38)');
-    fillGrad.addColorStop(0.6, 'rgba(56, 189, 248, 0.12)');
-    fillGrad.addColorStop(1, 'rgba(3, 7, 18, 0)');
-
-    const inspector = document.getElementById('percentileInspector');
-
-    percentileChartInst = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: subjects.map(s => s.code),
-        datasets: [{
-          label: 'Percentile in Subject',
-          data: subjects.map(s => s.percentile),
-          borderColor: strokeGrad,
-          backgroundColor: fillGrad,
-          pointBackgroundColor: '#00F0FF',
-          pointBorderColor: '#ffffff',
-          pointBorderWidth: 2.5,
-          pointRadius: 8,
-          pointHoverRadius: 14,
-          pointHoverBackgroundColor: '#ffffff',
-          pointHoverBorderColor: '#00F0FF',
-          pointHoverBorderWidth: 4,
-          borderWidth: 3.5,
-          fill: true,
-          tension: 0.38
-        }]
-      },
-      options: {
-        onHover: (event, activeElements) => {
-          if (!inspector) return;
-          if (activeElements.length > 0) {
-            const idx = activeElements[0].index;
-            const s = subjects[idx];
-            inspector.classList.add('active');
-            inspector.innerHTML = `<strong>📈 Pop-up Node: ${s.code} (${s.name}):</strong> Your Score: <strong>${s.myScore}/100</strong> · Subject Rank: <strong>#${s.myRank} of ${s.totalCount}</strong> · Standing: <strong>Top ${s.percentile}%</strong> of Class`;
-          } else {
-            inspector.classList.remove('active');
-            inspector.innerHTML = `<span>💡</span> <span>Hover over any subject node to pop up rank percentile &amp; class standing</span>`;
-          }
-        },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            padding: 14,
-            backgroundColor: 'rgba(3, 7, 18, 0.95)',
-            borderColor: '#00F0FF',
-            borderWidth: 2,
-            cornerRadius: 10,
-            callbacks: {
-              title: (items) => {
-                const s = subjects[items[0].dataIndex];
-                return `${s.code} – ${s.name}`;
-              },
-              label: (ctx) => ` Relative Percentile: Top ${ctx.raw}% of class`,
-              afterBody: (items) => {
-                const s = subjects[items[0].dataIndex];
-                return `Score: ${s.myScore}/100\nRank in Subject: #${s.myRank} of ${s.totalCount}\nRelative Grade: ${s.grade.grade}`;
-              }
-            }
-          }
-        },
-        scales: {
-          x: { ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 11, weight: 600 } }, grid: { color: 'rgba(56,189,248,0.08)' } },
-          y: { min: 0, max: 100, ticks: { color: 'rgba(186,230,253,0.75)', font: { family: 'DM Sans', size: 11 }, callback: v => v + '%' }, grid: { color: 'rgba(56,189,248,0.08)' } }
         },
         responsive: true,
         maintainAspectRatio: false

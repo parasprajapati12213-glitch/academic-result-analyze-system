@@ -42854,8 +42854,8 @@ function syncStudentMarksToShared(studentId) {
     if (!semGroups[sem]) semGroups[sem] = [];
 
     const m = r.isAbsent ? 0 : (r.marksObtained >= 0 ? r.marksObtained : 0);
-    const gr = r.finalGrade || (m >= 90 ? 'O' : m >= 80 ? 'A+' : m >= 70 ? 'A' : m >= 60 ? 'B+' : m >= 50 ? 'B' : m >= 40 ? 'C' : 'F');
-    const gp = r.finalGradePoint !== undefined ? r.finalGradePoint : (m >= 90 ? 10 : m >= 80 ? 9 : m >= 70 ? 8 : m >= 60 ? 7 : m >= 50 ? 6 : m >= 40 ? 5 : 0);
+    const gr = (r.finalGrade && r.finalGrade.trim() !== '') ? r.finalGrade : (m >= 90 ? 'O' : m >= 80 ? 'A+' : m >= 70 ? 'A' : m >= 60 ? 'B+' : m >= 50 ? 'B' : m >= 40 ? 'C' : 'F');
+    const gp = (r.finalGradePoint !== undefined && r.finalGradePoint >= 0) ? r.finalGradePoint : (m >= 90 ? 10 : m >= 80 ? 9 : m >= 70 ? 8 : m >= 60 ? 7 : m >= 50 ? 6 : m >= 40 ? 5 : 0);
 
     semGroups[sem].push({
       code: sub.code,
@@ -42923,8 +42923,8 @@ function computeStudentReportObject(student) {
     const r = resMap[sub.id];
     const marks = r ? (r.isAbsent ? 0 : (r.marksObtained >= 0 ? r.marksObtained : 0)) : 0;
     const isAbsent = r ? !!r.isAbsent : false;
-    const gr = r?.finalGrade || (marks >= 90 ? 'O' : marks >= 80 ? 'A+' : marks >= 70 ? 'A' : marks >= 60 ? 'B+' : marks >= 50 ? 'B' : marks >= 40 ? 'C' : 'F');
-    const gp = r?.finalGradePoint !== undefined ? r.finalGradePoint : (marks >= 90 ? 10 : marks >= 80 ? 9 : marks >= 70 ? 8 : marks >= 60 ? 7 : marks >= 50 ? 6 : marks >= 40 ? 5 : 0);
+    const gr = (r?.finalGrade && r.finalGrade.trim() !== '') ? r.finalGrade : (marks >= 90 ? 'O' : marks >= 80 ? 'A+' : marks >= 70 ? 'A' : marks >= 60 ? 'B+' : marks >= 50 ? 'B' : marks >= 40 ? 'C' : 'F');
+    const gp = (r?.finalGradePoint !== undefined && r.finalGradePoint >= 0) ? r.finalGradePoint : (marks >= 90 ? 10 : marks >= 80 ? 9 : marks >= 70 ? 8 : marks >= 60 ? 7 : marks >= 50 ? 6 : marks >= 40 ? 5 : 0);
     const passed = marks >= 40 && !isAbsent;
 
     regCredits += sub.credits;
@@ -42957,6 +42957,19 @@ function computeStudentReportObject(student) {
   const status = passedCount === semSubs.length && semSubs.length > 0 ? 'Pass' : (passedCount > 0 ? 'Fail' : 'Incomplete');
   const academicClass = sgpa >= 8.0 ? 'First Class with Distinction' : (sgpa >= 6.5 ? 'First Class' : (sgpa >= 5.0 ? 'Second Class' : 'Arrear / Backlog'));
 
+  // Multi-semester cumulative CGPA calculation
+  const allStudentResults = localGet(STORAGE_KEYS.FAC_RESULTS, SEED_RESULTS).filter(r => r.studentId === student.id);
+  let totalAllWeightedGP = 0, totalAllCredits = 0;
+  allStudentResults.forEach(r => {
+    const sub = subjects.find(s => s.id === r.subjectId);
+    if (!sub) return;
+    const m = r.isAbsent ? 0 : (r.marksObtained >= 0 ? r.marksObtained : 0);
+    const gp = (r.finalGradePoint !== undefined && r.finalGradePoint >= 0) ? r.finalGradePoint : (m >= 90 ? 10 : m >= 80 ? 9 : m >= 70 ? 8 : m >= 60 ? 7 : m >= 50 ? 6 : m >= 40 ? 5 : 0);
+    totalAllWeightedGP += (gp * (sub.credits || 1));
+    totalAllCredits += (sub.credits || 1);
+  });
+  const cgpa = totalAllCredits > 0 ? +(totalAllWeightedGP / totalAllCredits).toFixed(2) : sgpa;
+
   return {
     studentId: student.id,
     studentName: student.name,
@@ -42966,7 +42979,7 @@ function computeStudentReportObject(student) {
     department: student.department || 'Centre for Computer Science and Technology',
     academicYear: student.academicYear || '2025-2026',
     sgpa,
-    cgpa: sgpa,
+    cgpa,
     creditsRegistered: regCredits,
     creditsEarned: earnedCredits,
     academicClass,
@@ -43505,12 +43518,91 @@ const API = {
 
     const students = localGet(STORAGE_KEYS.FAC_STUDENTS, SEED_STUDENTS);
     const reports = students.map(s => computeStudentReportObject(s));
-    reports.sort((a, b) => b.cgpa - a.cgpa);
+
+    // Sort by CGPA descending with tie-breaker on SGPA then name
+    const sortedByCGPA = [...reports].sort((a, b) => {
+      const diff = b.cgpa - a.cgpa;
+      if (Math.abs(diff) > 0.001) return diff;
+      const sdiff = b.sgpa - a.sgpa;
+      if (Math.abs(sdiff) > 0.001) return sdiff;
+      return a.studentName.localeCompare(b.studentName);
+    });
+
+    // Sort by SGPA descending
+    const sortedBySGPA = [...reports].sort((a, b) => {
+      const diff = b.sgpa - a.sgpa;
+      if (Math.abs(diff) > 0.001) return diff;
+      const cdiff = b.cgpa - a.cgpa;
+      if (Math.abs(cdiff) > 0.001) return cdiff;
+      return a.studentName.localeCompare(b.studentName);
+    });
+
+    // College ranks (1..N)
+    const collegeRankMap = {};
+    const collegeTotal = sortedByCGPA.length || 1;
+    sortedByCGPA.forEach((st, idx) => { collegeRankMap[st.studentId] = idx + 1; });
+
+    const sgpaCollegeRankMap = {};
+    sortedBySGPA.forEach((st, idx) => { sgpaCollegeRankMap[st.studentId] = idx + 1; });
+
+    // Department grouping
+    const deptGroupsCGPA = {};
+    const deptGroupsSGPA = {};
+    sortedByCGPA.forEach(st => {
+      const d = st.department || 'Centre for Computer Science and Technology';
+      if (!deptGroupsCGPA[d]) deptGroupsCGPA[d] = [];
+      deptGroupsCGPA[d].push(st);
+    });
+    sortedBySGPA.forEach(st => {
+      const d = st.department || 'Centre for Computer Science and Technology';
+      if (!deptGroupsSGPA[d]) deptGroupsSGPA[d] = [];
+      deptGroupsSGPA[d].push(st);
+    });
+
+    const deptRankMap = {};
+    const deptTotalMap = {};
+    Object.keys(deptGroupsCGPA).forEach(d => {
+      const list = deptGroupsCGPA[d];
+      deptTotalMap[d] = list.length;
+      list.forEach((st, idx) => { deptRankMap[st.studentId] = idx + 1; });
+    });
+
+    const sgpaDeptRankMap = {};
+    Object.keys(deptGroupsSGPA).forEach(d => {
+      deptGroupsSGPA[d].forEach((st, idx) => { sgpaDeptRankMap[st.studentId] = idx + 1; });
+    });
+
+    // Class / Section grouping
+    const classGroupsCGPA = {};
+    const classGroupsSGPA = {};
+    sortedByCGPA.forEach(st => {
+      const cName = st.className || 'CSBS-A';
+      if (!classGroupsCGPA[cName]) classGroupsCGPA[cName] = [];
+      classGroupsCGPA[cName].push(st);
+    });
+    sortedBySGPA.forEach(st => {
+      const cName = st.className || 'CSBS-A';
+      if (!classGroupsSGPA[cName]) classGroupsSGPA[cName] = [];
+      classGroupsSGPA[cName].push(st);
+    });
+
+    const classRankMap = {};
+    const classTotalMap = {};
+    Object.keys(classGroupsCGPA).forEach(cName => {
+      const list = classGroupsCGPA[cName];
+      classTotalMap[cName] = list.length;
+      list.forEach((st, idx) => { classRankMap[st.studentId] = idx + 1; });
+    });
+
+    const sgpaClassRankMap = {};
+    Object.keys(classGroupsSGPA).forEach(cName => {
+      classGroupsSGPA[cName].forEach((st, idx) => { sgpaClassRankMap[st.studentId] = idx + 1; });
+    });
 
     let passCount = 0, failCount = 0, totalCgpa = 0;
     const gradeDist = { 'O': 0, 'A+': 0, 'A': 0, 'B+': 0, 'B': 0, 'C': 0, 'F': 0 };
 
-    reports.forEach(rpt => {
+    sortedByCGPA.forEach(rpt => {
       if (rpt.status === 'Pass') passCount++; else failCount++;
       totalCgpa += rpt.cgpa;
       rpt.subjects.forEach(s => {
@@ -43518,22 +43610,38 @@ const API = {
       });
     });
 
-    const avgCgpa = reports.length > 0 ? +(totalCgpa / reports.length).toFixed(2) : 8.42;
-    const highest = reports[0]?.cgpa || 9.85;
-    const lowest = reports[reports.length - 1]?.cgpa || 5.20;
+    const avgCgpa = sortedByCGPA.length > 0 ? +(totalCgpa / sortedByCGPA.length).toFixed(2) : 8.42;
+    const highest = sortedByCGPA[0]?.cgpa || 9.85;
+    const lowest = sortedByCGPA[sortedByCGPA.length - 1]?.cgpa || 5.20;
 
-    const rankings = reports.map(rpt => ({
-      id: rpt.studentId,
-      rollNo: rpt.rollNo,
-      name: rpt.studentName,
-      className: rpt.className,
-      creditsEarned: rpt.creditsEarned,
-      creditsTotal: rpt.creditsRegistered,
-      sgpa: rpt.sgpa,
-      cgpa: rpt.cgpa,
-      academicClass: rpt.academicClass,
-      status: rpt.status
-    }));
+    const rankings = sortedByCGPA.map(rpt => {
+      const cName = rpt.className || 'CSBS-A';
+      const dName = rpt.department || 'Centre for Computer Science and Technology';
+      return {
+        id: rpt.studentId,
+        rollNo: rpt.rollNo,
+        name: rpt.studentName,
+        className: cName,
+        department: dName,
+        creditsEarned: rpt.creditsEarned,
+        creditsTotal: rpt.creditsRegistered,
+        sgpa: rpt.sgpa,
+        cgpa: rpt.cgpa,
+        academicClass: rpt.academicClass,
+        status: rpt.status,
+        // Detailed Ranks (CGPA primary)
+        collegeRank: collegeRankMap[rpt.studentId] || 1,
+        totalInCollege: collegeTotal,
+        deptRank: deptRankMap[rpt.studentId] || 1,
+        totalInDept: deptTotalMap[dName] || 1,
+        classRank: classRankMap[rpt.studentId] || 1,
+        totalInClass: classTotalMap[cName] || 1,
+        // SGPA Ranks
+        sgpaCollegeRank: sgpaCollegeRankMap[rpt.studentId] || 1,
+        sgpaDeptRank: sgpaDeptRankMap[rpt.studentId] || 1,
+        sgpaClassRank: sgpaClassRankMap[rpt.studentId] || 1
+      };
+    });
 
     return {
       ok: true,
@@ -43548,6 +43656,17 @@ const API = {
         rankings
       }
     };
+  },
+
+  getStudentRankingsMap: async () => {
+    const analysisRes = await API.classAnalysis();
+    if (!analysisRes.ok || !analysisRes.data || !analysisRes.data.rankings) return {};
+    const map = {};
+    analysisRes.data.rankings.forEach(r => {
+      map[r.id] = r;
+      if (r.rollNo) map[r.rollNo] = r;
+    });
+    return map;
   },
 
   subjectAnalysis: async () => {
