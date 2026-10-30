@@ -5,10 +5,50 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Result Analyzer – Student Rankings & Paper Difficulty</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="../faculty/frontend/js/api.js"></script>
-  <script src="app.js"></script>
-  <script src="leo_chatbot.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+  // ── Live Real-Time Synchronization with Faculty Updates ──
+  window.addEventListener('storage', (e) => {
+    if (['faculty_results', 'ra_marks', 'faculty_students', 'ra_students'].includes(e.key)) {
+      if (currentStudent) initStudentRankings(currentStudent);
+    }
+  });
+  window.addEventListener('ra_data_sync', () => {
+    if (currentStudent) initStudentRankings(currentStudent);
+  });
+</script>
+  <script src="../faculty/frontend/js/api.js">
+  // ── Live Real-Time Synchronization with Faculty Updates ──
+  window.addEventListener('storage', (e) => {
+    if (['faculty_results', 'ra_marks', 'faculty_students', 'ra_students'].includes(e.key)) {
+      if (currentStudent) initStudentRankings(currentStudent);
+    }
+  });
+  window.addEventListener('ra_data_sync', () => {
+    if (currentStudent) initStudentRankings(currentStudent);
+  });
+</script>
+  <script src="app.js">
+  // ── Live Real-Time Synchronization with Faculty Updates ──
+  window.addEventListener('storage', (e) => {
+    if (['faculty_results', 'ra_marks', 'faculty_students', 'ra_students'].includes(e.key)) {
+      if (currentStudent) initStudentRankings(currentStudent);
+    }
+  });
+  window.addEventListener('ra_data_sync', () => {
+    if (currentStudent) initStudentRankings(currentStudent);
+  });
+</script>
+  <script src="leo_chatbot.js">
+  // ── Live Real-Time Synchronization with Faculty Updates ──
+  window.addEventListener('storage', (e) => {
+    if (['faculty_results', 'ra_marks', 'faculty_students', 'ra_students'].includes(e.key)) {
+      if (currentStudent) initStudentRankings(currentStudent);
+    }
+  });
+  window.addEventListener('ra_data_sync', () => {
+    if (currentStudent) initStudentRankings(currentStudent);
+  });
+</script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -631,7 +671,12 @@
     const dept = stu.department || (RA.getDepartmentForBranch ? RA.getDepartmentForBranch(stu.branch) : 'Centre for Computer Science and Technology');
     document.getElementById('stuDeptTag').textContent = 'Dept: ' + dept;
 
-    const allMarks = RA.getMarksForStudent(stu.id).sort((a,b) => a.semester - b.semester);
+    let allMarks = (typeof RA.getMarksForStudent === 'function')
+      ? RA.getMarksForStudent(stu.id).sort((a,b) => a.semester - b.semester)
+      : [];
+    if (!allMarks.length && stu.rollNo) {
+      allMarks = RA.getMarksForStudent(stu.rollNo).sort((a,b) => a.semester - b.semester);
+    }
     const semTabsEl = document.getElementById('semTabs');
 
     if (!allMarks.length) {
@@ -1341,6 +1386,16 @@ Variance (σ): ±${s.sd}`;
       }
     });
   }
+
+  // ── Live Real-Time Synchronization with Faculty Updates ──
+  window.addEventListener('storage', (e) => {
+    if (['faculty_results', 'ra_marks', 'faculty_students', 'ra_students'].includes(e.key)) {
+      if (currentStudent) initStudentRankings(currentStudent);
+    }
+  });
+  window.addEventListener('ra_data_sync', () => {
+    if (currentStudent) initStudentRankings(currentStudent);
+  });
 </script>
 </body>
 </html>

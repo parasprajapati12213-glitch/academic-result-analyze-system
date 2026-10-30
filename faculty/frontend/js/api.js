@@ -42878,10 +42878,20 @@ function syncDeleteStudentToShared(studentId) {
 
 function syncStudentMarksToShared(studentId) {
   const allResults = localGet(STORAGE_KEYS.FAC_RESULTS, SEED_RESULTS);
-  const studentResults = allResults.filter(r => r.studentId === studentId);
+  const facStudents = localGet(STORAGE_KEYS.FAC_STUDENTS, SEED_STUDENTS);
   const subjects = localGet(STORAGE_KEYS.FAC_SUBJECTS, SEED_SUBJECTS);
   const subMap = {};
-  subjects.forEach(sub => { subMap[sub.id] = sub; });
+  subjects.forEach(sub => { subMap[sub.id] = sub; subMap[sub.code] = sub; });
+
+  const matchedStudent = facStudents.find(s => s.id === studentId || s.rollNo === studentId);
+  const targetId = matchedStudent ? matchedStudent.id : studentId;
+  const targetRoll = matchedStudent ? (matchedStudent.rollNo || '').trim().toLowerCase() : String(studentId).trim().toLowerCase();
+
+  const studentResults = allResults.filter(r => {
+    if (r.studentId === targetId || r.studentId === studentId) return true;
+    const s = facStudents.find(x => x.id === r.studentId);
+    return s && (s.rollNo || '').trim().toLowerCase() === targetRoll;
+  });
 
   const semGroups = {};
   studentResults.forEach(r => {
@@ -42894,30 +42904,43 @@ function syncStudentMarksToShared(studentId) {
     const gr = (r.finalGrade && r.finalGrade.trim() !== '') ? r.finalGrade : (m >= 90 ? 'O' : m >= 80 ? 'A+' : m >= 70 ? 'A' : m >= 60 ? 'B+' : m >= 50 ? 'B' : m >= 40 ? 'C' : 'F');
     const gp = (r.finalGradePoint !== undefined && r.finalGradePoint >= 0) ? r.finalGradePoint : (m >= 90 ? 10 : m >= 80 ? 9 : m >= 70 ? 8 : m >= 60 ? 7 : m >= 50 ? 6 : m >= 40 ? 5 : 0);
 
-    semGroups[sem].push({
+    const existingIdx = semGroups[sem].findIndex(x => x.code === sub.code);
+    const courseObj = {
       code: sub.code,
       name: sub.name,
       credits: sub.credits || 3,
+      minor: Math.round(m * 0.2),
+      lab: Math.round(m * 0.3),
+      major: Math.round(m * 0.5),
       internal: Math.round(m * 0.4),
       external: Math.round(m * 0.6),
       total: m,
       grade: gr,
       points: gp
-    });
+    };
+    if (existingIdx >= 0) semGroups[sem][existingIdx] = courseObj;
+    else semGroups[sem].push(courseObj);
   });
 
-  let allMarks = localGet(STORAGE_KEYS.MARKS, []).filter(m => m.studentId !== studentId);
+  let allMarks = localGet(STORAGE_KEYS.MARKS, []).filter(m => m.studentId !== targetId && m.studentId !== studentId);
   Object.keys(semGroups).forEach(semStr => {
     const semNum = Number(semStr);
     allMarks.push({
-      id: 'MRK_' + studentId + '_' + semNum,
-      studentId: studentId,
+      id: 'MRK_' + targetId + '_' + semNum,
+      studentId: targetId,
       semester: semNum,
       subjects: semGroups[semStr],
       updatedAt: new Date().toISOString()
     });
   });
   localSet(STORAGE_KEYS.MARKS, allMarks);
+
+  // Dispatch live sync event for immediate reflection across all tabs
+  try {
+    if (typeof window !== 'undefined' && window.dispatchEvent) {
+      window.dispatchEvent(new CustomEvent('ra_data_sync', { detail: { studentId: targetId } }));
+    }
+  } catch(e) {}
 }
 
 function syncAllResultsToShared() {

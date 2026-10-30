@@ -5,11 +5,61 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Result Analyzer – Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="../faculty/frontend/js/api.js"></script>
-  <script src="app.js"></script>
-  <script src="leo_chatbot.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+  // ── Live Real-Time Synchronization with Faculty Updates ──
+  window.addEventListener('storage', (e) => {
+    if (['faculty_results', 'ra_marks', 'faculty_students', 'ra_students'].includes(e.key)) {
+      if (currentStudent) renderStudentDashboard(currentStudent);
+    }
+  });
+  window.addEventListener('ra_data_sync', () => {
+    if (currentStudent) renderStudentDashboard(currentStudent);
+  });
+</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+  // ── Live Real-Time Synchronization with Faculty Updates ──
+  window.addEventListener('storage', (e) => {
+    if (['faculty_results', 'ra_marks', 'faculty_students', 'ra_students'].includes(e.key)) {
+      if (currentStudent) renderStudentDashboard(currentStudent);
+    }
+  });
+  window.addEventListener('ra_data_sync', () => {
+    if (currentStudent) renderStudentDashboard(currentStudent);
+  });
+</script>
+  <script src="../faculty/frontend/js/api.js">
+  // ── Live Real-Time Synchronization with Faculty Updates ──
+  window.addEventListener('storage', (e) => {
+    if (['faculty_results', 'ra_marks', 'faculty_students', 'ra_students'].includes(e.key)) {
+      if (currentStudent) renderStudentDashboard(currentStudent);
+    }
+  });
+  window.addEventListener('ra_data_sync', () => {
+    if (currentStudent) renderStudentDashboard(currentStudent);
+  });
+</script>
+  <script src="app.js">
+  // ── Live Real-Time Synchronization with Faculty Updates ──
+  window.addEventListener('storage', (e) => {
+    if (['faculty_results', 'ra_marks', 'faculty_students', 'ra_students'].includes(e.key)) {
+      if (currentStudent) renderStudentDashboard(currentStudent);
+    }
+  });
+  window.addEventListener('ra_data_sync', () => {
+    if (currentStudent) renderStudentDashboard(currentStudent);
+  });
+</script>
+  <script src="leo_chatbot.js">
+  // ── Live Real-Time Synchronization with Faculty Updates ──
+  window.addEventListener('storage', (e) => {
+    if (['faculty_results', 'ra_marks', 'faculty_students', 'ra_students'].includes(e.key)) {
+      if (currentStudent) renderStudentDashboard(currentStudent);
+    }
+  });
+  window.addEventListener('ra_data_sync', () => {
+    if (currentStudent) renderStudentDashboard(currentStudent);
+  });
+</script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -546,7 +596,12 @@
     document.getElementById('stuBatchTag').textContent = 'Batch ' + (stu.batch || '2021');
 
     // Retrieve all marks for this student
-    const allMarks = RA.getMarksForStudent(stu.id).sort((a,b) => a.semester - b.semester);
+    let allMarks = (typeof RA.getMarksForStudent === 'function')
+      ? RA.getMarksForStudent(stu.id).sort((a,b) => a.semester - b.semester)
+      : [];
+    if (!allMarks.length && stu.rollNo) {
+      allMarks = RA.getMarksForStudent(stu.rollNo).sort((a,b) => a.semester - b.semester);
+    }
 
     // Compute relative CGPA
     const cgpa = RA.calcRelativeCGPA ? RA.calcRelativeCGPA(stu.id) : RA.calcCGPA(stu.id);
@@ -600,7 +655,10 @@
       btn.classList.toggle('active', btn.textContent.trim() === 'Semester ' + sem);
     });
 
-    const semRecord = RA.getMarksForStudentSem(currentStudent.id, sem);
+    let semRecord = RA.getMarksForStudentSem(currentStudent.id, sem);
+    if (!semRecord && currentStudent.rollNo) {
+      semRecord = RA.getMarksForStudentSem(currentStudent.rollNo, sem);
+    }
     const marksBody = document.getElementById('studentMarksBody');
     const classMap  = RA.buildClassMarkMap ? RA.buildClassMarkMap(sem) : {};
 
@@ -1294,6 +1352,16 @@
 
     doc.save('MITS_Result_' + currentStudent.rollNo + '_Sem' + activeSemester + '.pdf');
   }
+
+  // ── Live Real-Time Synchronization with Faculty Updates ──
+  window.addEventListener('storage', (e) => {
+    if (['faculty_results', 'ra_marks', 'faculty_students', 'ra_students'].includes(e.key)) {
+      if (currentStudent) renderStudentDashboard(currentStudent);
+    }
+  });
+  window.addEventListener('ra_data_sync', () => {
+    if (currentStudent) renderStudentDashboard(currentStudent);
+  });
 </script>
 </body>
 </html>
