@@ -422,7 +422,7 @@ function getStudentByEmail(email) {
   // 2. Institutional alias for Paras Prajapati (25chtpas)
   const prefix = clean.split('@')[0];
   const alphaPrefix = prefix.replace(/[^a-z0-9]/g, '');
-  if (alphaPrefix === '25chtpas' || alphaPrefix.includes('25chtpas') || clean.includes('25chtpas')) {
+  if (alphaPrefix === '25chtpas' || alphaPrefix.includes('25chtpas') || clean.includes('25chtpas') || clean.includes('25cb1pa89') || alphaPrefix === '25cb1pa89') {
     const p = students.find(s => (s.rollNo || '').includes('1089') || (s.name || '').toLowerCase().includes('paras'));
     if (p) return p;
   }
