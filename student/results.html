@@ -369,6 +369,18 @@
     doc.save('Result_' + currentStudent.rollNo + '_' + currentStudent.name.replace(/\s+/g,'_') + '.pdf');
   }
 
+  // ── Live Real-Time Synchronization with Faculty Updates ──
+  window.addEventListener('storage', (e) => {
+    if (!e.key || ['faculty_results', 'ra_marks', 'faculty_students', 'ra_students'].includes(e.key)) {
+      if (typeof RA !== 'undefined' && RA.invalidateAppCache) RA.invalidateAppCache();
+      loadStudent();
+    }
+  });
+  window.addEventListener('ra_data_sync', () => {
+    if (typeof RA !== 'undefined' && RA.invalidateAppCache) RA.invalidateAppCache();
+    loadStudent();
+  });
+
   populateStudents();
 </script>
 </body>

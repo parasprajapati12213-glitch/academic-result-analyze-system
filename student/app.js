@@ -122,8 +122,32 @@ const DB = {
 function dbGet(key)      { return JSON.parse(localStorage.getItem(key) || '[]'); }
 function dbSet(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
+// ── In-Memory Fast Cache for Instant Real-Time Loading ───────
+let _marksCache = null;
+let _classMapCache = {};
+let _studentsCache = null;
+
+function invalidateAppCache() {
+  _marksCache = null;
+  _classMapCache = {};
+  _studentsCache = null;
+}
+
+// Automatically invalidate on storage updates across tabs & local events
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+  window.addEventListener('storage', (e) => {
+    if (!e.key || ['faculty_results', 'ra_marks', 'faculty_students', 'ra_students'].includes(e.key)) {
+      invalidateAppCache();
+    }
+  });
+  window.addEventListener('ra_data_sync', () => {
+    invalidateAppCache();
+  });
+}
+
 // Students: Unify faculty_students and ra_students into a single cohesive cohort
 function getStudents() {
+  if (_studentsCache) return _studentsCache;
   const raList = dbGet(DB.STUDENTS) || [];
   let facList = [];
   try { facList = JSON.parse(localStorage.getItem('faculty_students') || '[]'); } catch(e){}
@@ -161,7 +185,7 @@ function getStudents() {
     }
   });
 
-  return Array.from(map.values()).map(s => ({
+  _studentsCache = Array.from(map.values()).map(s => ({
     department: 'Centre for Computer Science and Technology',
     batch: s.academicYear || s.batch || '2025-2026',
     className: s.className || s.branch || 'CSBS-A',
@@ -169,9 +193,10 @@ function getStudents() {
     phone: '',
     ...s
   }));
+  return _studentsCache;
 }
 
-function saveStudents(arr) { dbSet(DB.STUDENTS, arr); }
+function saveStudents(arr) { invalidateAppCache(); dbSet(DB.STUDENTS, arr); }
 
 function getStudent(id) {
   if (!id) return null;
@@ -179,7 +204,7 @@ function getStudent(id) {
   const list = getStudents();
   return list.find(s => 
     s.id === id || 
-    (s.id && String(s.id).toLowerCase() === clean) ||
+    (s.id && String(s.id).toLowerCase() === clean) || 
     (s.rollNo && s.rollNo.trim().toLowerCase() === clean)
   ) || null;
 }
@@ -200,50 +225,44 @@ function updateStudent(id, data) {
 function deleteStudent(id) {
   saveStudents(getStudents().filter(s => s.id !== id));
   dbSet(DB.MARKS, dbGet(DB.MARKS).filter(m => m.studentId !== id));
+  invalidateAppCache();
 }
 
-// ── Unified Real-Time Marks Engine (Reads Live Faculty Updates) ──────────────
-function getMarksFromFacultyResults(targetIdOrRoll) {
+// ── Unified Real-Time Marks Engine (High Speed O(N) Single-Pass) ─────────────
+function getAllMarks() {
+  if (_marksCache) return _marksCache;
   let facResults = [], facSubs = [], facStudents = [];
   try { facResults = JSON.parse(localStorage.getItem('faculty_results') || '[]'); } catch(e){}
   try { facSubs = JSON.parse(localStorage.getItem('faculty_subjects') || '[]'); } catch(e){}
   try { facStudents = JSON.parse(localStorage.getItem('faculty_students') || '[]'); } catch(e){}
 
-  if (!facResults.length) return [];
+  const subMap = new Map();
+  facSubs.forEach(s => { subMap.set(s.id, s); if (s.code) subMap.set(s.code, s); });
 
-  const subMap = {};
-  facSubs.forEach(s => { subMap[s.id] = s; subMap[s.code] = s; });
-
-  const clean = String(targetIdOrRoll || '').trim().toLowerCase();
-  const matchedStudent = facStudents.find(s => 
-    s.id === targetIdOrRoll || 
-    (s.id && String(s.id).toLowerCase() === clean) || 
-    (s.rollNo && s.rollNo.trim().toLowerCase() === clean)
-  );
-
-  const targetId = matchedStudent ? matchedStudent.id : targetIdOrRoll;
-  const targetRoll = matchedStudent ? (matchedStudent.rollNo || '').trim().toLowerCase() : clean;
-
-  const studentResults = facResults.filter(r => {
-    if (r.studentId === targetId || String(r.studentId).toLowerCase() === clean) return true;
-    const s = facStudents.find(x => x.id === r.studentId);
-    return s && (s.rollNo || '').trim().toLowerCase() === targetRoll;
+  const stuMap = new Map();
+  facStudents.forEach(s => {
+    stuMap.set(s.id, s);
+    if (s.rollNo) stuMap.set(s.rollNo.trim().toLowerCase(), s);
   });
 
-  if (!studentResults.length) return [];
-
-  const semGroups = {};
-  studentResults.forEach(r => {
-    const sub = subMap[r.subjectId];
+  const groupMap = new Map();
+  facResults.forEach(r => {
+    const sub = subMap.get(r.subjectId);
     if (!sub) return;
     const sem = sub.semester || 1;
-    if (!semGroups[sem]) semGroups[sem] = [];
+    const key = r.studentId + '__' + sem;
+
+    let group = groupMap.get(key);
+    if (!group) {
+      group = { id: 'MRK_' + r.studentId + '_' + sem, studentId: r.studentId, semester: sem, subjects: [] };
+      groupMap.set(key, group);
+    }
 
     const m = r.isAbsent ? 0 : (r.marksObtained >= 0 ? r.marksObtained : 0);
     const gr = (r.finalGrade && r.finalGrade.trim() !== '') ? r.finalGrade : (m >= 90 ? 'O' : m >= 80 ? 'A+' : m >= 70 ? 'A' : m >= 60 ? 'B+' : m >= 50 ? 'B' : m >= 40 ? 'C' : 'F');
     const gp = (r.finalGradePoint !== undefined && r.finalGradePoint >= 0) ? r.finalGradePoint : (m >= 90 ? 10 : m >= 80 ? 9 : m >= 70 ? 8 : m >= 60 ? 7 : m >= 50 ? 6 : m >= 40 ? 5 : 0);
 
-    const existingIdx = semGroups[sem].findIndex(x => x.code === sub.code);
+    const existingIdx = group.subjects.findIndex(x => x.code === sub.code);
     const courseObj = {
       code: sub.code,
       name: sub.name,
@@ -257,59 +276,55 @@ function getMarksFromFacultyResults(targetIdOrRoll) {
       grade: gr,
       points: gp
     };
-    if (existingIdx >= 0) semGroups[sem][existingIdx] = courseObj;
-    else semGroups[sem].push(courseObj);
+    if (existingIdx >= 0) group.subjects[existingIdx] = courseObj;
+    else group.subjects.push(courseObj);
   });
 
-  return Object.keys(semGroups).map(semStr => {
-    const semNum = Number(semStr);
-    return {
-      id: 'MRK_' + targetId + '_' + semNum,
-      studentId: targetId,
-      semester: semNum,
-      subjects: semGroups[semStr],
-      updatedAt: new Date().toISOString()
-    };
-  }).sort((a,b) => a.semester - b.semester);
+  // Also merge any shared marks not in faculty_results
+  const shared = dbGet(DB.MARKS) || [];
+  shared.forEach(sm => {
+    const key = sm.studentId + '__' + sm.semester;
+    if (!groupMap.has(key)) {
+      groupMap.set(key, sm);
+    }
+  });
+
+  _marksCache = Array.from(groupMap.values());
+  return _marksCache;
 }
 
-// Marks: Combines shared marks and real-time faculty results
-function getAllMarks() {
-  const shared = dbGet(DB.MARKS) || [];
-  let facResults = [];
-  try { facResults = JSON.parse(localStorage.getItem('faculty_results') || '[]'); } catch(e){}
-  if (facResults.length > 0) {
-    const facSids = new Set(facResults.map(r => r.studentId));
-    facSids.forEach(sid => {
-      const live = getMarksFromFacultyResults(sid);
-      live.forEach(lm => {
-        const idx = shared.findIndex(sm => sm.studentId === lm.studentId && sm.semester === lm.semester);
-        if (idx >= 0) shared[idx] = lm;
-        else shared.push(lm);
-      });
-    });
-  }
-  return shared;
+function getMarksFromFacultyResults(targetIdOrRoll) {
+  return getMarksForStudent(targetIdOrRoll);
 }
 
 function getMarksForStudent(sid) {
   if (!sid) return [];
-  // 1. Check live faculty portal results first for instant reflection of faculty edits
-  const live = getMarksFromFacultyResults(sid);
-  if (live && live.length > 0) return live;
-
-  // 2. Fallback to shared marks store
   const all = getAllMarks();
   const clean = String(sid).trim().toLowerCase();
-  const matched = all.filter(m => m.studentId === sid || String(m.studentId).toLowerCase() === clean);
-  if (matched.length > 0) return matched;
 
-  // 3. Fallback matching student roll number
+  // 1. Direct match on studentId
+  let list = all.filter(m => m.studentId === sid || String(m.studentId).toLowerCase() === clean);
+  if (list.length > 0) return list.slice().sort((a,b) => a.semester - b.semester);
+
+  // 2. Roll number or id lookup against students
   const stus = getStudents();
-  const targetStu = stus.find(s => s.id === sid || (s.rollNo && s.rollNo.trim().toLowerCase() === clean));
+  const targetStu = stus.find(s => 
+    s.id === sid || 
+    (s.id && String(s.id).toLowerCase() === clean) || 
+    (s.rollNo && s.rollNo.trim().toLowerCase() === clean)
+  );
+
   if (targetStu) {
-    return all.filter(m => m.studentId === targetStu.id || (targetStu.rollNo && m.studentId === targetStu.rollNo));
+    const tId = targetStu.id;
+    const tRoll = (targetStu.rollNo || '').trim().toLowerCase();
+    list = all.filter(m => 
+      m.studentId === tId || 
+      String(m.studentId).toLowerCase() === String(tId).toLowerCase() || 
+      (tRoll && String(m.studentId).toLowerCase() === tRoll)
+    );
+    if (list.length > 0) return list.slice().sort((a,b) => a.semester - b.semester);
   }
+
   return [];
 }
 
@@ -320,6 +335,7 @@ function getMarksForStudentSem(sid, sem) {
 }
 
 function saveMarks(studentId, semester, subjects) {
+  invalidateAppCache();
   const all = getAllMarks();
   const semNum = Number(semester);
   const idx = all.findIndex(m => m.studentId === studentId && Number(m.semester) === semNum);
@@ -333,7 +349,6 @@ function saveMarks(studentId, semester, subjects) {
   if (idx >= 0) all[idx] = record; else all.push(record);
   dbSet(DB.MARKS, all);
 }
-
 // Session
 function setSession(data) { localStorage.setItem(DB.SESSION, JSON.stringify(data)); }
 function getSession()     { return JSON.parse(localStorage.getItem(DB.SESSION) || '{}'); }
@@ -459,7 +474,9 @@ function getRelativeGrade(score, allScores) {
 }
 
 function buildClassMarkMap(sem) {
-  const allMarks = getAllMarks().filter(m => m.semester === sem);
+  const semNum = Number(sem);
+  if (_classMapCache[semNum]) return _classMapCache[semNum];
+  const allMarks = getAllMarks().filter(m => Number(m.semester) === semNum);
   const map = {};
   for (const record of allMarks) {
     for (const s of record.subjects) {
@@ -467,6 +484,7 @@ function buildClassMarkMap(sem) {
       map[s.code].push(s.total);
     }
   }
+  _classMapCache[semNum] = map;
   return map;
 }
 
@@ -1283,7 +1301,7 @@ window.RA = {
   getRelativeGrade, buildClassMarkMap, calcRelativeSGPA, calcRelativeCGPA,
   DEPARTMENT_BRANCH_MAP, getDepartmentForBranch, getExamBreakdown,
   getStudentHierarchyRanks, getSubjectWiseRanking,
-  getStudents, getStudent, getStudentByEmail, getLoggedInStudent,
+  invalidateAppCache, getStudents, getStudent, getStudentByEmail, getLoggedInStudent,
   addStudent, updateStudent, deleteStudent,
   getAllMarks, getMarksForStudent, getMarksForStudentSem, saveMarks,
   getToppers, getOverallToppers, getSubjectDifficulty,
