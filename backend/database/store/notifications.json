@@ -1,0 +1,102 @@
+[
+  {
+    "id": "notif_1793529220344_97",
+    "userId": "s_mits_BTCB25O1089",
+    "title": "Marks Updated by Faculty",
+    "message": "Your marks for Introduction to Computer Science and Business Systems were updated to 98 (O).",
+    "type": "marks",
+    "link": "dashboard.html",
+    "isRead": false,
+    "createdAt": "2026-11-01T10:33:40.344Z"
+  },
+  {
+    "id": "notif_1793529220334_14",
+    "userId": "s_mits_BTCB25O1089",
+    "title": "New Message from Dr. Abhishek Dixit",
+    "message": "Great. Also review Chapter 4 slides before coming.",
+    "type": "message",
+    "link": "doubts.html",
+    "isRead": false,
+    "createdAt": "2026-11-01T10:33:40.334Z"
+  },
+  {
+    "id": "notif_1793529220327_148",
+    "userId": "tch_101",
+    "title": "New Message from Paras Prajapati",
+    "message": "Thank you Sir! I will bring my previous assignment notes ...",
+    "type": "message",
+    "link": "#messages",
+    "isRead": false,
+    "createdAt": "2026-11-01T10:33:40.327Z"
+  },
+  {
+    "id": "notif_1793529220321_21",
+    "userId": "s_mits_BTCB25O1089",
+    "title": "Doubt Request ACCEPTED",
+    "message": "Your faculty mentor Dr. Abhishek Dixit marked your doubt session on \"Graph Theory & State Machine Optimization\" as ACCEPTED. Note: Accepted. Please meet in Academic Block 2, Room 204 at 3:15 PM sharp.",
+    "type": "doubt",
+    "link": "doubts.html",
+    "isRead": false,
+    "createdAt": "2026-11-01T10:33:40.321Z"
+  },
+  {
+    "id": "notif_1793529220313_502",
+    "userId": "tch_101",
+    "title": "New Student Doubt Booking",
+    "message": "Paras Prajapati (BTCB25O1089) booked a session on \"Graph Theory & State Machine Optimization\" for 2026-11-05 (3:00 PM - 4:00 PM).",
+    "type": "doubt",
+    "link": "#doubts",
+    "isRead": false,
+    "createdAt": "2026-11-01T10:33:40.313Z"
+  },
+  {
+    "id": "notif_1793529099425_829",
+    "userId": "s_mits_BTCB25O1089",
+    "title": "Marks Updated by Faculty",
+    "message": "Your marks for Introduction to Computer Science and Business Systems were updated to 98 (O).",
+    "type": "marks",
+    "link": "dashboard.html",
+    "isRead": false,
+    "createdAt": "2026-11-01T10:31:39.425Z"
+  },
+  {
+    "id": "notif_1793529099415_504",
+    "userId": "s_mits_BTCB25O1089",
+    "title": "New Message from Dr. Abhishek Dixit",
+    "message": "Great. Also review Chapter 4 slides before coming.",
+    "type": "message",
+    "link": "doubts.html",
+    "isRead": false,
+    "createdAt": "2026-11-01T10:31:39.415Z"
+  },
+  {
+    "id": "notif_1793529099409_882",
+    "userId": "tch_101",
+    "title": "New Message from Paras Prajapati",
+    "message": "Thank you Sir! I will bring my previous assignment notes ...",
+    "type": "message",
+    "link": "#messages",
+    "isRead": false,
+    "createdAt": "2026-11-01T10:31:39.409Z"
+  },
+  {
+    "id": "notif_1793529099403_418",
+    "userId": "s_mits_BTCB25O1089",
+    "title": "Doubt Request ACCEPTED",
+    "message": "Your faculty mentor Dr. Abhishek Dixit marked your doubt session on \"Graph Theory & State Machine Optimization\" as ACCEPTED. Note: Accepted. Please meet in Academic Block 2, Room 204 at 3:15 PM sharp.",
+    "type": "doubt",
+    "link": "doubts.html",
+    "isRead": false,
+    "createdAt": "2026-11-01T10:31:39.403Z"
+  },
+  {
+    "id": "notif_1793529099397_654",
+    "userId": "tch_101",
+    "title": "New Student Doubt Booking",
+    "message": "Paras Prajapati (BTCB25O1089) booked a session on \"Graph Theory & State Machine Optimization\" for 2026-11-05 (3:00 PM - 4:00 PM).",
+    "type": "doubt",
+    "link": "#doubts",
+    "isRead": false,
+    "createdAt": "2026-11-01T10:31:39.397Z"
+  }
+]

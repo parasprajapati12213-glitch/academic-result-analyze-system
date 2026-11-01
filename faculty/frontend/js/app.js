@@ -13,6 +13,8 @@ const PAGE_TITLES = {
   analysis:     'Class Performance',
   reports:      'College Reports',
   settings:     'Settings',
+  doubts:       'Student Doubt Consultations',
+  messages:     'Student Communication & Messages',
 };
 
 const PAGE_LOADERS = {
@@ -28,6 +30,8 @@ const PAGE_LOADERS = {
   analysis:     () => typeof loadAnalysis     === 'function' && loadAnalysis(),
   reports:      () => typeof loadReports      === 'function' && loadReports(),
   settings:     () => typeof loadSettings     === 'function' && loadSettings(),
+  doubts:       () => typeof loadDoubts       === 'function' && loadDoubts(),
+  messages:     () => typeof loadMessages     === 'function' && loadMessages(),
 };
 
 // ── Theme management (Light & Dark Mode) ───────────────────────────────────

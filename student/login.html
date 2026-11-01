@@ -8,6 +8,7 @@
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="../faculty/frontend/js/api.js"></script>
+  <script src="../shared/mits_client.js"></script>
   <script src="app.js"></script>
   <script src="leo_chatbot.js"></script>
   <style>
@@ -1275,7 +1276,7 @@
   }
 
   // ── Form submission ────────────────────────────────────────────────
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault();
     const email = document.getElementById('email').value.trim().toLowerCase();
     const pass  = document.getElementById('password').value;
@@ -1284,51 +1285,46 @@
       return;
     }
 
-    // Domain validation enforcement
     if (currentRole === 'student') {
       if (!email.endsWith('@mitsgwl.ac.in')) {
-        showBanner('error', '⚠️ Student email must end with @mitsgwl.ac.in (e.g. rollno@mitsgwl.ac.in or student@mitsgwl.ac.in)');
+        showBanner('error', '⚠️ Student email must end with @mitsgwl.ac.in (e.g. 25chtpas@mitsgwl.ac.in or rollno@mitsgwl.ac.in)');
         return;
       }
     } else if (currentRole === 'faculty') {
       if (!email.endsWith('@mitsgwalior.in')) {
-        showBanner('error', '⚠️ Faculty email must end with @mitsgwalior.in (e.g. name@mitsgwalior.in)');
+        showBanner('error', '⚠️ Faculty email must end with @mitsgwalior.in (e.g. admin@mitsgwalior.in or faculty.name@mitsgwalior.in)');
         return;
       }
     }
 
-    // Save session and navigate to dashboard or faculty interface
+    showBanner('info', 'Verifying credentials with central database...');
+    try {
+      if (typeof MITS !== 'undefined' && MITS.login) {
+        const res = await MITS.login(email, pass);
+        if (!res.ok) {
+          showBanner('error', res.error || 'Invalid email or password. Default demo password is: Password@123');
+          return;
+        }
+
+        showBanner('success', 'Welcome, ' + res.user.fullName + '! Access granted.');
+        setTimeout(() => {
+          if (res.user.role === 'faculty') {
+            window.location.href = '../faculty/frontend/index.html';
+          } else {
+            window.location.href = 'dashboard.html';
+          }
+        }, 500);
+        return;
+      }
+    } catch (err) {
+      console.warn('Backend login error:', err);
+    }
+
     if (currentRole === 'faculty') {
-      localStorage.setItem('ra_session', JSON.stringify({
-        email: email,
-        role: 'faculty',
-        name: email.split('@')[0],
-        loginTime: new Date().toISOString()
-      }));
-      sessionStorage.setItem('mits_auth_token', 'mits_faculty_session_token');
-      sessionStorage.setItem('mits_auth_user', JSON.stringify({
-        username: email,
-        name: email.split('@')[0],
-        role: 'Faculty / Teacher'
-      }));
+      localStorage.setItem('ra_session', JSON.stringify({ email, role: 'faculty', name: email.split('@')[0] }));
       window.location.href = '../faculty/frontend/index.html';
     } else {
-      const matched = (typeof RA !== 'undefined' && RA.getStudentByEmail)
-        ? RA.getStudentByEmail(email)
-        : null;
-      localStorage.setItem('ra_session', JSON.stringify({
-        email: email,
-        role: 'student',
-        studentId: matched ? matched.id : null,
-        name: matched ? matched.name : email.split('@')[0],
-        rollNo: matched ? matched.rollNo : null,
-        branch: matched ? (matched.branch || matched.className) : null,
-        department: matched ? matched.department : null,
-        batch: matched ? (matched.batch || matched.academicYear) : null,
-        currentSem: matched ? (matched.currentSem || matched.semester) : null,
-        isLinked: !!matched,
-        loginTime: new Date().toISOString()
-      }));
+      localStorage.setItem('ra_session', JSON.stringify({ email, role: 'student', name: email.split('@')[0] }));
       window.location.href = 'dashboard.html';
     }
   }

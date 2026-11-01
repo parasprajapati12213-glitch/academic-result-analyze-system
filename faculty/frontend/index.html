@@ -113,10 +113,19 @@
     <a href="#settings" class="nav-item" data-page="settings">
       <span class="nav-icon">⚙️</span><span class="nav-label">Settings</span>
     </a>
+    <div class="nav-section-title">Student Interaction</div>
+    <a href="#doubts" class="nav-item" data-page="doubts">
+      <span class="nav-icon">📅</span><span class="nav-label">Doubt Requests</span>
+      <span class="badge" id="pendingDoubtsBadge" style="display:none;background:#f59e0b;color:#030712;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:700;margin-left:auto">0</span>
+    </a>
+    <a href="#messages" class="nav-item" data-page="messages">
+      <span class="nav-icon">💬</span><span class="nav-label">Student Messages</span>
+      <span class="badge" id="unreadMessagesBadge" style="display:none;background:#00F0FF;color:#030712;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:700;margin-left:auto">0</span>
+    </a>
   </nav>
 
   <div class="sidebar-footer">
-    <div class="status-badge-live" id="serverLiveTag">C++ Backend Running</div>
+    <div class="status-badge-live" id="serverLiveTag">⚡ Live Unified Backend Running</div>
   </div>
 </aside>
 
@@ -195,5 +204,8 @@
 <script src="js/reports.js"></script>
 <script src="js/settings.js"></script>
 
+<script src="../../shared/mits_client.js"></script>
+<script src="js/doubts.js"></script>
+<script src="js/messages.js"></script>
 </body>
 </html>

@@ -1,0 +1,40 @@
+[
+  {
+    "id": "dbt_1793529220311_797",
+    "studentId": "s_mits_BTCB25O1089",
+    "studentName": "Paras Prajapati",
+    "studentRoll": "BTCB25O1089",
+    "studentEmail": "paras.prajapati@mitsgwalior.in",
+    "teacherId": "tch_101",
+    "teacherName": "Dr. Abhishek Dixit",
+    "subjectId": "sub_101",
+    "subjectName": "Introduction to Computer Science and Business Systems",
+    "topic": "Graph Theory & State Machine Optimization",
+    "description": "Need clarification on DFA minimization algorithm for upcoming mid-term exam.",
+    "slotDate": "2026-11-05",
+    "slotTime": "3:00 PM - 4:00 PM",
+    "status": "accepted",
+    "responseNote": "Accepted. Please meet in Academic Block 2, Room 204 at 3:15 PM sharp.",
+    "createdAt": "2026-11-01T10:33:40.311Z",
+    "updatedAt": "2026-11-01T10:33:40.319Z"
+  },
+  {
+    "id": "dbt_1793529099395_917",
+    "studentId": "s_mits_BTCB25O1089",
+    "studentName": "Paras Prajapati",
+    "studentRoll": "BTCB25O1089",
+    "studentEmail": "paras.prajapati@mitsgwalior.in",
+    "teacherId": "tch_101",
+    "teacherName": "Dr. Abhishek Dixit",
+    "subjectId": "sub_101",
+    "subjectName": "Introduction to Computer Science and Business Systems",
+    "topic": "Graph Theory & State Machine Optimization",
+    "description": "Need clarification on DFA minimization algorithm for upcoming mid-term exam.",
+    "slotDate": "2026-11-05",
+    "slotTime": "3:00 PM - 4:00 PM",
+    "status": "accepted",
+    "responseNote": "Accepted. Please meet in Academic Block 2, Room 204 at 3:15 PM sharp.",
+    "createdAt": "2026-11-01T10:31:39.395Z",
+    "updatedAt": "2026-11-01T10:31:39.402Z"
+  }
+]

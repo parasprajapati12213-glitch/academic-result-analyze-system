@@ -1,0 +1,82 @@
+[
+  {
+    "token": "mits_token_95821efa0e90cfe29a4d131b023b15043012018da2b8d907",
+    "userId": "user_paras_alias",
+    "email": "25chtpas@mitsgwl.ac.in",
+    "role": "student",
+    "fullName": "Paras Prajapati",
+    "rollNo": "BTCB25O1089",
+    "referenceId": "s_mits_BTCB25O1089",
+    "expiresAt": 1794132078150
+  },
+  {
+    "token": "mits_token_5c30a02f37957e2b3ed9bcf5feee1b5e60ed7acb2cbbe3e0",
+    "userId": "user_admin",
+    "email": "admin@mitsgwalior.in",
+    "role": "faculty",
+    "fullName": "Academic In-Charge",
+    "rollNo": null,
+    "referenceId": "t_admin",
+    "expiresAt": 1794132078155
+  },
+  {
+    "token": "mits_token_ffb327f04cc0d0d5c28ad46fc0453717d28258b7698f271a",
+    "userId": "user_paras_alias",
+    "email": "25chtpas@mitsgwl.ac.in",
+    "role": "student",
+    "fullName": "Paras Prajapati",
+    "rollNo": "BTCB25O1089",
+    "referenceId": "s_mits_BTCB25O1089",
+    "expiresAt": 1794132333103
+  },
+  {
+    "token": "mits_token_bf3b851e5d5bbea67c32de5f2edce9493023dc42d640a073",
+    "userId": "user_admin",
+    "email": "admin@mitsgwalior.in",
+    "role": "faculty",
+    "fullName": "Academic In-Charge",
+    "rollNo": null,
+    "referenceId": "t_admin",
+    "expiresAt": 1794132356395
+  },
+  {
+    "token": "mits_token_a35703e1402f77e6e6c77ed142cf5aca8447e02e2d722cfb",
+    "userId": "user_paras_alias",
+    "email": "25chtpas@mitsgwl.ac.in",
+    "role": "student",
+    "fullName": "Paras Prajapati",
+    "rollNo": "BTCB25O1089",
+    "referenceId": "s_mits_BTCB25O1089",
+    "expiresAt": 1794133899378
+  },
+  {
+    "token": "mits_token_b80e40d411ab82d10d3f20e2e6992c25723406dc48877558",
+    "userId": "user_admin",
+    "email": "admin@mitsgwalior.in",
+    "role": "faculty",
+    "fullName": "Academic In-Charge",
+    "rollNo": null,
+    "referenceId": "t_admin",
+    "expiresAt": 1794133899391
+  },
+  {
+    "token": "mits_token_8a77d355727c7fa064a447d7b9b5586c332c1be3c28d2dd5",
+    "userId": "user_paras_alias",
+    "email": "25chtpas@mitsgwl.ac.in",
+    "role": "student",
+    "fullName": "Paras Prajapati",
+    "rollNo": "BTCB25O1089",
+    "referenceId": "s_mits_BTCB25O1089",
+    "expiresAt": 1794134020294
+  },
+  {
+    "token": "mits_token_a7c6f2fa61dc72e391c362be82078857cd7e3694274b89cf",
+    "userId": "user_admin",
+    "email": "admin@mitsgwalior.in",
+    "role": "faculty",
+    "fullName": "Academic In-Charge",
+    "rollNo": null,
+    "referenceId": "t_admin",
+    "expiresAt": 1794134020307
+  }
+]

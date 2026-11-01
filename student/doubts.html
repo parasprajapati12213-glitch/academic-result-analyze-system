@@ -6,6 +6,7 @@
   <title>Result Analyzer – Doubts, Video Lectures & Notes Hub</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet"/>
   <script src="../faculty/frontend/js/api.js"></script>
+  <script src="../shared/mits_client.js"></script>
   <script src="app.js"></script>
   <script src="leo_chatbot.js"></script>
   <style>
@@ -869,7 +870,7 @@
     document.getElementById('doubtModal').style.display = 'none';
   }
 
-  function handleDoubtSubmit(e) {
+    async function handleDoubtSubmit(e) {
     e.preventDefault();
     const subjectCode = document.getElementById('doubtSubjectSelect').value;
     const teacherId   = document.getElementById('doubtTeacherSelect').value;
@@ -877,27 +878,87 @@
     const desc        = document.getElementById('doubtDesc').value;
     const mode        = document.getElementById('doubtMode').value;
 
-    const teacher = DEFAULT_TEACHERS.find(t => t.id === teacherId);
+    let teacher = (window._liveTeachers || []).find(t => t.id === teacherId) || DEFAULT_TEACHERS.find(t => t.id === teacherId);
 
-    // Save to localStorage
+    const bookingPayload = {
+      studentId: (currentStudent && currentStudent.id) ? currentStudent.id : (session.studentId || 'student'),
+      studentName: (currentStudent && currentStudent.name) ? currentStudent.name : (session.name || 'Student'),
+      studentRoll: (currentStudent && currentStudent.rollNo) ? currentStudent.rollNo : (session.rollNo || ''),
+      studentEmail: session.email || '',
+      teacherId: teacherId,
+      teacherName: teacher ? teacher.name : 'Faculty Mentor',
+      subjectId: subjectCode,
+      subjectName: activeSubject ? activeSubject.name : subjectCode,
+      topic: topic,
+      description: desc + (mode ? ' (Mode: ' + mode + ')' : ''),
+      slotDate: new Date().toISOString().split('T')[0],
+      slotTime: '3:00 PM - 4:00 PM'
+    };
+
+    if (typeof MITS !== 'undefined' && MITS.bookDoubt) {
+      const res = await MITS.bookDoubt(bookingPayload);
+      if (res.ok) {
+        closeAskDoubtModal();
+        alert('✅ Consultation request submitted! Your faculty mentor (' + (teacher ? teacher.name : 'Faculty') + ') has received an instant notification.');
+        await loadStudentBookedDoubts();
+        return;
+      }
+    }
+
     const savedDoubts = JSON.parse(localStorage.getItem('ra_student_doubts_v1') || '[]');
-    savedDoubts.push({
-      id: 'd_' + Date.now(),
-      studentEmail: session.email || 'student',
-      studentName: currentStudent ? currentStudent.name : 'Student',
-      subjectCode,
-      teacherName: teacher ? teacher.name : 'Faculty',
-      topic,
-      desc,
-      mode,
-      date: new Date().toLocaleDateString('en-IN'),
-      status: 'Slot Confirmed'
-    });
+    savedDoubts.push({ id: 'd_' + Date.now(), ...bookingPayload, status: 'pending' });
     localStorage.setItem('ra_student_doubts_v1', JSON.stringify(savedDoubts));
-
     closeAskDoubtModal();
-    alert(`✅ Success! Your doubt slot with ${teacher ? teacher.name : 'Faculty'} for "${topic}" has been confirmed (${mode}). The faculty mentor has been notified!`);
+    alert('✅ Consultation request logged. Faculty mentor notified.');
+    loadStudentBookedDoubts();
   }
+
+  async function loadStudentBookedDoubts() {
+    const listEl = document.getElementById('studentBookedDoubtsList');
+    if (!listEl) return;
+
+    const studentId = (currentStudent && currentStudent.id) ? currentStudent.id : (session.studentId || session.email);
+    let doubts = [];
+    if (typeof MITS !== 'undefined' && MITS.getDoubts) {
+      doubts = await MITS.getDoubts(studentId, 'student');
+    }
+    if (!doubts.length) {
+      doubts = JSON.parse(localStorage.getItem('ra_student_doubts_v1') || '[]');
+    }
+
+    if (!doubts.length) {
+      listEl.innerHTML = '<div style="text-align:center;padding:32px;background:rgba(6,18,38,0.6);border-radius:12px;border:1px solid rgba(56,189,248,0.15);color:var(--muted)"><p style="font-size:14px;margin-bottom:6px">No doubt consultation requests booked yet.</p><small style="color:var(--sky)">Click "📅 Book Slot" above on any faculty mentor card to request a 1-on-1 session.</small></div>';
+      return;
+    }
+
+    listEl.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:16px;">' +
+      doubts.map(d => {
+        let badge = '<span style="background:rgba(245,158,11,0.18);color:#fbbf24;border:1px solid rgba(245,158,11,0.4);font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px;">Pending Review ⏳</span>';
+        let cardBorder = '#f59e0b';
+        if (d.status === 'accepted') {
+          badge = '<span style="background:rgba(34,197,94,0.18);color:#4ade80;border:1px solid rgba(34,197,94,0.4);font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px;">Confirmed ✅</span>';
+          cardBorder = '#22c55e';
+        } else if (d.status === 'rejected') {
+          badge = '<span style="background:rgba(239,68,68,0.18);color:#f87171;border:1px solid rgba(239,68,68,0.4);font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px;">Declined / Reschedule ❌</span>';
+          cardBorder = '#ef4444';
+        }
+
+        return '<div style="background:rgba(6,18,38,0.78);border:1px solid rgba(56,189,248,0.22);border-top:3px solid ' + cardBorder + ';border-radius:12px;padding:16px;backdrop-filter:blur(10px);">' +
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">' +
+            '<strong style="color:#fff;font-size:15px;">' + RA.escHTML(d.topic) + '</strong>' +
+            badge +
+          '</div>' +
+          '<div style="font-size:12.5px;color:var(--sky);margin-bottom:8px;">🧑‍🏫 Faculty: <strong>' + RA.escHTML(d.teacherName) + '</strong></div>' +
+          '<div style="font-size:12px;color:var(--muted);margin-bottom:10px;">📅 ' + RA.escHTML(d.slotDate || d.date) + ' · ⏰ ' + RA.escHTML(d.slotTime || '3:00 PM') + '</div>' +
+          '<p style="font-size:12.5px;color:var(--soft);line-height:1.45;margin-bottom:12px;background:rgba(2,10,24,0.5);padding:8px 10px;border-radius:6px;">"' + RA.escHTML(d.description || d.desc || 'No details') + '"</p>' +
+          (d.responseNote ? '<div style="font-size:12px;background:rgba(0,240,255,0.08);border-left:3px solid #00F0FF;padding:6px 10px;margin-bottom:10px;color:var(--soft)"><strong>Faculty Note:</strong> ' + RA.escHTML(d.responseNote) + '</div>' : '') +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
+  window.addEventListener('doubt_status_changed', () => { loadStudentBookedDoubts(); });
+  window.addEventListener('load', () => { setTimeout(loadStudentBookedDoubts, 300); });
 
   function downloadNoteDoc(title) {
     // Generates a mock download confirmation

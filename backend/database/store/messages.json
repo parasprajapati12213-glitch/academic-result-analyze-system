@@ -1,0 +1,50 @@
+[
+  {
+    "id": "msg_1793529099408_882",
+    "senderId": "s_mits_BTCB25O1089",
+    "senderName": "Paras Prajapati",
+    "senderRole": "student",
+    "receiverId": "tch_101",
+    "receiverName": "Dr. Abhishek Dixit",
+    "receiverRole": "faculty",
+    "content": "Thank you Sir! I will bring my previous assignment notes with me.",
+    "readAt": null,
+    "createdAt": "2026-11-01T10:31:39.408Z"
+  },
+  {
+    "id": "msg_1793529099414_42",
+    "senderId": "tch_101",
+    "senderName": "Dr. Abhishek Dixit",
+    "senderRole": "faculty",
+    "receiverId": "s_mits_BTCB25O1089",
+    "receiverName": "Paras Prajapati",
+    "receiverRole": "student",
+    "content": "Great. Also review Chapter 4 slides before coming.",
+    "readAt": null,
+    "createdAt": "2026-11-01T10:31:39.414Z"
+  },
+  {
+    "id": "msg_1793529220326_123",
+    "senderId": "s_mits_BTCB25O1089",
+    "senderName": "Paras Prajapati",
+    "senderRole": "student",
+    "receiverId": "tch_101",
+    "receiverName": "Dr. Abhishek Dixit",
+    "receiverRole": "faculty",
+    "content": "Thank you Sir! I will bring my previous assignment notes with me.",
+    "readAt": null,
+    "createdAt": "2026-11-01T10:33:40.326Z"
+  },
+  {
+    "id": "msg_1793529220333_4",
+    "senderId": "tch_101",
+    "senderName": "Dr. Abhishek Dixit",
+    "senderRole": "faculty",
+    "receiverId": "s_mits_BTCB25O1089",
+    "receiverName": "Paras Prajapati",
+    "receiverRole": "student",
+    "content": "Great. Also review Chapter 4 slides before coming.",
+    "readAt": null,
+    "createdAt": "2026-11-01T10:33:40.333Z"
+  }
+]
